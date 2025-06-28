@@ -1,7 +1,11 @@
+
+```javascript
 import 'dotenv/config';
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
-import { Pool } from "@neondatabase/serverless";
+import { db } from "./db.ts";
+import { users } from "../shared/schema.ts";
+import { eq } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
 
@@ -12,28 +16,39 @@ async function hashPassword(password) {
 }
 
 async function seedAdmin() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  
   try {
     const hashedPassword = await hashPassword("12345");
     
-    const result = await pool.query(`
-      INSERT INTO users (username, email, password, full_name, role, status, join_date) 
-      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE) 
-      ON CONFLICT (email) DO UPDATE SET 
-        password = EXCLUDED.password,
-        full_name = EXCLUDED.full_name,
-        role = EXCLUDED.role,
-        status = EXCLUDED.status
-      RETURNING id, email, full_name, role;
-    `, ['admin', 'admin@example.com', hashedPassword, 'Administrator', 'admin', 'active']);
+    // Check if admin user already exists
+    const existingAdmin = await db.select().from(users).where(eq(users.email, 'admin@example.com'));
     
-    console.log('Admin user created/updated:', result.rows[0]);
+    if (existingAdmin.length > 0) {
+      console.log('Admin user already exists:', existingAdmin[0]);
+      return;
+    }
+    
+    // Create admin user
+    const [newAdmin] = await db.insert(users).values({
+      username: 'admin',
+      email: 'admin@example.com',
+      password: hashedPassword,
+      fullName: 'Administrator',
+      role: 'admin',
+      status: 'active',
+      joinDate: new Date().toISOString().split('T')[0]
+    }).returning();
+    
+    console.log('Admin user created successfully:', {
+      id: newAdmin.id,
+      email: newAdmin.email,
+      fullName: newAdmin.fullName,
+      role: newAdmin.role
+    });
+    
   } catch (error) {
     console.error('Error creating admin user:', error);
-  } finally {
-    await pool.end();
   }
 }
 
 seedAdmin();
+```
