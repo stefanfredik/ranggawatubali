@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 import { Pool } from "@neondatabase/serverless";
