@@ -63,11 +63,7 @@ app.use((req, res, next) => {
 
   // Use configured port or default to 5000
   const port = appConfig.server.port;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "localhost", () => {
     log(`serving on port ${port}`);
   });
 })();
