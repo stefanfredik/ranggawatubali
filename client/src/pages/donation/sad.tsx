@@ -79,7 +79,7 @@ export default function SadDonationPage() {
   const [notes, setNotes] = useState("");
   
   // State for create donation form
-  const [donationAmount, setDonationAmount] = useState("100000");
+  const [donationAmount, setDonationAmount] = useState("");
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState<Date | undefined>(new Date());
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -184,7 +184,7 @@ export default function SadDonationPage() {
   };
 
   const resetCreateForm = () => {
-    setDonationAmount("100000");
+    setDonationAmount("");
     setEventName("");
     setEventDate(new Date());
     setSelectedUserIds([]);
@@ -476,8 +476,16 @@ export default function SadDonationPage() {
                 <div className="col-span-3">
                   <Input
                     id="amount"
-                    value={`Rp ${selectedDonation?.amount.toLocaleString('id-ID')}`}
-                    disabled
+                    placeholder="Masukkan nominal donasi sesuai keinginan"
+                    defaultValue={selectedDonation?.amount.toString()}
+                    onChange={(e) => {
+                      if (selectedDonation) {
+                        setSelectedDonation({
+                          ...selectedDonation,
+                          amount: parseInt(e.target.value) || 0
+                        });
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -580,7 +588,34 @@ export default function SadDonationPage() {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
-                // onClick={handleCollectDonation}
+                onClick={() => {
+                  if (!selectedDonation) return;
+                  if (!collectionDate) {
+                    toast({
+                      title: "Error",
+                      description: "Tanggal pengumpulan harus diisi",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  if (!selectedWalletId) {
+                    toast({
+                      title: "Error",
+                      description: "Dompet tujuan harus dipilih",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  
+                  // Simulasi API call untuk mengumpulkan donasi
+                  toast({
+                    title: "Berhasil",
+                    description: `Donasi dari ${selectedDonation.user.fullName} sebesar Rp ${selectedDonation.amount.toLocaleString('id-ID')} berhasil dikumpulkan`,
+                  });
+                  
+                  setIsDialogOpen(false);
+                  resetCollectionForm();
+                }}
               >
                 Konfirmasi Pengumpulan
               </Button>
@@ -647,7 +682,7 @@ export default function SadDonationPage() {
                 <div className="col-span-3">
                   <Input
                     id="amount"
-                    placeholder="Nominal donasi"
+                    placeholder="Masukkan nominal donasi sesuai keinginan"
                     value={donationAmount}
                     onChange={(e) => setDonationAmount(e.target.value)}
                   />
