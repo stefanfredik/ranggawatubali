@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { appConfig, validateConfig } from "./config";
 
 // Validate environment configuration
+// Hot reload test comment
 validateConfig();
 
 const app = express();
