@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Mountain, Bell, Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
+import { Mountain, Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
@@ -163,17 +163,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                 {!isCollapsed && <span className="ml-2">Theme</span>}
               </Button>
               
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn("relative", isCollapsed ? "w-full" : "flex-1")}
-              >
-                <Bell size={18} />
-                {!isCollapsed && <span className="ml-2">Notifications</span>}
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </Button>
+
             </div>
 
             {/* User Profile */}
