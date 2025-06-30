@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, decimal } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -59,12 +59,70 @@ export const payments = pgTable("payments", {
   notes: text("notes"),
 });
 
+// Tabel untuk dompet keuangan
+export const wallets = pgTable("wallets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  balance: decimal("balance", { precision: 15, scale: 2 }).notNull().default("0"),
+  description: text("description"),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Tabel untuk transaksi keuangan
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").references(() => wallets.id).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  type: text("type").notNull(), // "income" atau "expense"
+  category: text("category").notNull(),
+  description: text("description"),
+  date: date("date").notNull(),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Tabel untuk iuran
+export const dues = pgTable("dues", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  dueDate: date("due_date").notNull(),
+  period: text("period").notNull(), // "YYYY-MM" format
+  status: text("status").notNull().default("unpaid"), // "unpaid", "paid"
+  paymentDate: date("payment_date"),
+  paymentMethod: text("payment_method"),
+  walletId: integer("wallet_id").references(() => wallets.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Tabel untuk uang pangkal
+export const initialFees = pgTable("initial_fees", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  status: text("status").notNull().default("unpaid"), // "unpaid", "paid"
+  paymentDate: date("payment_date"),
+  paymentMethod: text("payment_method"),
+  walletId: integer("wallet_id").references(() => wallets.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   announcements: many(announcements),
   activities: many(activities),
   activityParticipants: many(activityParticipants),
   payments: many(payments),
+  wallets: many(wallets),
+  transactions: many(transactions),
+  dues: many(dues),
+  initialFees: many(initialFees),
 }));
 
 export const announcementsRelations = relations(announcements, ({ one }) => ({
@@ -104,6 +162,49 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
+export const walletsRelations = relations(wallets, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [wallets.createdBy],
+    references: [users.id],
+  }),
+  transactions: many(transactions),
+  dues: many(dues),
+  initialFees: many(initialFees),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  wallet: one(wallets, {
+    fields: [transactions.walletId],
+    references: [wallets.id],
+  }),
+  creator: one(users, {
+    fields: [transactions.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const duesRelations = relations(dues, ({ one }) => ({
+  user: one(users, {
+    fields: [dues.userId],
+    references: [users.id],
+  }),
+  wallet: one(wallets, {
+    fields: [dues.walletId],
+    references: [wallets.id],
+  }),
+}));
+
+export const initialFeesRelations = relations(initialFees, ({ one }) => ({
+  user: one(users, {
+    fields: [initialFees.userId],
+    references: [users.id],
+  }),
+  wallet: one(wallets, {
+    fields: [initialFees.walletId],
+    references: [wallets.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -111,6 +212,34 @@ export const insertUserSchema = createInsertSchema(users).omit({
 }).extend({
   password: z.string().min(5, "Password must be at least 5 characters"),
   email: z.string().email("Invalid email address"),
+});
+
+export const insertWalletSchema = createInsertSchema(wallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  balance: true,
+}).extend({
+  balance: z.string().or(z.number()).optional(),
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+});
+
+export const insertDuesSchema = createInsertSchema(dues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInitialFeeSchema = createInsertSchema(initialFees).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
@@ -144,3 +273,11 @@ export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type ActivityParticipant = typeof activityParticipants.$inferSelect;
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type Dues = typeof dues.$inferSelect;
+export type InsertDues = z.infer<typeof insertDuesSchema>;
+export type InitialFee = typeof initialFees.$inferSelect;
+export type InsertInitialFee = z.infer<typeof insertInitialFeeSchema>;

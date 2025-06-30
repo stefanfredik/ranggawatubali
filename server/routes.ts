@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
-import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema } from "@shared/schema";
+import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -20,6 +20,29 @@ function requireAdmin(req: any, res: any, next: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
+
+  // Authentication routes
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err: any, user: any | false, info: any) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ message: 'Internal server error during authentication' });
+      }
+      
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
+      
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Session error during login:', err);
+          return res.status(500).json({ message: 'Error creating session' });
+        }
+        const { password, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+      });
+    })(req, res, next);
+  });
 
   // Dashboard stats (admin only)
   app.get("/api/dashboard/stats", requireAdmin, async (req, res) => {
@@ -319,6 +342,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(payment);
     } catch (error) {
       res.status(500).json({ message: "Failed to update payment status" });
+    }
+  });
+
+  // Wallet routes
+  app.get("/api/wallets", requireAuth, async (req, res) => {
+    try {
+      const wallets = await storage.getWallets();
+      res.json(wallets);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallets" });
+    }
+  });
+
+  app.get("/api/wallets/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const wallet = await storage.getWallet(id);
+      
+      if (!wallet) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+      
+      res.json(wallet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet" });
+    }
+  });
+
+  app.post("/api/wallets", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertWalletSchema.parse(req.body);
+      const wallet = await storage.createWallet({
+        ...validatedData,
+        createdBy: req.user!.id,
+      });
+      res.status(201).json(wallet);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create wallet" });
+    }
+  });
+
+  app.put("/api/wallets/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const wallet = await storage.updateWallet(id, updates);
+      if (!wallet) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+      
+      res.json(wallet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update wallet" });
+    }
+  });
+
+  app.delete("/api/wallets/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteWallet(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+      
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete wallet" });
+    }
+  });
+
+  // Transaction routes
+  app.get("/api/transactions", requireAuth, async (req, res) => {
+    try {
+      const transactions = await storage.getTransactions();
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.get("/api/wallets/:id/transactions", requireAuth, async (req, res) => {
+    try {
+      const walletId = parseInt(req.params.id);
+      const transactions = await storage.getWalletTransactions(walletId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet transactions" });
+    }
+  });
+
+  app.post("/api/transactions", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertTransactionSchema.parse(req.body);
+      const transaction = await storage.createTransaction({
+        ...validatedData,
+        createdBy: req.user!.id,
+      });
+      res.status(201).json(transaction);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create transaction" });
+    }
+  });
+
+  app.delete("/api/transactions/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTransaction(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete transaction" });
+    }
+  });
+
+  // Dues routes
+  app.get("/api/dues", requireAdmin, async (req, res) => {
+    try {
+      const dues = await storage.getDues();
+      res.json(dues);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dues" });
+    }
+  });
+
+  app.get("/api/dues/my", requireAuth, async (req, res) => {
+    try {
+      const dues = await storage.getUserDues(req.user!.id);
+      res.json(dues);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch your dues" });
+    }
+  });
+
+  app.post("/api/dues", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertDuesSchema.parse(req.body);
+      const dues = await storage.createDues(validatedData);
+      res.status(201).json(dues);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create dues" });
+    }
+  });
+
+  app.put("/api/dues/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, paymentDate, paymentMethod, walletId } = req.body;
+      
+      if (!status || !["paid", "unpaid"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const dues = await storage.updateDuesStatus(
+        id, 
+        status, 
+        paymentDate ? new Date(paymentDate) : undefined, 
+        paymentMethod, 
+        walletId ? parseInt(walletId) : undefined
+      );
+      
+      if (!dues) {
+        return res.status(404).json({ message: "Dues not found" });
+      }
+      
+      res.json(dues);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update dues status" });
+    }
+  });
+
+  // Initial Fee routes
+  app.get("/api/initial-fees", requireAdmin, async (req, res) => {
+    try {
+      const initialFees = await storage.getInitialFees();
+      res.json(initialFees);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch initial fees" });
+    }
+  });
+
+  app.get("/api/initial-fees/my", requireAuth, async (req, res) => {
+    try {
+      const initialFee = await storage.getUserInitialFee(req.user!.id);
+      res.json(initialFee || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch your initial fee" });
+    }
+  });
+
+  app.post("/api/initial-fees", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInitialFeeSchema.parse(req.body);
+      const initialFee = await storage.createInitialFee(validatedData);
+      res.status(201).json(initialFee);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create initial fee" });
+    }
+  });
+
+  app.put("/api/initial-fees/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, paymentDate, paymentMethod, walletId } = req.body;
+      
+      if (!status || !['paid', 'unpaid'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const initialFee = await storage.updateInitialFeeStatus(
+        id, 
+        status, 
+        paymentDate ? new Date(paymentDate) : undefined, 
+        paymentMethod, 
+        walletId ? parseInt(walletId) : undefined
+      );
+      
+      if (!initialFee) {
+        return res.status(404).json({ message: "Initial fee not found" });
+      }
+      
+      res.json(initialFee);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update initial fee status" });
     }
   });
 

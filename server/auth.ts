@@ -45,7 +45,9 @@ export function setupAuth(app: Express) {
       secure: appConfig.server.nodeEnv === "production",
       httpOnly: true,
       maxAge: appConfig.session.maxAge,
+      sameSite: 'lax'
     },
+    name: 'ranggawatubali.sid'
   };
 
   app.set("trust proxy", 1);
@@ -109,20 +111,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: SelectUser | false, info: any) => {
-      if (err) return next(err);
-      if (!user) {
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
-      }
-      
-      req.login(user, (err) => {
-        if (err) return next(err);
-        const { password, ...userWithoutPassword } = user;
-        res.json(userWithoutPassword);
-      });
-    })(req, res, next);
-  });
+  // Login route moved to routes.ts
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
