@@ -3,7 +3,8 @@ import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Mountain, Bell, Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useRoute } from "wouter";
 
 type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
 
@@ -39,10 +40,30 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
       .slice(0, 2);
   };
 
+  const [location, navigate] = useLocation();
+  
   const handleSectionChange = (section: Section) => {
     onSectionChange(section);
     setIsMobileOpen(false);
+    
+    // Navigate to the corresponding route
+    if (section === "dashboard") {
+      navigate("/dashboard");
+    } else {
+      navigate(`/${section}`);
+    }
   };
+  
+  // Update current section based on location
+  useEffect(() => {
+    const path = location.split("/")[1] || "dashboard";
+    if (path === "") return;
+    
+    const newSection = path as Section;
+    if (navigationItems.some(item => item.id === newSection)) {
+      onSectionChange(newSection);
+    }
+  }, [location, onSectionChange]);
 
   return (
     <>

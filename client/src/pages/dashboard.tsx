@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentActivities } from "@/components/dashboard/recent-activities";
@@ -6,11 +6,20 @@ import { Announcements } from "@/components/dashboard/announcements";
 import { UpcomingBirthdays } from "@/components/dashboard/upcoming-birthdays";
 import { MembersTable } from "@/components/members/members-table";
 import { PaymentCards } from "@/components/payments/payment-cards";
+import { useLocation } from "wouter";
 
 type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
 
 export default function Dashboard() {
   const [currentSection, setCurrentSection] = useState<Section>("dashboard");
+  const [location, navigate] = useLocation();
+  
+  // Redirect to the appropriate page based on the current section
+  useEffect(() => {
+    if (location === "/") {
+      navigate("/dashboard");
+    }
+  }, [location, navigate]);
 
   const renderSection = () => {
     switch (currentSection) {

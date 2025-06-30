@@ -9,11 +9,21 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import { ProtectedRoute } from "./lib/protected-route";
+import DashboardPage from "@/pages/dashboard-page";
+import MembersPage from "@/pages/members-page";
+import AnnouncementsPage from "@/pages/announcements-page";
+import ActivitiesPage from "@/pages/activities-page";
+import PaymentsPage from "@/pages/payments-page";
 
 function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/dashboard" component={DashboardPage} />
+      <ProtectedRoute path="/members" component={MembersPage} />
+      <ProtectedRoute path="/announcements" component={AnnouncementsPage} />
+      <ProtectedRoute path="/activities" component={ActivitiesPage} />
+      <ProtectedRoute path="/payments" component={PaymentsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
