@@ -1,18 +1,31 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, Plus, ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
+import { Wallet, Plus, ArrowUpDown, ArrowDown, ArrowUp, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 export default function FinanceWalletPage() {
-  // Dummy data for wallet balances
-  const wallets = [
+  // State untuk dialog tambah dompet
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newWallet, setNewWallet] = useState({
+    name: "",
+    balance: "",
+    description: ""
+  });
+
+  // State untuk daftar dompet
+  const [wallets, setWallets] = useState([
     {
       id: 1,
       name: "Kas Utama",
       balance: 15000000,
       currency: "IDR",
       transactions: 24,
-      lastUpdated: "2023-10-15"
+      lastUpdated: "2023-10-15",
+      description: "Dompet utama untuk operasional organisasi"
     },
     {
       id: 2,
@@ -20,7 +33,8 @@ export default function FinanceWalletPage() {
       balance: 5000000,
       currency: "IDR",
       transactions: 5,
-      lastUpdated: "2023-09-30"
+      lastUpdated: "2023-09-30",
+      description: "Dana cadangan untuk keadaan darurat"
     },
     {
       id: 3,
@@ -28,9 +42,46 @@ export default function FinanceWalletPage() {
       balance: 7500000,
       currency: "IDR",
       transactions: 12,
-      lastUpdated: "2023-10-10"
+      lastUpdated: "2023-10-10",
+      description: "Dana khusus untuk kegiatan organisasi"
     }
-  ];
+  ]);
+
+  // Handler untuk input form
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewWallet({
+      ...newWallet,
+      [name]: value
+    });
+  };
+
+  // Handler untuk submit form
+  const handleSubmit = () => {
+    // Validasi input
+    if (!newWallet.name || !newWallet.balance) {
+      alert("Nama dompet dan saldo awal harus diisi!");
+      return;
+    }
+
+    // Buat dompet baru
+    const newWalletData = {
+      id: wallets.length + 1,
+      name: newWallet.name,
+      balance: parseFloat(newWallet.balance),
+      currency: "IDR",
+      transactions: 0,
+      lastUpdated: new Date().toISOString().split('T')[0],
+      description: newWallet.description || "Dompet baru"
+    };
+
+    // Tambahkan ke daftar dompet
+    setWallets([...wallets, newWalletData]);
+
+    // Reset form dan tutup dialog
+    setNewWallet({ name: "", balance: "", description: "" });
+    setIsDialogOpen(false);
+  };
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -54,9 +105,68 @@ export default function FinanceWalletPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800">
-              <Plus className="mr-2 h-4 w-4" /> Tambah Dompet
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800">
+                  <Plus className="mr-2 h-4 w-4" /> Tambah Dompet
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Tambah Dompet Baru</DialogTitle>
+                  <DialogDescription>
+                    Buat dompet baru untuk mengelola dana organisasi. Isi detail dompet di bawah ini.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      Nama
+                    </Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={newWallet.name}
+                      onChange={handleInputChange}
+                      placeholder="Nama dompet"
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="balance" className="text-right">
+                      Saldo Awal
+                    </Label>
+                    <Input
+                      id="balance"
+                      name="balance"
+                      type="number"
+                      value={newWallet.balance}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="description" className="text-right">
+                      Deskripsi
+                    </Label>
+                    <Input
+                      id="description"
+                      name="description"
+                      value={newWallet.description}
+                      onChange={handleInputChange}
+                      placeholder="Deskripsi dompet (opsional)"
+                      className="col-span-3"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleSubmit}>
+                    <Check className="mr-2 h-4 w-4" /> Simpan
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline">
               <ArrowUpDown className="mr-2 h-4 w-4" /> Riwayat Transaksi
             </Button>
@@ -126,20 +236,24 @@ export default function FinanceWalletPage() {
           ))}
 
           {/* Add New Wallet Card */}
-          <Card className="border-dashed hover:shadow-lg transition-all duration-300 flex items-center justify-center cursor-pointer h-[250px]">
-            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-              <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-4">
-                <Plus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Tambah Dompet Baru</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Buat dompet baru untuk mengelola dana organisasi
-              </p>
-              <Button variant="outline">
-                Tambah Dompet
-              </Button>
-            </CardContent>
-          </Card>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Card className="border-dashed hover:shadow-lg transition-all duration-300 flex items-center justify-center cursor-pointer h-[250px]">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-4">
+                    <Plus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">Tambah Dompet Baru</h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Buat dompet baru untuk mengelola dana organisasi
+                  </p>
+                  <Button variant="outline">
+                    Tambah Dompet
+                  </Button>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+          </Dialog>
         </div>
       </main>
     </div>
