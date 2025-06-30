@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Mountain, Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard } from "lucide-react";
+import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
@@ -43,7 +43,7 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Mountain className="text-white" size={20} />
+              <span className="text-white font-bold text-sm">RWB</span>
             </div>
             <div>
               <h1 className="text-lg font-bold">Rangga Watu Bali</h1>

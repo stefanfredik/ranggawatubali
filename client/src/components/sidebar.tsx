@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Mountain, Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
+import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
@@ -71,7 +71,10 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="md:hidden fixed top-4 left-4 z-50 glassmorphism-card"
+        className={cn(
+          "md:hidden fixed top-4 z-50 glassmorphism-card transition-all duration-300",
+          !isCollapsed && !isMobileOpen ? "left-[68px]" : "left-4"
+        )}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -99,7 +102,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
             <div className="flex items-center justify-between">
               <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                  <Mountain className="text-white" size={20} />
+                  <span className="text-white font-bold text-sm">RWB</span>
                 </div>
                 {!isCollapsed && (
                   <div>
