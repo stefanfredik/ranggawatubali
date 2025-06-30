@@ -1,12 +1,12 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X, Wallet, DollarSign, PiggyBank, Receipt, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X, Wallet, DollarSign, PiggyBank, Receipt, ArrowDownCircle, ArrowUpCircle, Gift, HandHeart, HandHelping, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 
-type Section = "dashboard" | "members" | "announcements" | "activities" | "payments" | "finance" | "finance-wallet" | "finance-income" | "finance-expense" | "finance-dues" | "finance-initial";
+type Section = "dashboard" | "members" | "announcements" | "activities" | "payments" | "finance" | "finance-wallet" | "finance-income" | "finance-expense" | "finance-dues" | "finance-initial" | "donation" | "donation-happy" | "donation-sad" | "donation-fundraising";
 
 interface SidebarProps {
   currentSection: Section;
@@ -36,6 +36,17 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         { id: "finance-expense", label: "Pengeluaran", icon: ArrowUpCircle, adminOnly: false },
         { id: "finance-dues", label: "Iuran", icon: Receipt, adminOnly: false },
         { id: "finance-initial", label: "Uang Pangkal", icon: PiggyBank, adminOnly: false },
+      ]
+    },
+    { 
+      id: "donation", 
+      label: "Donasi", 
+      icon: Gift, 
+      adminOnly: false,
+      submenu: [
+        { id: "donation-happy", label: "Suka", icon: HandHeart, adminOnly: false },
+        { id: "donation-sad", label: "Duka", icon: HandHelping, adminOnly: false },
+        { id: "donation-fundraising", label: "Penggalangan Dana", icon: Coins, adminOnly: false },
       ]
     },
   ];
@@ -69,6 +80,13 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
     } else if (section === "finance") {
       // Navigate to main finance page
       navigate("/finance");
+    } else if (section.startsWith("donation-")) {
+      // Handle donation submenu navigation
+      const subSection = section.replace("donation-", "");
+      navigate(`/donation/${subSection}`);
+    } else if (section === "donation") {
+      // Navigate to main donation page
+      navigate("/donation");
     } else {
       navigate(`/${section}`);
     }

@@ -21,6 +21,10 @@ import FinanceIncomePage from "@/pages/finance/income";
 import FinanceExpensePage from "@/pages/finance/expense";
 import FinanceDuesPage from "@/pages/finance/dues";
 import FinanceInitialPage from "@/pages/finance/initial";
+import DonationPage from "@/pages/donation-page";
+import DonationHappyPage from "@/pages/donation/happy";
+import DonationSadPage from "@/pages/donation/sad";
+import DonationFundraisingPage from "@/pages/donation/fundraising";
 
 function AppRoutes() {
   return (
@@ -37,6 +41,10 @@ function AppRoutes() {
       <ProtectedRoute path="/finance/expense" component={FinanceExpensePage} />
       <ProtectedRoute path="/finance/dues" component={FinanceDuesPage} />
       <ProtectedRoute path="/finance/initial" component={FinanceInitialPage} />
+      <ProtectedRoute path="/donation-page" component={DonationPage} />
+      <ProtectedRoute path="/donation/happy" component={DonationHappyPage} />
+      <ProtectedRoute path="/donation/sad" component={DonationSadPage} />
+      <ProtectedRoute path="/donation/fundraising" component={DonationFundraisingPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
