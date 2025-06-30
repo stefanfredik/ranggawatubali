@@ -6,7 +6,18 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 
-type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
+type Section = 
+  | "dashboard" 
+  | "members" 
+  | "announcements" 
+  | "activities" 
+  | "payments"
+  | "finance"
+  | "finance-wallet"
+  | "finance-income"
+  | "finance-expense"
+  | "finance-dues"
+  | "finance-initial";
 
 export function NavHeader() {
   const { user, logoutMutation } = useAuth();
@@ -21,6 +32,15 @@ export function NavHeader() {
     if (location.includes("/announcements")) return "announcements";
     if (location.includes("/activities")) return "activities";
     if (location.includes("/payments")) return "payments";
+    
+    // Finance sections
+    if (location.includes("/finance/wallet")) return "finance-wallet";
+    if (location.includes("/finance/income")) return "finance-income";
+    if (location.includes("/finance/expense")) return "finance-expense";
+    if (location.includes("/finance/dues")) return "finance-dues";
+    if (location.includes("/finance/initial")) return "finance-initial";
+    if (location.includes("/finance")) return "finance";
+    
     return "dashboard";
   };
 

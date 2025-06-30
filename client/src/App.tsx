@@ -15,6 +15,12 @@ import MembersPage from "@/pages/members-page";
 import AnnouncementsPage from "@/pages/announcements-page";
 import ActivitiesPage from "@/pages/activities-page";
 import PaymentsPage from "@/pages/payments-page";
+import FinancePage from "@/pages/finance-page";
+import FinanceWalletPage from "@/pages/finance/wallet";
+import FinanceIncomePage from "@/pages/finance/income";
+import FinanceExpensePage from "@/pages/finance/expense";
+import FinanceDuesPage from "@/pages/finance/dues";
+import FinanceInitialPage from "@/pages/finance/initial";
 
 function AppRoutes() {
   return (
@@ -25,6 +31,12 @@ function AppRoutes() {
       <ProtectedRoute path="/announcements" component={AnnouncementsPage} />
       <ProtectedRoute path="/activities" component={ActivitiesPage} />
       <ProtectedRoute path="/payments" component={PaymentsPage} />
+      <ProtectedRoute path="/finance" component={FinancePage} />
+      <ProtectedRoute path="/finance/wallet" component={FinanceWalletPage} />
+      <ProtectedRoute path="/finance/income" component={FinanceIncomePage} />
+      <ProtectedRoute path="/finance/expense" component={FinanceExpensePage} />
+      <ProtectedRoute path="/finance/dues" component={FinanceDuesPage} />
+      <ProtectedRoute path="/finance/initial" component={FinanceInitialPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

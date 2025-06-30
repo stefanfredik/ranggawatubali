@@ -1,12 +1,12 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X } from "lucide-react";
+import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X, Wallet, DollarSign, PiggyBank, Receipt, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 
-type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
+type Section = "dashboard" | "members" | "announcements" | "activities" | "payments" | "finance" | "finance-wallet" | "finance-income" | "finance-expense" | "finance-dues" | "finance-initial";
 
 interface SidebarProps {
   currentSection: Section;
@@ -25,6 +25,19 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
     { id: "announcements", label: "Announcements", icon: Megaphone, adminOnly: false },
     { id: "activities", label: "Activities", icon: Calendar, adminOnly: false },
     { id: "payments", label: "Payments", icon: CreditCard, adminOnly: false },
+    { 
+      id: "finance", 
+      label: "Keuangan", 
+      icon: DollarSign, 
+      adminOnly: false,
+      submenu: [
+        { id: "finance-wallet", label: "Dompet Saldo", icon: Wallet, adminOnly: false },
+        { id: "finance-income", label: "Pemasukan", icon: ArrowDownCircle, adminOnly: false },
+        { id: "finance-expense", label: "Pengeluaran", icon: ArrowUpCircle, adminOnly: false },
+        { id: "finance-dues", label: "Iuran", icon: Receipt, adminOnly: false },
+        { id: "finance-initial", label: "Uang Pangkal", icon: PiggyBank, adminOnly: false },
+      ]
+    },
   ];
 
   const visibleItems = navigationItems.filter(
@@ -49,6 +62,13 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
     // Navigate to the corresponding route
     if (section === "dashboard") {
       navigate("/dashboard");
+    } else if (section.startsWith("finance-")) {
+      // Handle finance submenu navigation
+      const subSection = section.replace("finance-", "");
+      navigate(`/finance/${subSection}`);
+    } else if (section === "finance") {
+      // Navigate to main finance page
+      navigate("/finance");
     } else {
       navigate(`/${section}`);
     }
@@ -128,26 +148,73 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
           <nav className="flex-1 px-4 py-6 space-y-2">
             {visibleItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentSection === item.id;
+              const isActive = currentSection === item.id || (item.submenu && item.submenu.some(subItem => currentSection === subItem.id));
+              const [isSubmenuOpen, setIsSubmenuOpen] = useState(isActive);
               
               return (
-                <Button
-                  key={item.id}
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start transition-all duration-200",
-                    isCollapsed ? "px-3" : "px-4",
-                    isActive
-                      ? "bg-primary/10 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                <div key={item.id}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start transition-all duration-200",
+                      isCollapsed ? "px-3" : "px-4",
+                      isActive
+                        ? "bg-primary/10 text-primary border-r-2 border-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      if (item.submenu) {
+                        setIsSubmenuOpen(!isSubmenuOpen);
+                      } else {
+                        handleSectionChange(item.id as Section);
+                      }
+                    }}
+                  >
+                    <Icon size={20} className={cn("flex-shrink-0", !isCollapsed && "mr-3")} />
+                    {!isCollapsed && (
+                      <div className="flex justify-between items-center w-full">
+                        <span className="font-medium">{item.label}</span>
+                        {item.submenu && (
+                          <span className={cn("transition-transform", isSubmenuOpen ? "rotate-180" : "")}>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </Button>
+                  
+                  {/* Submenu */}
+                  {!isCollapsed && item.submenu && isSubmenuOpen && (
+                    <div className="ml-6 mt-1 space-y-1">
+                      {item.submenu.map((subItem) => {
+                        const isSubActive = currentSection === subItem.id;
+                        const SubIcon = subItem.icon || (() => <div className="w-2 h-2 rounded-full bg-current" />);
+                        return (
+                          <Button
+                            key={subItem.id}
+                            variant="ghost"
+                            className={cn(
+                              "w-full justify-start transition-all duration-200 pl-6",
+                              isSubActive
+                                ? "bg-primary/10 text-primary border-r-2 border-primary"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            )}
+                            onClick={() => handleSectionChange(subItem.id as Section)}
+                          >
+                            {subItem.icon ? (
+                              <SubIcon size={16} className="mr-3" />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-current mr-3" />
+                            )}
+                            <span className="font-medium">{subItem.label}</span>
+                          </Button>
+                        );
+                      })}
+                    </div>
                   )}
-                  onClick={() => handleSectionChange(item.id as Section)}
-                >
-                  <Icon size={20} className={cn("flex-shrink-0", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && (
-                    <span className="font-medium">{item.label}</span>
-                  )}
-                </Button>
+                </div>
               );
             })}
           </nav>

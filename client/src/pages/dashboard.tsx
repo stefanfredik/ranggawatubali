@@ -8,7 +8,18 @@ import { MembersTable } from "@/components/members/members-table";
 import { PaymentCards } from "@/components/payments/payment-cards";
 import { useLocation } from "wouter";
 
-type Section = "dashboard" | "members" | "announcements" | "activities" | "payments";
+type Section = 
+  | "dashboard" 
+  | "members" 
+  | "announcements" 
+  | "activities" 
+  | "payments"
+  | "finance"
+  | "finance-wallet"
+  | "finance-income"
+  | "finance-expense"
+  | "finance-dues"
+  | "finance-initial";
 
 export default function Dashboard() {
   const [currentSection, setCurrentSection] = useState<Section>("dashboard");
@@ -19,7 +30,22 @@ export default function Dashboard() {
     if (location === "/") {
       navigate("/dashboard");
     }
-  }, [location, navigate]);
+    
+    // Handle finance section redirects
+    if (currentSection === "finance") {
+      navigate("/finance");
+    } else if (currentSection === "finance-wallet") {
+      navigate("/finance/wallet");
+    } else if (currentSection === "finance-income") {
+      navigate("/finance/income");
+    } else if (currentSection === "finance-expense") {
+      navigate("/finance/expense");
+    } else if (currentSection === "finance-dues") {
+      navigate("/finance/dues");
+    } else if (currentSection === "finance-initial") {
+      navigate("/finance/initial");
+    }
+  }, [location, navigate, currentSection]);
 
   const renderSection = () => {
     switch (currentSection) {
