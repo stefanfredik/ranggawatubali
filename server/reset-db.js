@@ -108,13 +108,14 @@ async function resetDatabase() {
     
     console.log(`${createdMembers.length} user contoh berhasil dibuat.`);
     
-    // Buat dompet default
-    console.log('Membuat dompet default...');
+    // Buat dompet utama
+    console.log('Membuat dompet utama...');
     const [mainWallet] = await db.insert(wallets).values({
-      name: 'Kas Utama',
+      name: 'Dompet Utama',
       balance: '5000000',
-      description: 'Dompet utama organisasi',
-      createdBy: admin.id
+      description: 'Dompet utama organisasi yang tidak dapat dihapus',
+      createdBy: admin.id,
+      isMain: true
     }).returning();
     
     console.log('Dompet default berhasil dibuat:', {

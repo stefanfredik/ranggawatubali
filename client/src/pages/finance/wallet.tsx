@@ -1,7 +1,7 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet as WalletIcon, Plus, ArrowUpDown, ArrowDown, ArrowUp, Check, Loader2 } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowUpDown, ArrowDown, ArrowUp, Check, Loader2, Trash2, Info, Edit as EditIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,20 +10,42 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 // Interface untuk data wallet
 interface Wallet {
-  id: string;
+  id: number;
   name: string;
   balance: number;
   description?: string;
-  transactions: number;
-  lastUpdated: string;
+  isMain?: boolean; // Menandai dompet utama yang tidak dapat dihapus
+  createdBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  creator?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  transactions?: number;
+  lastUpdated?: string;
 }
 
 export default function FinanceWalletPage() {
   // State untuk dialog tambah dompet
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [newWallet, setNewWallet] = useState({
+    name: "",
+    balance: "",
+    description: ""
+  });
+  const [editWallet, setEditWallet] = useState({
     name: "",
     balance: "",
     description: ""
@@ -84,7 +106,57 @@ export default function FinanceWalletPage() {
     }
   });
 
-  // Handler untuk submit form
+  // Mutation for updating a wallet
+  const updateWalletMutation = useMutation({
+    mutationFn: async (data: { id: number; name: string; description: string }) => {
+      const res = await apiRequest("PUT", `/api/wallets/${data.id}`, {
+        name: data.name,
+        description: data.description || "Dompet"
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
+      toast({
+        title: "Dompet berhasil diperbarui",
+        description: "Informasi dompet telah diperbarui",
+      });
+      // Reset form dan tutup dialog
+      setEditWallet({ name: "", balance: "", description: "" });
+      setIsEditDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Gagal memperbarui dompet",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation for deleting a wallet
+  const deleteWalletMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/wallets/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
+      toast({
+        title: "Dompet berhasil dihapus",
+        description: "Dompet telah dihapus dari sistem",
+      });
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Gagal menghapus dompet",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handler untuk submit form tambah dompet
   const handleSubmit = () => {
     // Validasi input
     if (!newWallet.name || !newWallet.balance) {
@@ -100,6 +172,57 @@ export default function FinanceWalletPage() {
     createWalletMutation.mutate(newWallet);
   };
 
+  // Handler untuk submit form edit dompet
+  const handleEditSubmit = () => {
+    // Validasi input
+    if (!editWallet.name) {
+      toast({
+        title: "Input tidak lengkap",
+        description: "Nama dompet harus diisi!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedWallet) return;
+
+    // Kirim data ke server
+    updateWalletMutation.mutate({
+      id: selectedWallet.id,
+      name: editWallet.name,
+      description: editWallet.description
+    });
+  };
+
+  // Handler untuk hapus dompet
+  const handleDelete = () => {
+    if (!selectedWallet) return;
+    deleteWalletMutation.mutate(selectedWallet.id);
+  };
+
+  // Handler untuk membuka dialog detail
+  const handleOpenDetail = (wallet: Wallet) => {
+    setSelectedWallet(wallet);
+    setIsDetailDialogOpen(true);
+  };
+
+  // Handler untuk membuka dialog edit
+  const handleOpenEdit = (wallet: Wallet) => {
+    setSelectedWallet(wallet);
+    setEditWallet({
+      name: wallet.name,
+      balance: wallet.balance.toString(),
+      description: wallet.description || ""
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Handler untuk membuka dialog hapus
+  const handleOpenDelete = (wallet: Wallet) => {
+    setSelectedWallet(wallet);
+    setIsDeleteDialogOpen(true);
+  };
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -110,8 +233,23 @@ export default function FinanceWalletPage() {
     }).format(amount);
   };
 
+  // Format date
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "dd MMMM yyyy, HH:mm", { locale: id });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   // Calculate total balance
-  const totalBalance = wallets?.reduce((sum, wallet) => sum + wallet.balance, 0) || 0;
+  const totalBalance = wallets?.reduce((sum, wallet) => {
+    // Pastikan balance dikonversi ke number
+    const walletBalance = typeof wallet.balance === 'string' 
+      ? parseFloat(wallet.balance) 
+      : Number(wallet.balance);
+    return sum + walletBalance;
+  }, 0) || 0;
 
   if (isLoading) {
     return (
@@ -285,11 +423,34 @@ export default function FinanceWalletPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1"
+                      onClick={() => handleOpenDetail(wallet)}
+                    >
+                      <Info className="h-4 w-4" />
                       Detail
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1"
+                      onClick={() => handleOpenEdit(wallet)}
+                    >
+                      <EditIcon className="h-4 w-4" />
                       Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1 text-red-500 hover:text-red-600"
+                      onClick={() => handleOpenDelete(wallet)}
+                      disabled={wallet.isMain}
+                      title={wallet.isMain ? "Dompet utama tidak dapat dihapus" : "Hapus dompet"}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Hapus
                     </Button>
                   </div>
                 </div>
@@ -313,6 +474,145 @@ export default function FinanceWalletPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Detail Wallet Dialog */}
+        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Detail Dompet</DialogTitle>
+              <DialogDescription>
+                Informasi lengkap tentang dompet
+              </DialogDescription>
+            </DialogHeader>
+            {selectedWallet && (
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label>Nama Dompet</Label>
+                  <div className="p-2 bg-muted rounded-md">{selectedWallet.name}</div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Saldo</Label>
+                  <div className="p-2 bg-muted rounded-md font-bold">{formatCurrency(selectedWallet.balance)}</div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Deskripsi</Label>
+                  <div className="p-2 bg-muted rounded-md">{selectedWallet.description || "-"}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Dibuat Oleh</Label>
+                    <div className="p-2 bg-muted rounded-md">{selectedWallet.creator?.name || "-"}</div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Dibuat Pada</Label>
+                    <div className="p-2 bg-muted rounded-md">
+                      {selectedWallet.createdAt ? formatDate(selectedWallet.createdAt) : "-"}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Terakhir Diperbarui</Label>
+                  <div className="p-2 bg-muted rounded-md">
+                    {selectedWallet.updatedAt ? formatDate(selectedWallet.updatedAt) : "-"}
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button onClick={() => setIsDetailDialogOpen(false)}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Wallet Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Dompet</DialogTitle>
+              <DialogDescription>
+                Perbarui informasi dompet
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-name">Nama Dompet</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  placeholder="Contoh: Kas Utama"
+                  value={editWallet.name}
+                  onChange={(e) => setEditWallet({...editWallet, name: e.target.value})}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-balance">Saldo</Label>
+                <Input
+                  id="edit-balance"
+                  name="balance"
+                  disabled
+                  value={editWallet.balance}
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">Saldo hanya dapat diubah melalui transaksi</p>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Deskripsi</Label>
+                <Textarea
+                  id="edit-description"
+                  name="description"
+                  placeholder="Deskripsi singkat tentang dompet ini"
+                  value={editWallet.description}
+                  onChange={(e) => setEditWallet({...editWallet, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Batal
+              </Button>
+              <Button onClick={handleEditSubmit} disabled={updateWalletMutation.isPending}>
+                {updateWalletMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>Simpan</>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Wallet Confirmation */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Hapus Dompet</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus dompet "{selectedWallet?.name}"? Tindakan ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete}
+                className="bg-red-500 hover:bg-red-600"
+                disabled={deleteWalletMutation.isPending}
+              >
+                {deleteWalletMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  <>Hapus</>
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

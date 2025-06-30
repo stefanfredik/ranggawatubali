@@ -3,6 +3,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { appConfig, validateConfig } from "./config";
+import { storage } from "./storage";
+import { wallets } from "@shared/schema";
 
 // Validate environment configuration
 // Hot reload test comment
@@ -42,8 +44,45 @@ app.use((req, res, next) => {
   next();
 });
 
+// Fungsi untuk memastikan Dompet Utama selalu tersedia
+async function ensureMainWallet() {
+  try {
+    log('Memeriksa keberadaan Dompet Utama...');
+    const allWallets = await storage.getWallets();
+    
+    // Cek apakah sudah ada dompet dengan isMain = true
+    const mainWallet = allWallets.find(wallet => wallet.isMain === true);
+    
+    if (!mainWallet) {
+      log('Dompet Utama tidak ditemukan, membuat Dompet Utama baru...');
+      
+      // Cari admin untuk dijadikan creator
+      const adminUser = await storage.getUserByUsername('admin');
+      const creatorId = adminUser ? adminUser.id : 1; // Default ke ID 1 jika admin tidak ditemukan
+      
+      // Buat Dompet Utama baru
+      const newMainWallet = await storage.createWallet({
+        name: 'Dompet Utama',
+        balance: '0',
+        description: 'Dompet utama yang tidak dapat dihapus',
+        createdBy: creatorId,
+        isMain: true
+      });
+      
+      log(`Dompet Utama berhasil dibuat dengan ID: ${newMainWallet.id}`);
+    } else {
+      log(`Dompet Utama sudah tersedia dengan ID: ${mainWallet.id}`);
+    }
+  } catch (error) {
+    console.error('Error saat memastikan keberadaan Dompet Utama:', error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Pastikan Dompet Utama tersedia saat aplikasi pertama kali berjalan
+  await ensureMainWallet();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
