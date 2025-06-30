@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Router } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,7 +16,7 @@ import AnnouncementsPage from "@/pages/announcements-page";
 import ActivitiesPage from "@/pages/activities-page";
 import PaymentsPage from "@/pages/payments-page";
 
-function Router() {
+function AppRoutes() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={Dashboard} />
@@ -36,8 +37,10 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <TooltipProvider>
-            <Toaster />
-            <Router />
+            <Router hook={useHashLocation}>
+              <Toaster />
+              <AppRoutes />
+            </Router>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
