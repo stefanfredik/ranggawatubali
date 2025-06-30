@@ -65,7 +65,6 @@ export const wallets = pgTable("wallets", {
   name: text("name").notNull(),
   balance: decimal("balance", { precision: 15, scale: 2 }).notNull().default("0"),
   description: text("description"),
-  isMain: boolean("is_main").default(false).notNull(), // Menandai dompet utama yang tidak dapat dihapus
   createdBy: integer("created_by").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

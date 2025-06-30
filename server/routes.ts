@@ -407,12 +407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       
-      // Periksa apakah dompet adalah dompet utama
-      const wallet = await storage.getWallet(id);
-      if (wallet && wallet.isMain) {
-        return res.status(403).json({ message: "Dompet utama tidak dapat dihapus" });
-      }
-      
       const success = await storage.deleteWallet(id);
       
       if (!success) {

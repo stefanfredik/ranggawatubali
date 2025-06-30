@@ -20,7 +20,6 @@ interface Wallet {
   name: string;
   balance: number;
   description?: string;
-  isMain?: boolean; // Menandai dompet utama yang tidak dapat dihapus
   createdBy?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -446,8 +445,7 @@ export default function FinanceWalletPage() {
                       size="sm" 
                       className="flex-1 gap-1 text-red-500 hover:text-red-600"
                       onClick={() => handleOpenDelete(wallet)}
-                      disabled={wallet.isMain}
-                      title={wallet.isMain ? "Dompet utama tidak dapat dihapus" : "Hapus dompet"}
+                      title="Hapus dompet"
                     >
                       <Trash2 className="h-4 w-4" />
                       Hapus

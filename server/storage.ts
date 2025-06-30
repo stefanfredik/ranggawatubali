@@ -404,13 +404,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteWallet(id: number): Promise<boolean> {
-    // Periksa apakah dompet adalah dompet utama
-    const [wallet] = await db.select().from(wallets).where(eq(wallets.id, id));
-    if (wallet && wallet.isMain) {
-      // Tidak bisa menghapus dompet utama
-      return false;
-    }
-    
     const result = await db.delete(wallets).where(eq(wallets.id, id));
     return result.rowCount > 0;
   }

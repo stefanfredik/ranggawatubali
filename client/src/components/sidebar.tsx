@@ -92,18 +92,21 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         variant="ghost"
         size="sm"
         className={cn(
-          "md:hidden fixed top-4 z-50 glassmorphism-card transition-all duration-300",
+          "md:hidden fixed top-4 z-50 glassmorphism-card transition-all duration-300 shadow-lg hover:shadow-xl",
           !isCollapsed && !isMobileOpen ? "left-[68px]" : "left-4"
         )}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
+        {isMobileOpen ? 
+          <X size={20} className="text-destructive animate-fadeIn" /> : 
+          <Menu size={20} className="text-primary animate-fadeIn" />
+        }
       </Button>
 
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden animate-fadeIn"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -111,14 +114,14 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full glassmorphism border-r border-glass-border z-50 transition-all duration-300",
+          "fixed left-0 top-0 h-full glassmorphism border-r border-glass-border z-50 transition-all duration-300 shadow-xl",
           isCollapsed ? "w-16" : "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-glass-border">
+          <div className="p-4 border-b border-glass-border bg-gradient-to-r from-transparent to-primary/5 shadow-sm">
             <div className="flex items-center justify-between">
               <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -136,16 +139,16 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="hidden md:flex p-2"
+                  className="hidden md:flex p-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
                 >
-                  <Menu size={16} />
+                  <Menu size={16} className={cn("transition-transform duration-300", isCollapsed ? "rotate-180" : "rotate-0")} />
                 </Button>
               )}
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
             {visibleItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentSection === item.id || (item.submenu && item.submenu.some(subItem => currentSection === subItem.id));
@@ -156,11 +159,11 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start transition-all duration-200",
+                      "w-full justify-start transition-all duration-300 rounded-lg my-1",
                       isCollapsed ? "px-3" : "px-4",
                       isActive
-                        ? "bg-primary/10 text-primary border-r-2 border-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        ? "bg-primary/15 text-primary border-r-2 border-primary shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
                     )}
                     onClick={() => {
                       if (item.submenu) {
@@ -187,7 +190,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                   
                   {/* Submenu */}
                   {!isCollapsed && item.submenu && isSubmenuOpen && (
-                    <div className="ml-6 mt-1 space-y-1">
+                    <div className="ml-6 mt-2 mb-3 space-y-1 pl-1 border-l border-glass-border/50 animate-fadeIn">
                       {item.submenu.map((subItem) => {
                         const isSubActive = currentSection === subItem.id;
                         const SubIcon = subItem.icon || (() => <div className="w-2 h-2 rounded-full bg-current" />);
@@ -196,10 +199,10 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                             key={subItem.id}
                             variant="ghost"
                             className={cn(
-                              "w-full justify-start transition-all duration-200 pl-6",
+                              "w-full justify-start transition-all duration-300 pl-6 rounded-lg my-1",
                               isSubActive
-                                ? "bg-primary/10 text-primary border-r-2 border-primary"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                ? "bg-primary/15 text-primary border-r-2 border-primary shadow-sm"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
                             )}
                             onClick={() => handleSectionChange(subItem.id as Section)}
                           >
@@ -220,16 +223,22 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
           </nav>
 
           {/* Bottom Section */}
-          <div className="border-t border-glass-border p-4 space-y-4">
+          <div className="border-t border-glass-border p-4 space-y-4 bg-gradient-to-r from-transparent to-primary/5 shadow-inner">
             {/* Theme Toggle & Notifications */}
             <div className={cn("flex space-x-2", isCollapsed && "flex-col space-x-0 space-y-2")}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleTheme}
-                className={cn("relative", isCollapsed ? "w-full" : "flex-1")}
+                className={cn(
+                  "relative transition-all duration-300 hover:bg-primary/10 hover:text-primary", 
+                  isCollapsed ? "w-full" : "flex-1"
+                )}
               >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+                {theme === "dark" ? 
+                  <Sun size={18} className="text-amber-400 hover:rotate-45 transition-transform duration-300" /> : 
+                  <Moon size={18} className="text-indigo-400 hover:rotate-12 transition-transform duration-300" />
+                }
                 {!isCollapsed && <span className="ml-2">Theme</span>}
               </Button>
               
@@ -237,8 +246,11 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
             </div>
 
             {/* User Profile */}
-            <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+            <div className={cn(
+              "flex items-center space-x-3 p-2 rounded-lg transition-all duration-300",
+              isCollapsed && "justify-center"
+            )}>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <span className="text-white text-sm font-semibold">
                   {user?.fullName ? getUserInitials(user.fullName) : "U"}
                 </span>
@@ -256,9 +268,9 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                 size="sm"
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
-                className="text-muted-foreground hover:text-destructive p-2"
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 transition-all duration-300"
               >
-                <LogOut size={16} />
+                <LogOut size={16} className="hover:rotate-12 transition-transform duration-300" />
               </Button>
             </div>
           </div>
