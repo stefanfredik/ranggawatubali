@@ -906,7 +906,7 @@ export function MembersTable() {
 
         {/* View Member Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] glassmorphism border-0">
+          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] glassmorphism border-0 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Member Details</DialogTitle>
             </DialogHeader>
@@ -922,7 +922,7 @@ export function MembersTable() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="glassmorphism p-4 rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
