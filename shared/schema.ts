@@ -10,10 +10,15 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
   phone: text("phone"),
-  role: text("role").notNull().default("member"), // "admin" or "member"
+  role: text("role").notNull().default("member"), // "admin", "member", "ketua", "bendahara", "sekretaris"
   status: text("status").notNull().default("active"), // "active", "inactive", "pending"
   joinDate: date("join_date").notNull(),
   birthday: date("birthday"),
+  occupation: text("occupation"), // "Mahasiswa", "Bekerja", "Bekerja Sambil Kuliah"
+  campus: text("campus"), // Kampus (bagi yang sedang kuliah)
+  residence: text("residence"), // Tempat Tinggal: Alamat
+  arrivalDate: text("arrival_date"), // Tiba Di Bali: Bulan dan Tahun
+  position: text("position"), // Fungsi atau Jabatan: Ketua, Wakil Ketua, Bendahara, Sekretaris, Suka Duka, Kerohanian, Konsumsi
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

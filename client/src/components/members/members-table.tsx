@@ -21,14 +21,24 @@ import { useToast } from "@/hooks/use-toast";
 
 // Form schema for adding new members
 const addMemberSchema = insertUserSchema.extend({
-  role: z.enum(["admin", "member"]).default("member"),
+  role: z.enum(["admin", "member", "ketua", "bendahara", "sekretaris"]).default("member"),
   status: z.enum(["active", "inactive", "pending"]).default("active"),
+  occupation: z.enum(["Mahasiswa", "Bekerja", "Bekerja Sambil Kuliah"]).optional(),
+  campus: z.string().optional(),
+  residence: z.string().optional(),
+  arrivalDate: z.string().optional(),
+  position: z.enum(["Ketua", "Wakil Ketua", "Bendahara", "Sekretaris", "Suka Duka", "Kerohanian", "Konsumsi"]).optional(),
 });
 
 // Form schema for editing members (password is optional)
 const editMemberSchema = insertUserSchema.partial({ password: true }).extend({
-  role: z.enum(["admin", "member"]),
+  role: z.enum(["admin", "member", "ketua", "bendahara", "sekretaris"]),
   status: z.enum(["active", "inactive", "pending"]),
+  occupation: z.enum(["Mahasiswa", "Bekerja", "Bekerja Sambil Kuliah"]).optional(),
+  campus: z.string().optional(),
+  residence: z.string().optional(),
+  arrivalDate: z.string().optional(),
+  position: z.enum(["Ketua", "Wakil Ketua", "Bendahara", "Sekretaris", "Suka Duka", "Kerohanian", "Konsumsi"]).optional(),
 });
 
 // Form schema for changing password
@@ -73,6 +83,11 @@ export function MembersTable() {
       status: "active",
       joinDate: new Date().toISOString().split('T')[0],
       birthday: "",
+      occupation: undefined,
+      campus: "",
+      residence: "",
+      arrivalDate: "",
+      position: undefined,
     },
   });
 
@@ -88,6 +103,11 @@ export function MembersTable() {
       status: "active",
       joinDate: "",
       birthday: "",
+      occupation: undefined,
+      campus: "",
+      residence: "",
+      arrivalDate: "",
+      position: undefined,
     },
   });
 
@@ -269,6 +289,12 @@ export function MembersTable() {
         return "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100";
       case "member":
         return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100";
+      case "ketua":
+        return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100";
+      case "bendahara":
+        return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100";
+      case "sekretaris":
+        return "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100";
       default:
         return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100";
     }
@@ -399,6 +425,9 @@ export function MembersTable() {
                           <SelectContent>
                             <SelectItem value="member">Member</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
+                            <SelectItem value="ketua">Ketua</SelectItem>
+                            <SelectItem value="bendahara">Bendahara</SelectItem>
+                            <SelectItem value="sekretaris">Sekretaris</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -442,15 +471,97 @@ export function MembersTable() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="birthday"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Birthday (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="arrivalDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tiba Di Bali (Bulan/Tahun)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="month" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="occupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pekerjaan</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger className="glassmorphism border-0">
+                              <SelectValue placeholder="Pilih pekerjaan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Mahasiswa">Mahasiswa</SelectItem>
+                            <SelectItem value="Bekerja">Bekerja</SelectItem>
+                            <SelectItem value="Bekerja Sambil Kuliah">Bekerja Sambil Kuliah</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="campus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kampus (Opsional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Nama kampus" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="birthday"
+                  name="residence"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Birthday (Optional)</FormLabel>
+                      <FormLabel>Tempat Tinggal (Alamat)</FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          placeholder="Alamat tempat tinggal" 
                           {...field} 
                           value={field.value || ""} 
                           className="glassmorphism border-0" 
@@ -460,6 +571,33 @@ export function MembersTable() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                    control={form.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fungsi atau Jabatan (Opsional)</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger className="glassmorphism border-0">
+                              <SelectValue placeholder="Pilih fungsi atau jabatan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Ketua">Ketua</SelectItem>
+                            <SelectItem value="Wakil Ketua">Wakil Ketua</SelectItem>
+                            <SelectItem value="Bendahara">Bendahara</SelectItem>
+                            <SelectItem value="Sekretaris">Sekretaris</SelectItem>
+                            <SelectItem value="Suka Duka">Suka Duka</SelectItem>
+                            <SelectItem value="Kerohanian">Kerohanian</SelectItem>
+                            <SelectItem value="Konsumsi">Konsumsi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                 <div className="flex justify-end space-x-4 pt-4">
                   <Button
@@ -570,6 +708,9 @@ export function MembersTable() {
                           <SelectContent>
                             <SelectItem value="member">Member</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
+                            <SelectItem value="ketua">Ketua</SelectItem>
+                            <SelectItem value="bendahara">Bendahara</SelectItem>
+                            <SelectItem value="sekretaris">Sekretaris</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -613,20 +754,129 @@ export function MembersTable() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="birthday"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Birthday (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="arrivalDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tiba Di Bali (Bulan/Tahun)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="month" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="occupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pekerjaan</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="glassmorphism border-0">
+                              <SelectValue placeholder="Pilih pekerjaan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Mahasiswa">Mahasiswa</SelectItem>
+                            <SelectItem value="Bekerja">Bekerja</SelectItem>
+                            <SelectItem value="Bekerja Sambil Kuliah">Bekerja Sambil Kuliah</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="campus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kampus (Opsional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Nama kampus" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={editForm.control}
-                  name="birthday"
+                  name="residence"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Birthday (Optional)</FormLabel>
+                      <FormLabel>Tempat Tinggal (Alamat)</FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          placeholder="Alamat tempat tinggal" 
                           {...field} 
                           value={field.value || ""} 
                           className="glassmorphism border-0" 
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="position"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fungsi atau Jabatan (Opsional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || undefined}>
+                        <FormControl>
+                          <SelectTrigger className="glassmorphism border-0">
+                            <SelectValue placeholder="Pilih fungsi atau jabatan" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Ketua">Ketua</SelectItem>
+                          <SelectItem value="Wakil Ketua">Wakil Ketua</SelectItem>
+                          <SelectItem value="Bendahara">Bendahara</SelectItem>
+                          <SelectItem value="Sekretaris">Sekretaris</SelectItem>
+                          <SelectItem value="Suka Duka">Suka Duka</SelectItem>
+                          <SelectItem value="Kerohanian">Kerohanian</SelectItem>
+                          <SelectItem value="Konsumsi">Konsumsi</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -692,7 +942,10 @@ export function MembersTable() {
                         <label className="text-sm font-medium text-muted-foreground">Role</label>
                         <div className="mt-1">
                           <Badge className={getRoleColor(viewingMember.role)}>
-                            {viewingMember.role === "admin" ? "Administrator" : "Member"}
+                            {viewingMember.role === "admin" ? "Administrator" : 
+                             viewingMember.role === "ketua" ? "Ketua" : 
+                             viewingMember.role === "bendahara" ? "Bendahara" : 
+                             viewingMember.role === "sekretaris" ? "Sekretaris" : "Member"}
                           </Badge>
                         </div>
                       </div>
@@ -727,6 +980,47 @@ export function MembersTable() {
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="glassmorphism p-4 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Pekerjaan</label>
+                        <p className="text-sm mt-1">
+                          {viewingMember.occupation || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Kampus</label>
+                        <p className="text-sm mt-1">
+                          {viewingMember.campus || "Not provided"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glassmorphism p-4 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Tiba Di Bali</label>
+                        <p className="text-sm mt-1">
+                          {viewingMember.arrivalDate || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Fungsi/Jabatan</label>
+                        <p className="text-sm mt-1">
+                          {viewingMember.position || "Not provided"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glassmorphism p-4 rounded-lg">
+                    <label className="text-sm font-medium text-muted-foreground">Tempat Tinggal</label>
+                    <p className="text-sm mt-1">
+                      {viewingMember.residence || "Not provided"}
+                    </p>
                   </div>
 
                   <div className="glassmorphism p-4 rounded-lg">
@@ -876,6 +1170,9 @@ export function MembersTable() {
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Administrator</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="ketua">Ketua</SelectItem>
+                  <SelectItem value="bendahara">Bendahara</SelectItem>
+                  <SelectItem value="sekretaris">Sekretaris</SelectItem>
                 </SelectContent>
               </Select>
             </div>
