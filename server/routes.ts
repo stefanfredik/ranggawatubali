@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
 import passport from "passport";
-import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema } from "@shared/schema";
+import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema, insertDonationSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -585,6 +585,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(initialFee);
     } catch (error) {
       res.status(500).json({ message: "Failed to update initial fee status" });
+    }
+  });
+
+  // Donation routes
+  app.get("/api/donations", requireAdmin, async (req, res) => {
+    try {
+      const donations = await storage.getDonations();
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  app.get("/api/donations/type/:type", requireAuth, async (req, res) => {
+    try {
+      const type = req.params.type;
+      if (!['fundraising', 'happy', 'sad'].includes(type)) {
+        return res.status(400).json({ message: "Invalid donation type" });
+      }
+      const donations = await storage.getDonationsByType(type);
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donations by type" });
+    }
+  });
+
+  app.get("/api/donations/my", requireAuth, async (req, res) => {
+    try {
+      const donations = await storage.getUserDonations(req.user!.id);
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch your donations" });
+    }
+  });
+
+  app.post("/api/donations", requireAuth, async (req, res) => {
+    try {
+      const { type, amount, eventName, eventDate, targetAmount, notes, description, userIds } = req.body;
+      
+      if (!type || !['fundraising', 'happy', 'sad'].includes(type)) {
+        return res.status(400).json({ message: "Invalid donation type" });
+      }
+      
+      if (!amount || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+      
+      // If userIds is provided, create multiple donations (one for each user)
+      if (userIds && Array.isArray(userIds) && userIds.length > 0) {
+        const donations = [];
+        
+        for (const userId of userIds) {
+          const donation = await storage.createDonation({
+            userId: parseInt(userId),
+            type,
+            amount: parseFloat(amount),
+            eventName,
+            eventDate: eventDate ? new Date(eventDate) : undefined,
+            targetAmount: targetAmount ? parseFloat(targetAmount) : undefined,
+            notes: description || notes, // Use description as notes if provided
+            status: 'pending',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+          
+          donations.push(donation);
+        }
+        
+        res.status(201).json(donations);
+      } else {
+        // Create a single donation for the current user
+        const donation = await storage.createDonation({
+          userId: req.user!.id,
+          type,
+          amount: parseFloat(amount),
+          eventName,
+          eventDate: eventDate ? new Date(eventDate) : undefined,
+          targetAmount: targetAmount ? parseFloat(targetAmount) : undefined,
+          notes: description || notes, // Use description as notes if provided
+          status: 'pending',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        res.status(201).json(donation);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to create donation" });
+    }
+  });
+
+  app.put("/api/donations/:id/status", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, collectionDate, collectionMethod, walletId, amount } = req.body;
+      
+      if (!status || !['pending', 'collected', 'cancelled'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const donation = await storage.updateDonationStatus(
+        id, 
+        status, 
+        collectionDate ? new Date(collectionDate) : undefined, 
+        collectionMethod, 
+        walletId ? parseInt(walletId) : undefined,
+        amount ? parseFloat(amount) : undefined
+      );
+      
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      res.json(donation);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update donation status" });
     }
   });
 

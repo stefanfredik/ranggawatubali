@@ -113,6 +113,24 @@ export const initialFees = pgTable("initial_fees", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Tabel untuk donasi
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  eventName: text("event_name").notNull(),
+  eventDate: date("event_date").notNull(),
+  targetAmount: decimal("target_amount", { precision: 15, scale: 2 }),
+  status: text("status").notNull().default("pending"), // "pending", "collected"
+  collectionDate: date("collection_date"),
+  collectionMethod: text("collection_method"),
+  walletId: integer("wallet_id").references(() => wallets.id),
+  notes: text("notes"),
+  type: text("type").notNull(), // "happy", "sad", "fundraising"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   announcements: many(announcements),
@@ -123,6 +141,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
   dues: many(dues),
   initialFees: many(initialFees),
+  donations: many(donations),
 }));
 
 export const announcementsRelations = relations(announcements, ({ one }) => ({
@@ -170,6 +189,7 @@ export const walletsRelations = relations(wallets, ({ one, many }) => ({
   transactions: many(transactions),
   dues: many(dues),
   initialFees: many(initialFees),
+  donations: many(donations),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -201,6 +221,17 @@ export const initialFeesRelations = relations(initialFees, ({ one }) => ({
   }),
   wallet: one(wallets, {
     fields: [initialFees.walletId],
+    references: [wallets.id],
+  }),
+}));
+
+export const donationsRelations = relations(donations, ({ one }) => ({
+  user: one(users, {
+    fields: [donations.userId],
+    references: [users.id],
+  }),
+  wallet: one(wallets, {
+    fields: [donations.walletId],
     references: [wallets.id],
   }),
 }));
@@ -263,6 +294,13 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   userId: true,
 });
 
+export const insertDonationSchema = createInsertSchema(donations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -281,3 +319,5 @@ export type Dues = typeof dues.$inferSelect;
 export type InsertDues = z.infer<typeof insertDuesSchema>;
 export type InitialFee = typeof initialFees.$inferSelect;
 export type InsertInitialFee = z.infer<typeof insertInitialFeeSchema>;
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = z.infer<typeof insertDonationSchema>;

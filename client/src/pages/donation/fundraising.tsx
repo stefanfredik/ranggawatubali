@@ -88,20 +88,18 @@ export default function FundraisingPage() {
   const [selectAll, setSelectAll] = useState(false);
   const [description, setDescription] = useState("");
 
-  // Fetch donations data (placeholder - API endpoint needs to be implemented)
-  const { data: donationsData, isLoading: isLoadingDonations, error: donationsError } = useQuery<Donation[]>({
-    queryKey: ["/api/donations/fundraising"],
+  // Fetch donations data
+  const { data: donationsData, isLoading: isLoadingDonations, error: donationsError, refetch } = useQuery<Donation[]>({
+    queryKey: ["/api/donations/type/fundraising"],
     queryFn: async () => {
-      // This is a placeholder. The actual API endpoint needs to be implemented.
-      const res = await fetch("/api/donations/fundraising", {
+      const res = await fetch("/api/donations/type/fundraising", {
         credentials: "include",
       });
       if (!res.ok) {
         throw new Error(`Error fetching donations: ${res.status}`);
       }
       return res.json();
-    },
-    enabled: false // Disable this query until the API endpoint is implemented
+    }
   });
 
   // Fetch wallets for collection form
@@ -132,53 +130,80 @@ export default function FundraisingPage() {
     }
   });
 
-  // Placeholder data for development
-  const placeholderDonations: Donation[] = [
-    {
-      id: 1,
-      userId: 1,
-      amount: 500000,
-      eventName: "Pembangunan Balai",
-      eventDate: "2023-08-15",
-      targetAmount: 10000000,
-      status: "collected",
-      collectionDate: "2023-08-10",
-      collectionMethod: "Transfer Bank",
-      walletId: 1,
-      notes: "Donasi untuk pembangunan balai",
-      createdAt: "2023-08-01T00:00:00Z",
-      updatedAt: "2023-08-10T00:00:00Z",
-      user: {
-        id: 1,
-        fullName: "Budi Santoso",
-        email: "budi@example.com",
-        username: "budi",
-        role: "member"
+  // Create donation mutation
+  const createDonationMutation = useMutation({
+    mutationFn: async (donationData: any) => {
+      const response = await fetch('/api/donations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(donationData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create donation');
       }
+      
+      return response.json();
     },
-    {
-      id: 2,
-      userId: 2,
-      amount: 750000,
-      eventName: "Renovasi Tempat Ibadah",
-      eventDate: "2023-09-20",
-      targetAmount: 15000000,
-      status: "pending",
-      collectionDate: null,
-      collectionMethod: null,
-      walletId: null,
-      notes: null,
-      createdAt: "2023-09-01T00:00:00Z",
-      updatedAt: "2023-09-01T00:00:00Z",
-      user: {
-        id: 2,
-        fullName: "Ani Wijaya",
-        email: "ani@example.com",
-        username: "ani",
-        role: "member"
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/donations/type/fundraising"] });
+      toast({
+        title: "Berhasil",
+        description: "Donasi baru berhasil dibuat",
+      });
+      setIsCreateDialogOpen(false);
+      resetCreateForm();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal membuat donasi",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Collect donation mutation
+  const collectDonationMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/donations/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to collect donation');
       }
-    }
-  ];
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/donations/type/fundraising"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
+      toast({
+        title: "Berhasil",
+        description: `Donasi berhasil dikumpulkan`,
+      });
+      setIsDialogOpen(false);
+      resetCollectionForm();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal mengumpulkan donasi",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Reset form functions
   const resetCollectionForm = () => {
@@ -230,29 +255,29 @@ export default function FundraisingPage() {
   };
 
   // Filter donations based on search term and filters
-  const filteredDonations = placeholderDonations.filter(donation => {
+  const filteredDonations = donationsData ? donationsData.filter(donation => {
     const matchesSearch = donation.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          donation.eventName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || donation.status === statusFilter;
     const matchesEvent = eventFilter === "all" || donation.eventName === eventFilter;
     
     return matchesSearch && matchesStatus && matchesEvent;
-  });
+  }) : [];
 
   // Calculate statistics
-  const totalDonations = placeholderDonations.length;
-  const collectedDonations = placeholderDonations.filter(d => d.status === "collected").length;
-  const pendingDonations = placeholderDonations.filter(d => d.status === "pending").length;
+  const totalDonations = donationsData ? donationsData.length : 0;
+  const collectedDonations = donationsData ? donationsData.filter(d => d.status === "collected").length : 0;
+  const pendingDonations = donationsData ? donationsData.filter(d => d.status === "pending").length : 0;
   const collectionRate = totalDonations > 0 ? (collectedDonations / totalDonations) * 100 : 0;
-  const totalAmount = placeholderDonations.reduce((sum, d) => sum + d.amount, 0);
-  const collectedAmount = placeholderDonations
-    .filter(d => d.status === "collected")
-    .reduce((sum, d) => sum + d.amount, 0);
-  const totalTargetAmount = placeholderDonations.reduce((sum, d) => sum + d.targetAmount, 0);
+  const totalAmount = donationsData ? donationsData.reduce((sum, d) => sum + d.amount, 0) : 0;
+  const collectedAmount = donationsData
+    ? donationsData.filter(d => d.status === "collected").reduce((sum, d) => sum + d.amount, 0)
+    : 0;
+  const totalTargetAmount = donationsData ? donationsData.reduce((sum, d) => sum + (d.targetAmount || 0), 0) : 0;
   const progressRate = totalTargetAmount > 0 ? (totalAmount / totalTargetAmount) * 100 : 0;
 
   // Get unique event names for filter
-  const uniqueEvents = Array.from(new Set(placeholderDonations.map(d => d.eventName)));
+  const uniqueEvents = donationsData ? Array.from(new Set(donationsData.map(d => d.eventName))) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-300">
@@ -346,7 +371,7 @@ export default function FundraisingPage() {
             <Progress value={progressRate} className="h-2" />
             <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
               <span>Terkumpul: Rp {totalAmount.toLocaleString('id-ID')}</span>
-              <span>Target: Rp {totalTargetAmount.toLocaleString('id-ID')}</span>
+              <span>Target: Rp {totalTargetAmount ? totalTargetAmount.toLocaleString('id-ID') : '0'}</span>
             </div>
           </CardContent>
         </Card>
@@ -416,14 +441,33 @@ export default function FundraisingPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDonations.length > 0 ? (
+                {isLoadingDonations ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="ml-2">Memuat data donasi...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : donationsError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="text-center py-8 text-red-500">
+                        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                        <p>Terjadi kesalahan saat memuat data donasi.</p>
+                        <p className="text-sm">{donationsError.message}</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredDonations.length > 0 ? (
                   filteredDonations.map((donation) => (
                     <TableRow key={donation.id}>
                       <TableCell className="font-medium">{donation.user.fullName}</TableCell>
                       <TableCell>{donation.eventName}</TableCell>
                       <TableCell>{new Date(donation.eventDate).toLocaleDateString('id-ID')}</TableCell>
                       <TableCell>Rp {donation.amount.toLocaleString('id-ID')}</TableCell>
-                      <TableCell>Rp {donation.targetAmount.toLocaleString('id-ID')}</TableCell>
+                      <TableCell>Rp {donation.targetAmount ? donation.targetAmount.toLocaleString('id-ID') : '0'}</TableCell>
                       <TableCell>
                         {donation.status === "collected" ? (
                           <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
@@ -618,17 +662,26 @@ export default function FundraisingPage() {
                     return;
                   }
                   
-                  // Simulasi API call untuk mengumpulkan donasi
-                  toast({
-                    title: "Berhasil",
-                    description: `Donasi dari ${selectedDonation.user.fullName} sebesar Rp ${selectedDonation.amount.toLocaleString('id-ID')} berhasil dikumpulkan`,
-                  });
+                  const collectionData = {
+                    status: "collected",
+                    collectionDate: collectionDate.toISOString(),
+                    collectionMethod,
+                    walletId: selectedWalletId,
+                    notes
+                  };
                   
-                  setIsDialogOpen(false);
-                  resetCollectionForm();
+                  collectDonationMutation.mutate({ id: selectedDonation.id, data: collectionData });
                 }}
+                disabled={collectDonationMutation.isPending}
               >
-                Konfirmasi Pengumpulan
+                {collectDonationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Konfirmasi Pengumpulan"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -772,10 +825,31 @@ export default function FundraisingPage() {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800"
-                // onClick={handleCreateDonation}
-                disabled={!eventName || !eventDate || !donationAmount || !targetAmount || selectedUserIds.length === 0}
+                onClick={() => {
+                  if (!eventName || !eventDate || !donationAmount || !targetAmount || selectedUserIds.length === 0) return;
+                  
+                  const donationData = {
+                    type: "fundraising",
+                    eventName,
+                    eventDate: eventDate?.toISOString(),
+                    amount: parseInt(donationAmount),
+                    targetAmount: parseInt(targetAmount),
+                    notes: description, // Menggunakan description sebagai notes
+                    userIds: selectedUserIds
+                  };
+                  
+                  createDonationMutation.mutate(donationData);
+                }}
+                disabled={!eventName || !eventDate || !donationAmount || !targetAmount || selectedUserIds.length === 0 || createDonationMutation.isPending}
               >
-                Buat Penggalangan Dana
+                {createDonationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Buat Penggalangan Dana"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -811,7 +885,7 @@ export default function FundraisingPage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Target</p>
-                    <p className="font-medium">Rp {selectedDonation.targetAmount.toLocaleString('id-ID')}</p>
+                    <p className="font-medium">Rp {selectedDonation.targetAmount ? selectedDonation.targetAmount.toLocaleString('id-ID') : '0'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Status</p>

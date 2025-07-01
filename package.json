@@ -13,6 +13,9 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx server/reset-db.js",
+    "db:rollback": "node migrations/rollback-all.cjs",
+    "db:rollback:donations": "node migrations/rollback-donations-table.cjs",
+    "db:rollback:session": "node migrations/rollback-session-table.cjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"

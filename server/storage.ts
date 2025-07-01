@@ -1,4 +1,4 @@
-import { users, announcements, activities, payments, activityParticipants, wallets, transactions, dues, initialFees, type User, type InsertUser, type Announcement, type InsertAnnouncement, type Activity, type InsertActivity, type Payment, type InsertPayment, type Wallet, type InsertWallet, type Transaction, type InsertTransaction, type Dues, type InsertDues, type InitialFee, type InsertInitialFee } from "@shared/schema";
+import { users, announcements, activities, payments, activityParticipants, wallets, transactions, dues, initialFees, donations, type User, type InsertUser, type Announcement, type InsertAnnouncement, type Activity, type InsertActivity, type Payment, type InsertPayment, type Wallet, type InsertWallet, type Transaction, type InsertTransaction, type Dues, type InsertDues, type InitialFee, type InsertInitialFee, type Donation, type InsertDonation } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, or } from "drizzle-orm";
 import session from "express-session";
@@ -63,6 +63,13 @@ export interface IStorage {
   getUserInitialFee(userId: number): Promise<InitialFee | undefined>;
   createInitialFee(initialFee: InsertInitialFee): Promise<InitialFee>;
   updateInitialFeeStatus(id: number, status: string, paymentDate?: Date, paymentMethod?: string, walletId?: number): Promise<InitialFee | undefined>;
+
+  // Donation methods
+  getDonations(): Promise<(Donation & { user: User })[]>;
+  getDonationsByType(type: string): Promise<(Donation & { user: User })[]>;
+  getUserDonations(userId: number): Promise<Donation[]>;
+  createDonation(donation: InsertDonation & { userId: number }): Promise<Donation>;
+  updateDonationStatus(id: number, status: string, collectionDate?: Date, collectionMethod?: string, walletId?: number, amount?: number): Promise<Donation | undefined>;
 
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -711,6 +718,132 @@ export class DatabaseStorage implements IStorage {
         .where(eq(initialFees.id, id))
         .returning();
       return updatedInitialFee || undefined;
+    }
+  }
+
+  // Donation methods implementation
+  async getDonations(): Promise<(Donation & { user: User })[]> {
+    return await db
+      .select({
+        id: donations.id,
+        userId: donations.userId,
+        type: donations.type,
+        amount: donations.amount,
+        eventName: donations.eventName,
+        eventDate: donations.eventDate,
+        targetAmount: donations.targetAmount,
+        status: donations.status,
+        collectionDate: donations.collectionDate,
+        collectionMethod: donations.collectionMethod,
+        walletId: donations.walletId,
+        notes: donations.notes,
+        createdAt: donations.createdAt,
+        updatedAt: donations.updatedAt,
+        user: users,
+      })
+      .from(donations)
+      .leftJoin(users, eq(donations.userId, users.id))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getDonationsByType(type: string): Promise<(Donation & { user: User })[]> {
+    return await db
+      .select({
+        id: donations.id,
+        userId: donations.userId,
+        type: donations.type,
+        amount: donations.amount,
+        eventName: donations.eventName,
+        eventDate: donations.eventDate,
+        targetAmount: donations.targetAmount,
+        status: donations.status,
+        collectionDate: donations.collectionDate,
+        collectionMethod: donations.collectionMethod,
+        walletId: donations.walletId,
+        notes: donations.notes,
+        createdAt: donations.createdAt,
+        updatedAt: donations.updatedAt,
+        user: users,
+      })
+      .from(donations)
+      .leftJoin(users, eq(donations.userId, users.id))
+      .where(eq(donations.type, type))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getUserDonations(userId: number): Promise<Donation[]> {
+    return await db
+      .select()
+      .from(donations)
+      .where(eq(donations.userId, userId))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async createDonation(donation: InsertDonation & { userId: number }): Promise<Donation> {
+    const [newDonation] = await db.insert(donations).values(donation).returning();
+    return newDonation;
+  }
+
+  async updateDonationStatus(id: number, status: string, collectionDate?: Date, collectionMethod?: string, walletId?: number, amount?: number): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    if (!donation) return undefined;
+
+    // If status is changing to 'collected' and wallet is provided, update wallet balance
+    if (status === 'collected' && donation.status !== 'collected' && walletId) {
+      const [wallet] = await db.select().from(wallets).where(eq(wallets.id, walletId));
+      if (!wallet) return undefined;
+
+      // Use the provided amount or the original donation amount
+      const finalAmount = amount !== undefined ? amount : donation.amount;
+
+      // Start a transaction to ensure both operations succeed or fail together
+      return await db.transaction(async (tx) => {
+        // Update wallet balance
+        await tx
+          .update(wallets)
+          .set({
+            balance: sql`${wallets.balance} + ${finalAmount}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, walletId));
+
+        // Update donation status
+        const [updatedDonation] = await tx
+          .update(donations)
+          .set({
+            status,
+            collectionDate,
+            collectionMethod,
+            walletId,
+            amount: finalAmount,
+            updatedAt: new Date(),
+          })
+          .where(eq(donations.id, id))
+          .returning();
+
+        return updatedDonation;
+      });
+    } else {
+      // Simple update without wallet balance change
+      const updateData: any = {
+        status,
+        collectionDate,
+        collectionMethod,
+        walletId,
+        updatedAt: new Date(),
+      };
+      
+      // Only update amount if provided
+      if (amount !== undefined) {
+        updateData.amount = amount;
+      }
+      
+      const [updatedDonation] = await db
+        .update(donations)
+        .set(updateData)
+        .where(eq(donations.id, id))
+        .returning();
+      return updatedDonation || undefined;
     }
   }
 }
