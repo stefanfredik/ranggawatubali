@@ -13,6 +13,8 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx server/reset-db.js",
+    "db:setup": "node server/setup-db.cjs",
+    "db:setup:all": "node server/setup-all.cjs",
     "db:rollback": "node migrations/rollback-all.cjs",
     "db:rollback:donations": "node migrations/rollback-donations-table.cjs",
     "db:rollback:session": "node migrations/rollback-session-table.cjs",

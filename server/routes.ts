@@ -705,6 +705,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Edit donation
+  app.put("/api/donations/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { type, amount, eventName, eventDate, targetAmount, notes } = req.body;
+      
+      // Validate donation type if provided
+      if (type && !['fundraising', 'happy', 'sad'].includes(type)) {
+        return res.status(400).json({ message: "Invalid donation type" });
+      }
+      
+      // Validate amount if provided
+      if (amount !== undefined && (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0)) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      // Get the donation to check if it exists and if user has permission
+      const existingDonation = await storage.getDonation(id);
+      if (!existingDonation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      // Only admin can edit any donation, regular users can only edit their own donations
+      if (req.user!.role !== "admin" && existingDonation.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You don't have permission to edit this donation" });
+      }
+
+      // Don't allow editing collected donations unless user is admin
+      if (existingDonation.status === "collected" && req.user!.role !== "admin") {
+        return res.status(400).json({ message: "Cannot edit a donation that has already been collected" });
+      }
+      
+      // Prepare updates object
+      const updates: Partial<Donation> = {};
+      
+      if (type) updates.type = type;
+      if (amount !== undefined) updates.amount = parseFloat(amount);
+      if (eventName) updates.eventName = eventName;
+      if (eventDate) updates.eventDate = new Date(eventDate);
+      if (targetAmount !== undefined) updates.targetAmount = parseFloat(targetAmount);
+      if (notes) updates.notes = notes;
+      
+      const updatedDonation = await storage.updateDonation(id, updates);
+      
+      res.json(updatedDonation);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to update donation" });
+    }
+  });
+
+  // Delete donation
+  app.delete("/api/donations/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Get the donation to check if it exists and if user has permission
+      const donation = await storage.getDonation(id);
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      // Only admin can delete any donation, regular users can only delete their own pending donations
+      if (req.user!.role !== "admin") {
+        if (donation.userId !== req.user!.id) {
+          return res.status(403).json({ message: "You don't have permission to delete this donation" });
+        }
+        
+        if (donation.status === "collected") {
+          return res.status(400).json({ message: "Cannot delete a donation that has already been collected" });
+        }
+      }
+      
+      const success = await storage.deleteDonation(id);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete donation" });
+      }
+      
+      res.sendStatus(204);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to delete donation" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -70,6 +70,9 @@ export interface IStorage {
   getUserDonations(userId: number): Promise<Donation[]>;
   createDonation(donation: InsertDonation & { userId: number }): Promise<Donation>;
   updateDonationStatus(id: number, status: string, collectionDate?: Date, collectionMethod?: string, walletId?: number, amount?: number): Promise<Donation | undefined>;
+  getDonation(id: number): Promise<Donation | undefined>;
+  updateDonation(id: number, updates: Partial<Donation>): Promise<Donation | undefined>;
+  deleteDonation(id: number): Promise<boolean>;
 
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -844,6 +847,48 @@ export class DatabaseStorage implements IStorage {
         .where(eq(donations.id, id))
         .returning();
       return updatedDonation || undefined;
+    }
+  }
+
+  async getDonation(id: number): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    return donation || undefined;
+  }
+
+  async updateDonation(id: number, updates: Partial<Donation>): Promise<Donation | undefined> {
+    const [donation] = await db
+      .update(donations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(donations.id, id))
+      .returning();
+    return donation || undefined;
+  }
+
+  async deleteDonation(id: number): Promise<boolean> {
+    // Check if donation exists and is not collected yet
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    if (!donation) return false;
+
+    // If donation is already collected and linked to a wallet, we need to adjust the wallet balance
+    if (donation.status === 'collected' && donation.walletId) {
+      return await db.transaction(async (tx) => {
+        // Update wallet balance (subtract the donation amount)
+        await tx
+          .update(wallets)
+          .set({
+            balance: sql`${wallets.balance} - ${donation.amount}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, donation.walletId));
+
+        // Delete the donation
+        const result = await tx.delete(donations).where(eq(donations.id, id));
+        return result.rowCount > 0;
+      });
+    } else {
+      // Simple delete without wallet balance adjustment
+      const result = await db.delete(donations).where(eq(donations.id, id));
+      return result.rowCount > 0;
     }
   }
 }

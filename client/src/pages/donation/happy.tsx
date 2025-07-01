@@ -1,7 +1,7 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, Loader2, CalendarIcon, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,11 +11,11 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,6 +66,8 @@ export default function HappyDonationPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);  // For edit dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);  // For delete dialog
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
   
   // State for filters
@@ -85,6 +87,12 @@ export default function HappyDonationPage() {
   const [eventDate, setEventDate] = useState<Date | undefined>(new Date());
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  
+  // Form states for edit donation
+  const [editEventName, setEditEventName] = useState("");
+  const [editEventDate, setEditEventDate] = useState<Date | undefined>();
+  const [editAmount, setEditAmount] = useState("");
+  const [editNotes, setEditNotes] = useState("");
 
   // Fetch donations data
   const { data: donationsData, isLoading: isLoadingDonations, error: donationsError, refetch } = useQuery<Donation[]>({
@@ -166,24 +174,110 @@ export default function HappyDonationPage() {
     },
   });
   
+  // Update donation mutation
+  const updateDonationMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      try {
+        const response = await fetch(`/api/donations/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update donation');
+        }
+        
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Update donation error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/donations/type/happy"] });
+      toast({
+        title: "Berhasil",
+        description: "Donasi berhasil diperbarui",
+      });
+      setIsEditDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal memperbarui donasi",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Delete donation mutation
+  const deleteDonationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      try {
+        const response = await fetch(`/api/donations/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete donation');
+        }
+        
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Delete donation error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/donations/type/happy"] });
+      toast({
+        title: "Berhasil",
+        description: "Donasi berhasil dihapus",
+      });
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menghapus donasi",
+        variant: "destructive",
+      });
+    },
+  });
+  
   // Collect donation mutation
   const collectDonationMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await fetch(`/api/donations/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to collect donation');
+      try {
+        const response = await fetch(`/api/donations/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to collect donation');
+        }
+        
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Collect donation error:', error);
+        throw error;
       }
-      
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/donations/type/happy"] });
@@ -231,6 +325,30 @@ export default function HappyDonationPage() {
     setSelectedDonation(donation);
     setIsDetailDialogOpen(true);
   };
+  
+  // Reset edit form
+  const resetEditForm = () => {
+    setEditEventName("");
+    setEditEventDate(undefined);
+    setEditAmount("");
+    setEditNotes("");
+  };
+  
+  // Handle opening edit dialog
+  const handleOpenEditDialog = (donation: Donation) => {
+    setSelectedDonation(donation);
+    setEditEventName(donation.eventName);
+    setEditEventDate(new Date(donation.eventDate));
+    setEditAmount(donation.amount.toString());
+    setEditNotes(donation.notes || "");
+    setIsEditDialogOpen(true);
+  };
+  
+  // Handle opening delete dialog
+  const handleOpenDeleteDialog = (donation: Donation) => {
+    setSelectedDonation(donation);
+    setIsDeleteDialogOpen(true);
+  };
 
   // Handle select all members
   const handleSelectAll = (checked: boolean) => {
@@ -263,14 +381,23 @@ export default function HappyDonationPage() {
     }
 
     // Create donations for all selected users at once
-    createDonationMutation.mutate({
-      type: "happy",
-      amount: parseFloat(donationAmount),
-      eventName,
-      eventDate: format(eventDate, "yyyy-MM-dd"),
-      notes: `Donasi suka untuk ${eventName}`,
-      userIds: selectedUserIds
-    });
+    try {
+      createDonationMutation.mutate({
+        type: "happy",
+        amount: parseFloat(donationAmount),
+        eventName,
+        eventDate: format(eventDate, "yyyy-MM-dd"),
+        notes: `Donasi suka untuk ${eventName}`,
+        userIds: selectedUserIds
+      });
+    } catch (error) {
+      console.error('Error triggering create mutation:', error);
+      toast({
+        title: "Error",
+        description: "Gagal membuat donasi",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle collect donation
@@ -295,16 +422,25 @@ export default function HappyDonationPage() {
       return;
     }
     
-    collectDonationMutation.mutate({
-      id: selectedDonation.id,
-      data: {
-        status: "collected",
-        collectionDate: format(collectionDate, "yyyy-MM-dd"),
-        collectionMethod,
-        walletId: selectedWalletId,
-        notes
-      }
-    });
+    try {
+      collectDonationMutation.mutate({
+        id: selectedDonation.id,
+        data: {
+          status: "collected",
+          collectionDate: format(collectionDate, "yyyy-MM-dd"),
+          collectionMethod,
+          walletId: selectedWalletId,
+          notes
+        }
+      });
+    } catch (error) {
+      console.error('Error triggering collect mutation:', error);
+      toast({
+        title: "Error",
+        description: "Gagal mengumpulkan donasi",
+        variant: "destructive",
+      });
+    }
   };
 
   // Filter donations based on search term and filters
@@ -538,14 +674,32 @@ export default function HappyDonationPage() {
                             Detail
                           </Button>
                           {donation.status === "pending" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
-                              onClick={() => handleOpenCollectionDialog(donation)}
-                            >
-                              Kumpulkan
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                                onClick={() => handleOpenCollectionDialog(donation)}
+                              >
+                                Kumpulkan
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 p-0 w-8"
+                                onClick={() => handleOpenEditDialog(donation)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950 p-0 w-8"
+                                onClick={() => handleOpenDeleteDialog(donation)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </TableCell>
@@ -836,6 +990,199 @@ export default function HappyDonationPage() {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) resetEditForm();
+        }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Donasi</DialogTitle>
+              <DialogDescription>
+                Edit detail donasi untuk {selectedDonation?.user.fullName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-event-name" className="text-right">
+                  Nama Acara
+                </Label>
+                <div className="col-span-3">
+                  <Input
+                    id="edit-event-name"
+                    placeholder="Contoh: Pernikahan Anggota"
+                    value={editEventName}
+                    onChange={(e) => setEditEventName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-event-date" className="text-right">
+                  Tanggal Acara
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="edit-event-date"
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !editEventDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editEventDate ? format(editEventDate, "PPP") : <span>Pilih tanggal</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={editEventDate}
+                        onSelect={setEditEventDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-amount" className="text-right">
+                  Nominal Donasi
+                </Label>
+                <div className="col-span-3">
+                  <Input
+                    id="edit-amount"
+                    placeholder="Masukkan nominal donasi"
+                    value={editAmount}
+                    onChange={(e) => setEditAmount(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-notes" className="text-right">
+                  Catatan
+                </Label>
+                <div className="col-span-3">
+                  <Textarea
+                    id="edit-notes"
+                    placeholder="Catatan tambahan (opsional)"
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Batal
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800"
+                onClick={() => {
+                  if (!selectedDonation) return;
+                  if (!editEventName) {
+                    toast({
+                      title: "Error",
+                      description: "Nama acara harus diisi",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  if (!editEventDate) {
+                    toast({
+                      title: "Error",
+                      description: "Tanggal acara harus diisi",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  const editAmountNum = parseInt(editAmount);
+                  if (isNaN(editAmountNum) || editAmountNum <= 0) {
+                    toast({
+                      title: "Error",
+                      description: "Nominal donasi harus berupa angka positif",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  try {
+                    updateDonationMutation.mutate({
+                      id: selectedDonation.id,
+                      data: {
+                        eventName: editEventName,
+                        eventDate: editEventDate.toISOString(),
+                        amount: editAmountNum,
+                        notes: editNotes
+                      }
+                    });
+                  } catch (error) {
+                    console.error('Error triggering update mutation:', error);
+                    toast({
+                      title: "Error",
+                      description: "Gagal memperbarui donasi",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                disabled={updateDonationMutation.isPending}
+              >
+                {updateDonationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Simpan Perubahan"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Delete Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus donasi ini? Tindakan ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 text-white hover:bg-red-700"
+                onClick={() => {
+                  if (selectedDonation) {
+                    try {
+                      deleteDonationMutation.mutate(selectedDonation.id);
+                    } catch (error) {
+                      console.error('Error triggering delete mutation:', error);
+                      toast({
+                        title: "Error",
+                        description: "Gagal menghapus donasi",
+                        variant: "destructive",
+                      });
+                    }
+                  }
+                }}
+                disabled={deleteDonationMutation.isPending}
+              >
+                {deleteDonationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  "Hapus"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
         {/* Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
           <DialogContent>
