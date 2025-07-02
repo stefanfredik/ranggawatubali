@@ -326,13 +326,16 @@ export function MembersTable() {
               Add Member
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] glassmorphism border-0">
+          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto glassmorphism border-0">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Add New Member</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Tambah Anggota Baru</DialogTitle>
+              <DialogDescription>Isi data lengkap anggota baru</DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">  
+                  <h3 className="form-section-title">Informasi Dasar</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="fullName"
@@ -359,9 +362,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Kontak</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="email"
@@ -393,9 +399,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <FormField
+                <div className="form-section">
+                  <h3 className="form-section-title">Keamanan</h3>
+                  <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
@@ -407,9 +416,12 @@ export function MembersTable() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                  />
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Status Keanggotaan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="role"
@@ -469,9 +481,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Tanggal Penting</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="birthday"
@@ -508,9 +523,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Pekerjaan & Pendidikan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="occupation"
@@ -551,9 +569,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <FormField
+                <div className="form-section">
+                  <h3 className="form-section-title">Alamat</h3>
+                  <FormField
                   control={form.control}
                   name="residence"
                   render={({ field }) => (
@@ -570,9 +591,12 @@ export function MembersTable() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                  />
+                </div>
 
-                <FormField
+                <div className="form-section">
+                  <h3 className="form-section-title">Jabatan</h3>
+                  <FormField
                     control={form.control}
                     name="position"
                     render={({ field }) => (
@@ -598,22 +622,23 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                </div>
 
-                <div className="flex justify-end space-x-4 pt-4">
+                <div className="flex justify-end space-x-4 pt-6 border-t mt-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsAddDialogOpen(false)}
                     className="glassmorphism border-0"
                   >
-                    Cancel
+                    Batal
                   </Button>
                   <Button
                     type="submit"
                     disabled={addMemberMutation.isPending}
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                   >
-                    {addMemberMutation.isPending ? "Adding..." : "Add Member"}
+                    {addMemberMutation.isPending ? "Menambahkan..." : "Tambah Anggota"}
                   </Button>
                 </div>
               </form>
@@ -623,13 +648,16 @@ export function MembersTable() {
 
         {/* Edit Member Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] glassmorphism border-0">
+          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto glassmorphism border-0">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Edit Member</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Edit Anggota</DialogTitle>
+              <DialogDescription>Ubah data anggota</DialogDescription>
             </DialogHeader>
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Informasi Dasar</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
                     name="fullName"
@@ -656,9 +684,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Kontak</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
                     name="email"
@@ -690,9 +721,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Status Keanggotaan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={editForm.control}
                     name="role"
@@ -752,9 +786,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Tanggal Penting</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
                     name="birthday"
@@ -791,9 +828,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-section">
+                  <h3 className="form-section-title">Pekerjaan & Pendidikan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
                     name="occupation"
@@ -834,9 +874,12 @@ export function MembersTable() {
                       </FormItem>
                     )}
                   />
+                  </div>
                 </div>
 
-                <FormField
+                <div className="form-section">
+                  <h3 className="form-section-title">Alamat</h3>
+                  <FormField
                   control={editForm.control}
                   name="residence"
                   render={({ field }) => (
@@ -853,9 +896,12 @@ export function MembersTable() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                  />
+                </div>
 
-                <FormField
+                <div className="form-section">
+                  <h3 className="form-section-title">Jabatan</h3>
+                  <FormField
                   control={editForm.control}
                   name="position"
                   render={({ field }) => (
@@ -880,23 +926,24 @@ export function MembersTable() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                  />
+                </div>
 
-                <div className="flex justify-end space-x-4 pt-4">
+                <div className="flex justify-end space-x-4 pt-6 border-t mt-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsEditDialogOpen(false)}
                     className="glassmorphism border-0"
                   >
-                    Cancel
+                    Batal
                   </Button>
                   <Button
                     type="submit"
                     disabled={editMemberMutation.isPending}
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                   >
-                    {editMemberMutation.isPending ? "Updating..." : "Update Member"}
+                    {editMemberMutation.isPending ? "Memperbarui..." : "Perbarui Anggota"}
                   </Button>
                 </div>
               </form>

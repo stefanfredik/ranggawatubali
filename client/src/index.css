@@ -197,6 +197,35 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
+  
+  /* Enhanced scrollbar styling for all elements */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #6366f1, #a855f7);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #4f46e5, #9333ea);
+  }
+  
+  /* Form section styling */
+  .form-section {
+    @apply p-4 rounded-lg mb-4 glassmorphism;
+  }
+  
+  .form-section-title {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 pb-2 border-b;
+  }
 
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
