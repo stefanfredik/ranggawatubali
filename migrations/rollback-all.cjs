@@ -21,6 +21,7 @@ async function rollbackAllTables() {
     try {
       // Define the order of rollbacks (reverse order of creation)
       const rollbackFiles = [
+        'rollback_campus_column.sql',
         'rollback_donations_table.sql',
         'rollback_session_table.sql'
       ];
