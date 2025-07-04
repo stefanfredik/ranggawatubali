@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowDownCircle, Plus, Filter, Download, Loader2 } from "lucide-react";
+import { ArrowDownCircle, Plus, Filter, Download } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -328,7 +329,7 @@ export default function FinanceIncomePage() {
                   <Button onClick={handleSubmit} disabled={createTransactionMutation.isPending}>
                     {createTransactionMutation.isPending ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loading variant="dots" size="sm" className="mr-2" />
                         Menyimpan...
                       </>
                     ) : (
@@ -536,7 +537,7 @@ export default function FinanceIncomePage() {
               >
                 {deleteTransactionMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading variant="dots" size="sm" className="mr-2" />
                     Menghapus...
                   </>
                 ) : (

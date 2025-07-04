@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HandHeart, HandHelping, Coins, ArrowLeft, CalendarIcon, Users, Loader2, AlertCircle } from "lucide-react";
+import { HandHeart, HandHelping, Coins, ArrowLeft, CalendarIcon, Users, AlertCircle } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -141,8 +142,7 @@ export default function EventDetailPage() {
         
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2">Memuat data acara...</span>
+            <Loading variant="dots" text="Memuat data acara..." />
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-500">

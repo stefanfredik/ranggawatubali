@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HandHelping, Plus, Filter, Download, CheckCircle, AlertCircle, Loader2, Pencil, Trash2 } from "lucide-react";
+import { HandHelping, Plus, Filter, Download, CheckCircle, AlertCircle, Pencil, Trash2 } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -568,8 +569,7 @@ export default function SadDonationPage() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <span className="ml-2">Memuat data donasi...</span>
+                        <Loading variant="dots" text="Memuat data donasi..." />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -766,8 +766,7 @@ export default function SadDonationPage() {
                     <SelectContent>
                       {isLoadingWallets ? (
                         <SelectItem value="loading" disabled>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Memuat...
+                          <Loading size="sm" variant="dots" text="Memuat..." />
                         </SelectItem>
                       ) : wallets && wallets.length > 0 ? (
                         wallets.map((wallet) => (
@@ -846,7 +845,7 @@ export default function SadDonationPage() {
               >
                 {collectDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading size="sm" variant="dots" className="mr-2" />
                     Memproses...
                   </>
                 ) : (
@@ -937,8 +936,7 @@ export default function SadDonationPage() {
                   </div>
                   {isLoadingMembers ? (
                     <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                      <span className="ml-2 text-muted-foreground">Memuat anggota...</span>
+                      <Loading variant="dots" text="Memuat anggota..." />
                     </div>
                   ) : members && members.length > 0 ? (
                     <div className="space-y-2">
@@ -1117,7 +1115,7 @@ export default function SadDonationPage() {
               >
                 {updateDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading size="sm" variant="dots" className="mr-2" />
                     Memproses...
                   </>
                 ) : (
@@ -1238,7 +1236,7 @@ export default function SadDonationPage() {
               >
                 {deleteDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading size="sm" variant="dots" className="mr-2" />
                     Menghapus...
                   </>
                 ) : (

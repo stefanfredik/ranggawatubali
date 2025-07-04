@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, Download, Loader2 } from "lucide-react";
+import { Plus, Filter, Download } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -312,8 +313,7 @@ export default function FinanceExpensePage() {
                   <Button onClick={handleSubmit} disabled={createTransactionMutation.isPending}>
                     {createTransactionMutation.isPending ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Menyimpan...
+                        <Loading variant="dots" size="sm" text="Menyimpan..." />
                       </>
                     ) : (
                       <>Simpan</>
@@ -520,8 +520,7 @@ export default function FinanceExpensePage() {
               >
                 {deleteTransactionMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Menghapus...
+                    <Loading variant="dots" size="sm" text="Menghapus..." />
                   </>
                 ) : (
                   <>Hapus</>

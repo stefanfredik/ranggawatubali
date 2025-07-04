@@ -1,7 +1,7 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Receipt, Plus, Filter, Download, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Receipt, Plus, Filter, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,6 +19,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Loading } from "@/components/ui/loading";
 import {
   Table,
   TableBody,
@@ -643,8 +644,7 @@ export default function FinanceDuesPage() {
           <CardContent>
             {isLoadingDues ? (
               <div className="flex justify-center items-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Memuat data iuran...</span>
+                <Loading variant="dots" text="Memuat data iuran..." />
               </div>
             ) : duesError ? (
               <div className="text-center py-8 text-red-500">
@@ -794,8 +794,7 @@ export default function FinanceDuesPage() {
                 <div className="col-span-3">
                   {isLoadingWallets ? (
                     <div className="flex items-center">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>Memuat dompet...</span>
+                      <Loading size="sm" variant="dots" text="Memuat dompet..." />
                     </div>
                   ) : (
                     <Select 
@@ -839,7 +838,7 @@ export default function FinanceDuesPage() {
                 disabled={updateDuesStatusMutation.isPending}
               >
                 {updateDuesStatusMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loading size="sm" variant="dots" className="mr-2" />
                 )}
                 Tandai Lunas
               </Button>
@@ -1016,8 +1015,7 @@ export default function FinanceDuesPage() {
                   
                   {isLoadingMembers ? (
                     <div className="flex items-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>Memuat daftar anggota...</span>
+                      <Loading size="sm" variant="dots" text="Memuat daftar anggota..." />
                     </div>
                   ) : (
                     <div className="max-h-60 overflow-y-auto border rounded-md p-2">
@@ -1056,7 +1054,7 @@ export default function FinanceDuesPage() {
                 disabled={createDuesMutation.isPending}
               >
                 {createDuesMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loading size="sm" variant="dots" className="mr-2" />
                 )}
                 Buat Tagihan
               </Button>

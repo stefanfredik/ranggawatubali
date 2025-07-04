@@ -1,8 +1,9 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PiggyBank, Plus, Filter, Download, CheckCircle, AlertCircle, UserPlus, Loader2 } from "lucide-react";
+import { PiggyBank, Plus, Filter, Download, CheckCircle, AlertCircle, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Loading } from "@/components/ui/loading";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
@@ -487,8 +488,7 @@ export default function FinanceInitialPage() {
           <CardContent>
             {isLoadingInitialFees ? (
               <div className="flex justify-center items-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Memuat data...</span>
+                <Loading variant="dots" size="lg" text="Memuat data..." />
               </div>
             ) : initialFeesError ? (
               <div className="text-center py-8 text-red-500">
@@ -667,7 +667,7 @@ export default function FinanceInitialPage() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Batal</Button>
               <Button onClick={handleMarkAsPaid} disabled={updateInitialFeeStatusMutation.isPending}>
                 {updateInitialFeeStatusMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loading variant="dots" size="sm" />
                 )}
                 Tandai Lunas
               </Button>
@@ -795,8 +795,7 @@ export default function FinanceInitialPage() {
                   <Label htmlFor="member" className="text-right">Anggota</Label>
                   {isLoadingMembers ? (
                     <div className="col-span-3 flex items-center">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>Memuat anggota...</span>
+                      <Loading variant="dots" size="sm" text="Memuat anggota..." />
                     </div>
                   ) : (
                     <Select
@@ -833,7 +832,7 @@ export default function FinanceInitialPage() {
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Batal</Button>
               <Button onClick={handleCreateInitialFee} disabled={createInitialFeeMutation.isPending}>
                 {createInitialFeeMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loading variant="dots" size="sm" />
                 )}
                 Buat Uang Pangkal
               </Button>

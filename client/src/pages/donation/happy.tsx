@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, Loader2, CalendarIcon, Pencil, Trash2 } from "lucide-react";
+import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, CalendarIcon, Pencil, Trash2 } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -630,8 +631,7 @@ export default function HappyDonationPage() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <span className="ml-2">Memuat data donasi...</span>
+                        <Loading variant="dots" text="Memuat data donasi..." />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -808,8 +808,9 @@ export default function HappyDonationPage() {
                     <SelectContent>
                       {isLoadingWallets ? (
                         <SelectItem value="loading" disabled>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Memuat...
+                          <div className="flex items-center">
+                            <Loading variant="dots" size="sm" text="Memuat..." />
+                          </div>
                         </SelectItem>
                       ) : wallets && wallets.length > 0 ? (
                         wallets.map((wallet) => (
@@ -851,8 +852,7 @@ export default function HappyDonationPage() {
               >
                 {collectDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Memproses...
+                    <Loading variant="dots" size="sm" text="Memproses..." />
                   </>
                 ) : (
                   "Konfirmasi Pengumpulan"
@@ -942,8 +942,7 @@ export default function HappyDonationPage() {
                   </div>
                   {isLoadingMembers ? (
                     <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                      <span className="ml-2 text-muted-foreground">Memuat anggota...</span>
+                      <Loading variant="dots" text="Memuat anggota..." className="text-muted-foreground" />
                     </div>
                   ) : members && members.length > 0 ? (
                     <div className="space-y-2">
@@ -979,8 +978,7 @@ export default function HappyDonationPage() {
               >
                 {createDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Memproses...
+                    <Loading variant="dots" size="sm" text="Memproses..." />
                   </>
                 ) : (
                   "Buat Donasi"
@@ -1130,7 +1128,7 @@ export default function HappyDonationPage() {
               >
                 {updateDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading variant="dots" size="sm" className="mr-2" />
                     Memproses...
                   </>
                 ) : (
@@ -1172,7 +1170,7 @@ export default function HappyDonationPage() {
               >
                 {deleteDonationMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loading variant="dots" size="sm" className="mr-2" />
                     Menghapus...
                   </>
                 ) : (

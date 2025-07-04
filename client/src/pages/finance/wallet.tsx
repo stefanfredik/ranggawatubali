@@ -1,7 +1,8 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet as WalletIcon, Plus, ArrowUpDown, ArrowDown, ArrowUp, Check, Loader2, Trash2, Info, Edit as EditIcon } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowUpDown, ArrowDown, ArrowUp, Check, Trash2, Info, Edit as EditIcon } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -358,8 +359,7 @@ export default function FinanceWalletPage() {
                 <Button onClick={handleSubmit} disabled={createWalletMutation.isPending}>
                   {createWalletMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Menyimpan...
+                      <Loading variant="dots" size="sm" text="Menyimpan..." />
                     </>
                   ) : (
                     <>Simpan</>
@@ -572,8 +572,7 @@ export default function FinanceWalletPage() {
               <Button onClick={handleEditSubmit} disabled={updateWalletMutation.isPending}>
                 {updateWalletMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Menyimpan...
+                    <Loading variant="dots" size="sm" text="Menyimpan..." />
                   </>
                 ) : (
                   <>Simpan</>
@@ -601,8 +600,7 @@ export default function FinanceWalletPage() {
               >
                 {deleteWalletMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Menghapus...
+                    <Loading variant="dots" size="sm" text="Menghapus..." />
                   </>
                 ) : (
                   <>Hapus</>

@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Mountain, Moon, Sun } from "lucide-react";
+import { Mountain, Moon, Sun } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
@@ -169,7 +170,7 @@ export default function AuthPage() {
                         >
                           {loginMutation.isPending ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loading size="sm" variant="dots" text="" className="mr-2" />
                               Signing In...
                             </>
                           ) : (
@@ -262,7 +263,7 @@ export default function AuthPage() {
                         >
                           {registerMutation.isPending ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loading size="sm" variant="dots" text="" className="mr-2" />
                               Creating Account...
                             </>
                           ) : (
@@ -278,10 +279,10 @@ export default function AuthPage() {
               {/* Theme Toggle */}
               <div className="flex justify-center">
                 <Button
-                  variant="ghost"
+                  variant="glass"
                   size="sm"
                   onClick={toggleTheme}
-                  variant="glass" className="rounded-full p-3 hover:scale-110 transition-all duration-200"
+                  className="rounded-full p-3 hover:scale-110 transition-all duration-200"
                 >
                   {theme === "dark" ? (
                     <Sun className="h-5 w-5" />

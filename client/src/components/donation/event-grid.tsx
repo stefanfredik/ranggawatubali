@@ -3,7 +3,8 @@ import { EventCard } from "./event-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, AlertCircle } from "lucide-react";
+import { Filter, AlertCircle } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 
 interface Event {
   id: number;
@@ -81,8 +82,7 @@ export function EventGrid({
       {/* Events Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Memuat data acara...</span>
+          <Loading variant="dots" text="Memuat data acara..." />
         </div>
       ) : error ? (
         <div className="text-center py-12 text-red-500">
@@ -92,8 +92,7 @@ export function EventGrid({
         </div>
       ) : filteredEvents && filteredEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => {
-            return (
+          {filteredEvents.map((event) => (
               <EventCard
                 key={event.id}
                 id={event.id}
@@ -105,8 +104,7 @@ export function EventGrid({
                 type={donationType}
                 onClick={() => onEventClick(event)}
               />
-            );
-          })}
+          ))}
         </div>
       ) : (
         <div className="text-center py-12 text-muted-foreground">
