@@ -110,7 +110,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         variant="ghost"
         size="sm"
         className={cn(
-          "md:hidden fixed top-4 z-50 glassmorphism-card transition-all duration-300 shadow-lg hover:shadow-xl",
+          "md:hidden fixed top-4 z-50 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm transition-all duration-300 shadow-lg hover:shadow-xl",
           !isCollapsed && !isMobileOpen ? "left-[68px]" : "left-4"
         )}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -132,14 +132,15 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full glassmorphism border-r border-glass-border z-50 transition-all duration-300 shadow-xl",
+          "fixed left-0 top-0 h-full z-50 transition-all duration-300 shadow-xl",
           isCollapsed ? "w-16" : "w-64",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          "neumorphism border-0"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-glass-border bg-gradient-to-r from-transparent to-primary/5 shadow-sm">
+          <div className="p-4 border-b border-glass-border bg-gradient-to-r from-transparent to-primary/10 shadow-sm">
             <div className="flex items-center justify-between">
               <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -154,10 +155,10 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
               </div>
               {!isMobileOpen && (
                 <Button
-                  variant="ghost"
+                  variant="neomorphic"
                   size="sm"
                   onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="hidden md:flex p-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                  className="hidden md:flex p-2 hover:text-primary transition-all duration-300"
                 >
                   <Menu size={16} className={cn("transition-transform duration-300", isCollapsed ? "rotate-180" : "rotate-0")} />
                 </Button>
@@ -175,13 +176,13 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
               return (
                 <div key={item.id}>
                   <Button
-                    variant="ghost"
+                    variant={isActive ? "glass" : "flat"}
                     className={cn(
                       "w-full justify-start transition-all duration-300 rounded-lg my-1",
                       isCollapsed ? "px-3" : "px-4",
                       isActive
-                        ? "bg-primary/15 text-primary border-r-2 border-primary shadow-sm"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
+                        ? "text-primary shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:translate-x-1"
                     )}
                     onClick={() => {
                       if (item.submenu) {
@@ -215,12 +216,12 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                         return (
                           <Button
                             key={subItem.id}
-                            variant="ghost"
+                            variant={isSubActive ? "glass" : "flat"}
                             className={cn(
                               "w-full justify-start transition-all duration-300 pl-6 rounded-lg my-1",
                               isSubActive
-                                ? "bg-primary/15 text-primary border-r-2 border-primary shadow-sm"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
+                                ? "text-primary shadow-sm"
+                                : "text-muted-foreground hover:text-foreground hover:translate-x-1"
                             )}
                             onClick={() => handleSectionChange(subItem.id as Section)}
                           >
@@ -245,11 +246,11 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
             {/* Theme Toggle & Notifications */}
             <div className={cn("flex space-x-2", isCollapsed && "flex-col space-x-0 space-y-2")}>
               <Button
-                variant="ghost"
+                variant="neomorphic"
                 size="sm"
                 onClick={toggleTheme}
                 className={cn(
-                  "relative transition-all duration-300 hover:bg-primary/10 hover:text-primary", 
+                  "relative transition-all duration-300 hover:text-primary", 
                   isCollapsed ? "w-full" : "flex-1"
                 )}
               >
@@ -282,11 +283,11 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                 </div>
               )}
               <Button
-                variant="ghost"
+                variant="glass"
                 size="sm"
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 transition-all duration-300"
+                className="text-muted-foreground hover:text-destructive p-2 transition-all duration-300"
               >
                 <LogOut size={16} className="hover:rotate-12 transition-transform duration-300" />
               </Button>

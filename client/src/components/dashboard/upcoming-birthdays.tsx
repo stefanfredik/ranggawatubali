@@ -34,14 +34,14 @@ export function UpcomingBirthdays() {
 
   if (isLoading) {
     return (
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardHeader>
           <CardTitle>Upcoming Birthdays</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-3 p-4 glassmorphism rounded-xl">
+              <div key={i} className="flex items-center space-x-3 p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl">
                 <Skeleton className="w-12 h-12 rounded-full" />
                 <div className="flex-1 space-y-1">
                   <Skeleton className="h-4 w-24" />
@@ -57,7 +57,7 @@ export function UpcomingBirthdays() {
   }
 
   return (
-    <Card className="glassmorphism-card border-0">
+    <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Upcoming Birthdays</CardTitle>
@@ -78,7 +78,7 @@ export function UpcomingBirthdays() {
               return (
                 <div
                   key={member.id}
-                  className="flex items-center space-x-3 p-4 glassmorphism rounded-xl"
+                  className="flex items-center space-x-3 p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl"
                 >
                   <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-semibold text-sm">

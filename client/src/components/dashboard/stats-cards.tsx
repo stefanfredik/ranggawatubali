@@ -47,7 +47,7 @@ export function StatsCards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="glassmorphism-card border-0">
+          <Card key={i} variant="glass">
             <CardContent className="p-6">
               <Skeleton className="h-4 w-24 mb-2" />
               <Skeleton className="h-8 w-16 mb-4" />
@@ -63,8 +63,12 @@ export function StatsCards() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card, index) => {
         const Icon = card.icon;
+        // Alternate between different card styles for visual variety
+        const cardVariants = ['glass', 'neomorphic', 'flat', 'glass'];
+        const variant = cardVariants[index % cardVariants.length] as 'glass' | 'neomorphic' | 'flat';
+        
         return (
-          <Card key={index} className="glassmorphism-card border-0">
+          <Card key={index} variant={variant}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>

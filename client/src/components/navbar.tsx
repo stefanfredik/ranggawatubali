@@ -37,7 +37,7 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
   };
 
   return (
-    <nav className="glassmorphism sticky top-0 z-50 border-b border-glass-border">
+    <nav className="neumorphism sticky top-0 z-50 border-0">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -58,12 +58,12 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
               return (
                 <Button
                   key={item.id}
-                  variant="ghost"
+                  variant={currentSection === item.id ? "glass" : "flat"}
                   size="sm"
                   className={cn(
                     "transition-colors font-medium",
                     currentSection === item.id
-                      ? "text-primary bg-primary/10"
+                      ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                   onClick={() => onSectionChange(item.id as Section)}
@@ -79,7 +79,7 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
           <div className="flex items-center space-x-2">
 
             {/* Theme Toggle */}
-            <Button variant="ghost" size="sm" onClick={toggleTheme}>
+            <Button variant="neomorphic" size="sm" onClick={toggleTheme}>
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
 
@@ -97,7 +97,7 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
                 </p>
               </div>
               <Button
-                variant="ghost"
+                variant="glass"
                 size="sm"
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
@@ -118,12 +118,12 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
             return (
               <Button
                 key={item.id}
-                variant="ghost"
+                variant={currentSection === item.id ? "glass" : "flat"}
                 size="sm"
                 className={cn(
                   "flex-shrink-0 transition-colors",
                   currentSection === item.id
-                    ? "text-primary bg-primary/10"
+                    ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => onSectionChange(item.id as Section)}

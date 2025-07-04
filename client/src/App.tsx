@@ -25,6 +25,10 @@ import DonationPage from "@/pages/donation-page";
 import DonationHappyPage from "@/pages/donation/happy";
 import DonationSadPage from "@/pages/donation/sad";
 import DonationFundraisingPage from "@/pages/donation/fundraising";
+import DonationEventDetailPage from "@/pages/donation/events/event-detail";
+import DonationHappyEventsPage from "@/pages/donation/events/happy";
+import DonationSadEventsPage from "@/pages/donation/events/sad";
+import DonationFundraisingEventsPage from "@/pages/donation/events/fundraising";
 
 function AppRoutes() {
   return (
@@ -41,10 +45,15 @@ function AppRoutes() {
       <ProtectedRoute path="/finance/expense" component={FinanceExpensePage} />
       <ProtectedRoute path="/finance/dues" component={FinanceDuesPage} />
       <ProtectedRoute path="/finance/initial" component={FinanceInitialPage} />
+      <ProtectedRoute path="/donation" component={DonationPage} />
       <ProtectedRoute path="/donation-page" component={DonationPage} />
       <ProtectedRoute path="/donation/happy" component={DonationHappyPage} />
       <ProtectedRoute path="/donation/sad" component={DonationSadPage} />
       <ProtectedRoute path="/donation/fundraising" component={DonationFundraisingPage} />
+      <ProtectedRoute path="/donation/:type/event/:eventName" component={DonationEventDetailPage} />
+      <ProtectedRoute path="/donation/events/happy" component={DonationHappyEventsPage} />
+      <ProtectedRoute path="/donation/events/sad" component={DonationSadEventsPage} />
+      <ProtectedRoute path="/donation/events/fundraising" component={DonationFundraisingEventsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

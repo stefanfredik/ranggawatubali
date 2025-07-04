@@ -478,7 +478,7 @@ export function MembersTable() {
               Add Member
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto glassmorphism border-0">
+          <DialogContent variant="glass" className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Tambah Anggota Baru</DialogTitle>
               <DialogDescription>Isi data lengkap anggota baru</DialogDescription>
@@ -495,7 +495,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter full name" {...field} className="glassmorphism border-0" />
+                          <Input placeholder="Enter full name" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -508,7 +508,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter username" {...field} className="glassmorphism border-0" />
+                          <Input placeholder="Enter username" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -531,7 +531,7 @@ export function MembersTable() {
                             placeholder="Masukkan nama panggilan" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -545,7 +545,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter email" {...field} className="glassmorphism border-0" />
+                          <Input type="email" placeholder="Enter email" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -562,7 +562,7 @@ export function MembersTable() {
                             placeholder="Enter phone number" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -581,7 +581,7 @@ export function MembersTable() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter password" {...field} className="glassmorphism border-0" />
+                        <Input type="password" placeholder="Enter password" {...field} variant="glass" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -600,7 +600,7 @@ export function MembersTable() {
                         <FormLabel>Role</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                           </FormControl>
@@ -624,7 +624,7 @@ export function MembersTable() {
                         <FormLabel>Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
@@ -645,7 +645,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Join Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} className="glassmorphism border-0" />
+                          <Input type="date" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -668,7 +668,7 @@ export function MembersTable() {
                             type="date" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -686,7 +686,7 @@ export function MembersTable() {
                             type="month" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -707,7 +707,7 @@ export function MembersTable() {
                         <FormLabel>Pekerjaan</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Pilih pekerjaan" />
                             </SelectTrigger>
                           </FormControl>
@@ -732,7 +732,7 @@ export function MembersTable() {
                             placeholder="Nama kampus" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -755,7 +755,7 @@ export function MembersTable() {
                           placeholder="Alamat tempat tinggal" 
                           {...field} 
                           value={field.value || ""} 
-                          className="glassmorphism border-0" 
+                          variant="glass" 
                         />
                       </FormControl>
                       <FormMessage />
@@ -774,7 +774,7 @@ export function MembersTable() {
                         <FormLabel>Fungsi atau Jabatan (Opsional)</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Pilih fungsi atau jabatan" />
                             </SelectTrigger>
                           </FormControl>
@@ -797,9 +797,8 @@ export function MembersTable() {
                 <div className="flex justify-end space-x-4 pt-6 border-t mt-4">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="glass"
                     onClick={() => setIsAddDialogOpen(false)}
-                    className="glassmorphism border-0"
                   >
                     Batal
                   </Button>
@@ -818,7 +817,7 @@ export function MembersTable() {
 
         {/* Edit Member Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto glassmorphism border-0">
+          <DialogContent variant="glass" className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Edit Anggota</DialogTitle>
               <DialogDescription>Ubah data anggota</DialogDescription>
@@ -835,7 +834,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter full name" {...field} className="glassmorphism border-0" />
+                          <Input placeholder="Enter full name" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -848,7 +847,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter username" {...field} className="glassmorphism border-0" />
+                          <Input placeholder="Enter username" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -871,7 +870,7 @@ export function MembersTable() {
                             placeholder="Masukkan nama panggilan" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -885,7 +884,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter email" {...field} className="glassmorphism border-0" />
+                          <Input type="email" placeholder="Enter email" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -902,7 +901,7 @@ export function MembersTable() {
                             placeholder="Enter phone number" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -923,7 +922,7 @@ export function MembersTable() {
                         <FormLabel>Role</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                           </FormControl>
@@ -947,7 +946,7 @@ export function MembersTable() {
                         <FormLabel>Status</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
@@ -968,7 +967,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Join Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} className="glassmorphism border-0" />
+                          <Input type="date" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -991,7 +990,7 @@ export function MembersTable() {
                             type="date" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -1009,7 +1008,7 @@ export function MembersTable() {
                             type="month" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -1030,7 +1029,7 @@ export function MembersTable() {
                         <FormLabel>Pekerjaan</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="glassmorphism border-0">
+                            <SelectTrigger variant="glass">
                               <SelectValue placeholder="Pilih pekerjaan" />
                             </SelectTrigger>
                           </FormControl>
@@ -1055,7 +1054,7 @@ export function MembersTable() {
                             placeholder="Nama kampus" 
                             {...field} 
                             value={field.value || ""} 
-                            className="glassmorphism border-0" 
+                            variant="glass" 
                           />
                         </FormControl>
                         <FormMessage />
@@ -1078,7 +1077,7 @@ export function MembersTable() {
                           placeholder="Alamat tempat tinggal" 
                           {...field} 
                           value={field.value || ""} 
-                          className="glassmorphism border-0" 
+                          variant="glass" 
                         />
                       </FormControl>
                       <FormMessage />
@@ -1097,7 +1096,7 @@ export function MembersTable() {
                       <FormLabel>Fungsi atau Jabatan (Opsional)</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || undefined}>
                         <FormControl>
-                          <SelectTrigger className="glassmorphism border-0">
+                          <SelectTrigger variant="glass">
                             <SelectValue placeholder="Pilih fungsi atau jabatan" />
                           </SelectTrigger>
                         </FormControl>
@@ -1120,9 +1119,8 @@ export function MembersTable() {
                 <div className="flex justify-end space-x-4 pt-6 border-t mt-4">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="glass"
                     onClick={() => setIsEditDialogOpen(false)}
-                    className="glassmorphism border-0"
                   >
                     Batal
                   </Button>
@@ -1141,7 +1139,7 @@ export function MembersTable() {
 
         {/* View Member Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="sm:max-w-[700px] md:max-w-[800px] glassmorphism border-0 max-h-[90vh] overflow-y-auto">
+          <DialogContent variant="glass" className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Detail Anggota</DialogTitle>
               <DialogDescription>
@@ -1220,7 +1218,7 @@ export function MembersTable() {
                 
                 {/* Tabs untuk mengorganisir informasi - hanya tampil di desktop */}
                 <Tabs defaultValue="personal" className="w-full hidden md:block">
-                  <TabsList className="grid w-full grid-cols-3 glassmorphism border-0">
+                  <TabsList className="grid w-full grid-cols-3" variant="glass">
                     <TabsTrigger value="personal">Informasi Pribadi</TabsTrigger>
                     <TabsTrigger value="academic">Akademik & Pekerjaan</TabsTrigger>
                     <TabsTrigger value="organization">Organisasi</TabsTrigger>
@@ -1232,7 +1230,7 @@ export function MembersTable() {
                     <div className="md:hidden mb-4">
                       <h3 className="text-lg font-semibold mb-2">Informasi Pribadi</h3>
                     </div>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Kontak</CardTitle>
                       </CardHeader>
@@ -1260,7 +1258,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
                     
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Tanggal Penting</CardTitle>
                       </CardHeader>
@@ -1287,7 +1285,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
                     
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Alamat</CardTitle>
                       </CardHeader>
@@ -1311,7 +1309,7 @@ export function MembersTable() {
                     <div className="md:hidden mb-4">
                       <h3 className="text-lg font-semibold mb-2">Akademik & Pekerjaan</h3>
                     </div>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Informasi Akademik</CardTitle>
                       </CardHeader>
@@ -1330,7 +1328,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
                     
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Informasi Pekerjaan</CardTitle>
                       </CardHeader>
@@ -1354,7 +1352,7 @@ export function MembersTable() {
                     <div className="md:hidden mb-4">
                       <h3 className="text-lg font-semibold mb-2">Organisasi</h3>
                     </div>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Informasi Keanggotaan</CardTitle>
                       </CardHeader>
@@ -1378,7 +1376,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
                     
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Posisi dalam Organisasi</CardTitle>
                       </CardHeader>
@@ -1416,7 +1414,7 @@ export function MembersTable() {
                   {/* Informasi Pribadi */}
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Informasi Pribadi</h3>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle>Kontak</CardTitle>
                       </CardHeader>
@@ -1434,7 +1432,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
 
-                    <Card className="glassmorphism border-0 mt-4">
+                    <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
                         <CardTitle>Tanggal Penting</CardTitle>
                       </CardHeader>
@@ -1460,7 +1458,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
 
-                    <Card className="glassmorphism border-0 mt-4">
+                    <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
                         <CardTitle>Alamat</CardTitle>
                       </CardHeader>
@@ -1480,7 +1478,7 @@ export function MembersTable() {
                   {/* Akademik & Pekerjaan */}
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Akademik & Pekerjaan</h3>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle>Pekerjaan</CardTitle>
                       </CardHeader>
@@ -1496,7 +1494,7 @@ export function MembersTable() {
                       </CardContent>
                     </Card>
 
-                    <Card className="glassmorphism border-0 mt-4">
+                    <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
                         <CardTitle>Pendidikan</CardTitle>
                       </CardHeader>
@@ -1516,7 +1514,7 @@ export function MembersTable() {
                   {/* Organisasi */}
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Organisasi</h3>
-                    <Card className="glassmorphism border-0">
+                    <Card variant="glass">
                       <CardHeader className="pb-2">
                         <CardTitle>Posisi di Organisasi</CardTitle>
                       </CardHeader>
@@ -1536,9 +1534,8 @@ export function MembersTable() {
 
                 <div className="flex justify-end space-x-4 pt-4 border-t">
                   <Button
-                    variant="outline"
+                    variant="glass"
                     onClick={() => setIsDetailDialogOpen(false)}
-                    className="glassmorphism border-0"
                   >
                     Tutup
                   </Button>
@@ -1559,7 +1556,7 @@ export function MembersTable() {
 
         {/* Change Password Dialog */}
         <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-          <DialogContent className="sm:max-w-[400px] glassmorphism border-0">
+          <DialogContent variant="glass" className="sm:max-w-[400px]">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Change Password</DialogTitle>
             </DialogHeader>
@@ -1588,7 +1585,7 @@ export function MembersTable() {
                               type="password" 
                               placeholder="Enter new password" 
                               {...field} 
-                              className="glassmorphism border-0" 
+                              variant="glass" 
                             />
                           </FormControl>
                           <FormMessage />
@@ -1606,7 +1603,7 @@ export function MembersTable() {
                               type="password" 
                               placeholder="Confirm new password" 
                               {...field} 
-                              className="glassmorphism border-0" 
+                              variant="glass" 
                             />
                           </FormControl>
                           <FormMessage />
@@ -1616,12 +1613,11 @@ export function MembersTable() {
                     <div className="flex justify-end space-x-3 pt-4">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="glass"
                         onClick={() => {
                           setIsPasswordDialogOpen(false);
                           passwordForm.reset();
                         }}
-                        className="glassmorphism border-0"
                       >
                         Cancel
                       </Button>
@@ -1642,7 +1638,7 @@ export function MembersTable() {
       </div>
 
       {/* Search and Filter */}
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -1650,12 +1646,12 @@ export function MembersTable() {
                 placeholder="Search members..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="glassmorphism border-0"
+                variant="glass"
               />
             </div>
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 glassmorphism border-0">
+                <SelectTrigger className="w-32" variant="glass">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1666,7 +1662,7 @@ export function MembersTable() {
                 </SelectContent>
               </Select>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-32 glassmorphism border-0">
+                <SelectTrigger className="w-32" variant="glass">
                   <SelectValue placeholder="All Roles" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1684,7 +1680,7 @@ export function MembersTable() {
       </Card>
 
       {/* Members Table */}
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-6">
@@ -1790,7 +1786,7 @@ export function MembersTable() {
                                   <Trash2 size={14} />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="glassmorphism border-0">
+                              <AlertDialogContent variant="glass">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Member</AlertDialogTitle>
                                   <AlertDialogDescription>
@@ -1798,7 +1794,7 @@ export function MembersTable() {
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel className="glassmorphism border-0">Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel variant="glass">Cancel</AlertDialogCancel>
                                   <AlertDialogAction 
                                     onClick={() => handleDeleteMember(member.id)}
                                     className="bg-destructive hover:bg-destructive/90"

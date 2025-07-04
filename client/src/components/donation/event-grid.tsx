@@ -92,19 +92,21 @@ export function EventGrid({
         </div>
       ) : filteredEvents && filteredEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              id={event.id}
-              eventName={event.eventName}
-              eventDate={event.eventDate}
-              amount={event.amount}
-              targetAmount={event.targetAmount}
-              status={event.status}
-              type={donationType}
-              onClick={() => onEventClick(event)}
-            />
-          )}
+          {filteredEvents.map((event) => {
+            return (
+              <EventCard
+                key={event.id}
+                id={event.id}
+                eventName={event.eventName}
+                eventDate={event.eventDate}
+                amount={event.amount}
+                targetAmount={event.targetAmount}
+                status={event.status}
+                type={donationType}
+                onClick={() => onEventClick(event)}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-12 text-muted-foreground">

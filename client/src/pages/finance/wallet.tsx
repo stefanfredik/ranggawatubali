@@ -371,7 +371,7 @@ export default function FinanceWalletPage() {
         </div>
 
         {/* Total Balance Card */}
-        <Card className="mb-8 glassmorphism-card border-0">
+        <Card className="mb-8 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-lg border-0">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>

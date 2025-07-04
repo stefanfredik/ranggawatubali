@@ -41,13 +41,13 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
 
   if (isLoading) {
     return (
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardHeader>
           <CardTitle>Recent Activities</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-start space-x-4 p-4 glassmorphism rounded-xl">
+            <div key={i} className="flex items-start space-x-4 p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl">
               <Skeleton className="w-10 h-10 rounded-full" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-32" />
@@ -64,7 +64,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
   const displayActivities = showAll ? activities : activities?.slice(0, 3);
 
   return (
-    <Card className="glassmorphism-card border-0">
+    <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Recent Activities</CardTitle>
@@ -87,7 +87,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
               return (
                 <div
                   key={activity.id}
-                  className="flex items-start space-x-4 p-4 glassmorphism rounded-xl"
+                  className="flex items-start space-x-4 p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl"
                 >
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Icon className="text-white" size={16} />

@@ -17,7 +17,11 @@ type Section =
   | "finance-income"
   | "finance-expense"
   | "finance-dues"
-  | "finance-initial";
+  | "finance-initial"
+  | "donation"
+  | "donation-happy"
+  | "donation-sad"
+  | "donation-fundraising";
 
 export function NavHeader() {
   const { user, logoutMutation } = useAuth();
@@ -41,6 +45,13 @@ export function NavHeader() {
     if (location.includes("/finance/initial")) return "finance-initial";
     if (location.includes("/finance")) return "finance";
     
+    // Donation sections
+    if (location.includes("/donation/happy")) return "donation-happy";
+    if (location.includes("/donation/sad")) return "donation-sad";
+    if (location.includes("/donation/fundraising")) return "donation-fundraising";
+    if (location.includes("/donation-page")) return "donation";
+    if (location.includes("/donation")) return "donation";
+    
     return "dashboard";
   };
 
@@ -57,7 +68,7 @@ export function NavHeader() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-16 glassmorphism border-b border-glass-border z-40 flex items-center justify-between px-4">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm border-b z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
           <Button
             variant="ghost"

@@ -29,13 +29,13 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
 
   if (isLoading) {
     return (
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardHeader>
           <CardTitle>Latest Announcements</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="p-4 glassmorphism rounded-xl border-l-4">
+            <div key={i} className="p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4">
               <div className="flex items-center justify-between mb-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-16" />
@@ -52,7 +52,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
   const displayAnnouncements = showAll ? announcements : announcements?.slice(0, 3);
 
   return (
-    <Card className="glassmorphism-card border-0">
+    <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Latest Announcements</CardTitle>
@@ -75,7 +75,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
               return (
                 <div
                   key={announcement.id}
-                  className={`p-4 glassmorphism rounded-xl border-l-4 ${typeColors.split(' ').pop()}`}
+                  className={`p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4 ${typeColors.split(' ').pop()}`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{announcement.title}</h4>

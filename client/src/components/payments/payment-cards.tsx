@@ -62,7 +62,7 @@ export function PaymentCards() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="glassmorphism-card border-0">
+            <Card key={i} variant="glass">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -104,7 +104,7 @@ export function PaymentCards() {
         </div>
         <div className="flex space-x-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 glassmorphism border-0">
+            <SelectTrigger className="w-40" variant="glass">
               <SelectValue placeholder="All Payments" />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ export function PaymentCards() {
       </div>
 
       {!filteredPayments?.length ? (
-        <Card className="glassmorphism-card border-0">
+        <Card variant="glass">
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground">No payment submissions found</p>
           </CardContent>
@@ -126,7 +126,7 @@ export function PaymentCards() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPayments.map((payment: any) => (
-            <Card key={payment.id} className="glassmorphism-card border-0">
+            <Card key={payment.id} variant="glass">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">

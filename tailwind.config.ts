@@ -10,6 +10,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundOpacity: {
+        '50': '0.5',
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

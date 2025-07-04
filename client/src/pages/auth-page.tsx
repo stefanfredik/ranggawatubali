@@ -67,7 +67,7 @@ export default function AuthPage() {
         <div className="grid lg:grid-cols-2 gap-8 items-center min-h-screen">
           {/* Left side - Hero Section */}
           <div className="hidden lg:block space-y-8">
-            <div className="glassmorphism-card rounded-3xl p-12 text-center">
+            <div className="rounded-3xl p-12 text-center" style={{backdropFilter: "blur(10px)", backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid rgba(255, 255, 255, 0.2)", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"}}> 
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                 <Mountain className="text-3xl text-white" size={32} />
               </div>
@@ -102,7 +102,7 @@ export default function AuthPage() {
           <div className="flex flex-col justify-center">
             <div className="w-full max-w-md mx-auto space-y-6">
               {/* Mobile Logo */}
-              <div className="lg:hidden text-center glassmorphism-card rounded-2xl p-6">
+              <div className="lg:hidden text-center rounded-2xl p-6" style={{backdropFilter: "blur(10px)", backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid rgba(255, 255, 255, 0.2)", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"}}> 
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                   <Mountain className="text-2xl text-white" size={24} />
                 </div>
@@ -115,7 +115,7 @@ export default function AuthPage() {
               </div>
 
               {/* Auth Card */}
-              <Card className="glassmorphism-card border-0 shadow-2xl">
+              <Card variant="glass" className="shadow-2xl">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl font-bold">
                     Welcome
@@ -123,7 +123,7 @@ export default function AuthPage() {
                 </CardHeader>
                 <CardContent>
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="grid w-full grid-cols-2 glassmorphism">
+                    <TabsList className="grid w-full grid-cols-2" variant="glass">
                       <TabsTrigger value="login">Sign In</TabsTrigger>
                       <TabsTrigger value="register">Sign Up</TabsTrigger>
                     </TabsList>
@@ -135,7 +135,7 @@ export default function AuthPage() {
                           <Input
                             id="email"
                             type="email"
-                            className="glassmorphism border-0"
+                            variant="glass"
                             placeholder="Enter your email"
                             {...loginForm.register("email")}
                           />
@@ -151,7 +151,7 @@ export default function AuthPage() {
                           <Input
                             id="password"
                             type="password"
-                            className="glassmorphism border-0"
+                            variant="glass"
                             placeholder="Enter your password"
                             {...loginForm.register("password")}
                           />
@@ -186,7 +186,7 @@ export default function AuthPage() {
                             <Label htmlFor="fullName">Full Name</Label>
                             <Input
                               id="fullName"
-                              className="glassmorphism border-0"
+                              variant="glass"
                               placeholder="Your full name"
                               {...registerForm.register("fullName")}
                             />
@@ -201,7 +201,7 @@ export default function AuthPage() {
                             <Label htmlFor="username">Username</Label>
                             <Input
                               id="username"
-                              className="glassmorphism border-0"
+                              variant="glass"
                               placeholder="Choose username"
                               {...registerForm.register("username")}
                             />
@@ -218,7 +218,7 @@ export default function AuthPage() {
                           <Input
                             id="reg-email"
                             type="email"
-                            className="glassmorphism border-0"
+                            variant="glass"
                             placeholder="Enter your email"
                             {...registerForm.register("email")}
                           />
@@ -233,7 +233,7 @@ export default function AuthPage() {
                           <Label htmlFor="phone">Phone (Optional)</Label>
                           <Input
                             id="phone"
-                            className="glassmorphism border-0"
+                            variant="glass"
                             placeholder="Your phone number"
                             {...registerForm.register("phone")}
                           />
@@ -244,7 +244,7 @@ export default function AuthPage() {
                           <Input
                             id="reg-password"
                             type="password"
-                            className="glassmorphism border-0"
+                            variant="glass"
                             placeholder="Create a password"
                             {...registerForm.register("password")}
                           />
@@ -281,7 +281,7 @@ export default function AuthPage() {
                   variant="ghost"
                   size="sm"
                   onClick={toggleTheme}
-                  className="glassmorphism-card rounded-full p-3 hover:scale-110 transition-all duration-200"
+                  variant="glass" className="rounded-full p-3 hover:scale-110 transition-all duration-200"
                 >
                   {theme === "dark" ? (
                     <Sun className="h-5 w-5" />

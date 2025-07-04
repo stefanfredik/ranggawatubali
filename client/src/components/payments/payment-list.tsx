@@ -64,7 +64,7 @@ export function PaymentList() {
           </div>
         </div>
 
-        <Card className="glassmorphism-card border-0">
+        <Card variant="glass">
           <CardContent className="p-6">
             <div className="flex justify-between items-center mb-4">
               <Skeleton className="h-4 w-40" />
@@ -88,7 +88,7 @@ export function PaymentList() {
         </div>
         <div className="flex space-x-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 glassmorphism border-0">
+            <SelectTrigger className="w-40" variant="glass">
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
             <SelectContent>
@@ -101,7 +101,7 @@ export function PaymentList() {
         </div>
       </div>
 
-      <Card className="glassmorphism-card border-0">
+      <Card variant="glass">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div>

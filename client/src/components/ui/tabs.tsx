@@ -7,17 +7,26 @@ const Tabs = TabsPrimitive.Root
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { variant?: 'default' | 'glass' | 'neomorphic' | 'flat' }
+>(({ className, variant = 'default', ...props }, ref) => {
+  const variantClasses = {
+    default: "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+    glass: "inline-flex h-10 items-center justify-center rounded-md bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm p-1 text-muted-foreground",
+    neomorphic: "inline-flex h-10 items-center justify-center rounded-md neumorphism p-1 text-muted-foreground",
+    flat: "inline-flex h-10 items-center justify-center rounded-md flat-card p-1 text-muted-foreground"
+  }
+  
+  return (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        variantClasses[variant],
+        className
+      )}
+      {...props}
+    />
+  )
+})
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<
