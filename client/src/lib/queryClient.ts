@@ -23,6 +23,47 @@ export async function apiRequest(
   return res;
 }
 
+export async function apiFileUpload(
+  method: string,
+  url: string,
+  file: File,
+  fieldName: string = 'file'
+): Promise<Response> {
+  console.log(`Uploading file: ${file.name}, size: ${file.size}, type: ${file.type}`);
+  console.log(`Using field name: ${fieldName}`);
+  
+  const formData = new FormData();
+  formData.append(fieldName, file);
+  
+  // Log the full URL being used
+  const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+  console.log(`Full upload URL: ${fullUrl}`);
+  console.log(`Sending ${method} request to ${url}`);
+  
+  try {
+    const res = await fetch(url, {
+      method,
+      body: formData,
+      credentials: "include",
+      // Don't set Content-Type header, browser will set it with boundary for FormData
+    });
+
+    console.log(`Upload response status: ${res.status}`);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`Upload failed with status ${res.status}: ${errorText}`);
+      throw new Error(`${res.status}: ${errorText || res.statusText}`);
+    }
+    
+    console.log('Upload successful');
+    return res;
+  } catch (error) {
+    console.error('Upload error:', error);
+    throw error;
+  }
+}
+
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;

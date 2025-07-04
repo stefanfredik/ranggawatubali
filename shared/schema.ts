@@ -19,6 +19,7 @@ export const users = pgTable("users", {
   residence: text("residence"), // Tempat Tinggal: Alamat
   arrivalDate: text("arrival_date"), // Tiba Di Bali: Bulan dan Tahun
   position: text("position"), // Fungsi atau Jabatan: Ketua, Wakil Ketua, Bendahara, Sekretaris, Suka Duka, Kerohanian, Konsumsi
+  profile_picture: text("profile_picture"), // URL atau path ke foto profil
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

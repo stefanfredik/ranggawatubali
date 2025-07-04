@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,10 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Trash2, Calendar, Eye, Key } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Eye, Key, Upload, Camera, X } from "lucide-react";
 import { format } from "date-fns";
 import { insertUserSchema } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, apiFileUpload, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 // Form schema for adding new members
@@ -119,6 +119,98 @@ export function MembersTable() {
       confirmPassword: "",
     },
   });
+  
+  // Profile picture upload mutation
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: async ({ id, file }: { id: number; file: File }) => {
+      console.log(`Starting profile picture upload for member ID: ${id}`);
+      console.log(`File details: name=${file.name}, size=${file.size}, type=${file.type}`);
+      
+      if (file.size > 5 * 1024 * 1024) {
+        console.error('File too large:', file.size);
+        throw new Error('File too large. Maximum size is 5MB');
+      }
+      
+      if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+        console.error('Invalid file type:', file.type);
+        throw new Error('Invalid file type. Allowed types: JPEG, PNG, GIF');
+      }
+      
+      try {
+        console.log('Calling apiFileUpload with URL:', `/api/members/${id}/profile-picture`);
+        const response = await apiFileUpload(
+          "POST", 
+          `/api/members/${id}/profile-picture`, 
+          file, 
+          'profilePicture'
+        );
+        console.log('Upload response received with status:', response.status);
+        const data = await response.json();
+        console.log('Upload response data:', data);
+        return data;
+      } catch (error) {
+        console.error('Upload failed:', error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      console.log('Upload mutation succeeded:', data);
+      // Update the viewing member with the new profile picture
+      setViewingMember({ ...viewingMember, profile_picture: data.user.profile_picture });
+      
+      // Also update the member in the members list
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Upload mutation error:', error);
+      toast({
+        title: "Error",
+        description: error.message || 'Failed to upload profile picture',
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Delete profile picture mutation
+  const deleteProfilePictureMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/members/${id}/profile-picture`);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      // Update the viewing member with no profile picture
+      setViewingMember({ ...viewingMember, profile_picture: null });
+      
+      // Also update the member in the members list
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      
+      toast({
+        title: "Success",
+        description: "Profile picture deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Helper functions for profile picture
+  const uploadProfilePicture = (id: number, file: File) => {
+    uploadProfilePictureMutation.mutate({ id, file });
+  };
+  
+  const deleteProfilePicture = (id: number) => {
+    deleteProfilePictureMutation.mutate(id);
+  };
 
   const addMemberMutation = useMutation({
     mutationFn: async (data: AddMemberForm) => {
@@ -269,6 +361,50 @@ export function MembersTable() {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+  
+  // Helper function to render profile picture or initials
+  const renderProfilePicture = (member: any, size: "sm" | "md" | "lg" = "md") => {
+    const sizeClasses = {
+      sm: "w-8 h-8 text-xs",
+      md: "w-10 h-10 text-sm",
+      lg: "w-20 h-20 text-2xl"
+    };
+    
+    if (member.profile_picture) {
+      // Log the profile picture URL for debugging
+      console.log('Rendering profile picture with URL:', member.profile_picture);
+      
+      // Ensure the URL is absolute by prepending the base URL if it's a relative path
+      const imageUrl = member.profile_picture.startsWith('http') 
+        ? member.profile_picture 
+        : `${window.location.origin}${member.profile_picture}`;
+      
+      console.log('Final image URL:', imageUrl);
+      
+      return (
+        <div className={`${sizeClasses[size]} rounded-full overflow-hidden shadow-sm`}>
+          <img 
+            src={imageUrl} 
+            alt={member.fullName} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Image failed to load:', imageUrl);
+              e.currentTarget.onerror = null; // Prevent infinite loop
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.innerHTML = getUserInitials(member.fullName);
+              e.currentTarget.parentElement!.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-purple-600', 'flex', 'items-center', 'justify-center', 'text-white', 'font-bold');
+            }}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className={`${sizeClasses[size]} bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
+          {getUserInitials(member.fullName)}
+        </div>
+      );
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -965,8 +1101,51 @@ export function MembersTable() {
               <div className="space-y-6">
                 {/* Header dengan foto profil dan nama */}
                 <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg">
-                  <div className="w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                    {getUserInitials(viewingMember.fullName)}
+                  <div className="relative group">
+                    {renderProfilePicture(viewingMember, "lg")}
+                    
+                    {/* Profile picture upload button */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-full">
+                      <input 
+                        type="file" 
+                        id="profile-picture-upload" 
+                        className="hidden" 
+                        accept="image/jpeg,image/png,image/gif"
+                        onChange={(e) => {
+                          console.log('File input change event triggered');
+                          if (e.target.files && e.target.files[0]) {
+                            console.log('File selected:', e.target.files[0].name);
+                            try {
+                              uploadProfilePicture(viewingMember.id, e.target.files[0]);
+                            } catch (error) {
+                              console.error('Error in file input handler:', error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to process the selected file",
+                                variant: "destructive",
+                              });
+                            }
+                          } else {
+                            console.log('No file selected');
+                          }
+                        }}
+                      />
+                      <label 
+                        htmlFor="profile-picture-upload"
+                        className="p-1.5 bg-white/80 rounded-full cursor-pointer hover:bg-white"
+                      >
+                        <Camera className="w-4 h-4 text-gray-700" />
+                      </label>
+                      
+                      {viewingMember.profile_picture && (
+                        <button 
+                          onClick={() => deleteProfilePicture(viewingMember.id)}
+                          className="p-1.5 bg-white/80 rounded-full cursor-pointer hover:bg-white ml-1"
+                        >
+                          <X className="w-4 h-4 text-red-500" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold">{viewingMember.fullName}</h3>
@@ -1362,11 +1541,7 @@ export function MembersTable() {
                       >
                         <TableCell>
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">
-                                {getUserInitials(member.fullName)}
-                              </span>
-                            </div>
+                            {renderProfilePicture(member, "md")}
                             <div>
                               <div className="font-medium">{member.fullName}</div>
                               <div className="text-sm text-muted-foreground">

@@ -1,9 +1,17 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
 import passport from "passport";
 import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema, insertDonationSchema } from "@shared/schema";
+import upload, { handleMulterError, deleteProfilePicture } from "./upload";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -21,6 +29,33 @@ function requireAdmin(req: any, res: any, next: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
+  
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    // Basic security check to prevent directory traversal
+    const requestedPath = req.path;
+    console.log('==== STATIC FILE REQUEST ====');
+    console.log('Requested upload path:', requestedPath);
+    console.log('Full URL:', req.protocol + '://' + req.get('host') + req.originalUrl);
+    console.log('Request headers:', req.headers);
+    
+    // Check if the file exists
+    const filePath = path.join(__dirname, '../uploads', requestedPath);
+    console.log('Looking for file at:', filePath);
+    try {
+      const fileExists = fs.existsSync(filePath);
+      console.log('File exists:', fileExists);
+    } catch (error) {
+      console.error('Error checking file existence:', error);
+    }
+    
+    if (requestedPath.includes('..')) {
+      return res.status(403).send('Forbidden');
+    }
+    next();
+  }, express.static(path.join(__dirname, '../uploads')));
+  
+  console.log('Static file serving path:', path.join(__dirname, '../uploads'));
 
   // Authentication routes
   app.post("/api/login", (req, res, next) => {
@@ -174,6 +209,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+  
+  // Profile picture upload route
+  app.post("/api/members/:id/profile-picture", requireAuth, upload.single('profilePicture'), handleMulterError, async (req, res) => {
+    console.log('==== PROFILE PICTURE UPLOAD ENDPOINT CALLED ====');
+    try {
+      console.log('Profile picture upload request received');
+      console.log('Request body:', req.body);
+      console.log('Request file:', req.file);
+      
+      const id = parseInt(req.params.id);
+      console.log('Member ID:', id);
+      
+      // Only allow users to update their own profile picture, unless they're an admin
+      if (req.user!.id !== id && req.user!.role !== "admin") {
+        console.log('Permission denied: User trying to update another user\'s profile picture');
+        return res.status(403).json({ message: "You can only update your own profile picture" });
+      }
+      
+      if (!req.file) {
+        console.log('Error: No file uploaded');
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const member = await storage.getUser(id);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      // Delete old profile picture if it exists
+      if (member.profile_picture) {
+        deleteProfilePicture(member.profile_picture);
+      }
+      
+      // Log file information
+      console.log('File successfully uploaded:', {
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        path: req.file.path
+      });
+      
+      // Update user with new profile picture path
+      const profilePicturePath = `/uploads/profile-pictures/${req.file.filename}`;
+      console.log('Setting profile picture path:', profilePicturePath);
+      
+      try {
+        const updatedUser = await storage.updateUser(id, { profile_picture: profilePicturePath });
+        
+        if (!updatedUser) {
+          console.error('Failed to update user record with new profile picture');
+          return res.status(500).json({ message: "Failed to update profile picture" });
+        }
+        
+        console.log('User record updated successfully with new profile picture');
+      } catch (error) {
+        console.error('Database error when updating profile picture:', error);
+        return res.status(500).json({ message: "Database error when updating profile picture" });
+      }
+      
+      const updatedUser = await storage.getUser(id);
+      if (!updatedUser) {
+        console.error('Failed to retrieve updated user data');
+        return res.status(500).json({ message: "Failed to retrieve updated user data" });
+      }
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      console.log('Sending successful response with updated user data');
+      res.json({ 
+        message: "Profile picture updated successfully", 
+        user: userWithoutPassword 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update profile picture" });
+    }
+  });
+  
+  // Delete profile picture route
+  app.delete("/api/members/:id/profile-picture", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Only allow users to delete their own profile picture, unless they're an admin
+      if (req.user!.id !== id && req.user!.role !== "admin") {
+        return res.status(403).json({ message: "You can only delete your own profile picture" });
+      }
+      
+      const member = await storage.getUser(id);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      // Delete profile picture if it exists
+      if (member.profile_picture) {
+        deleteProfilePicture(member.profile_picture);
+      }
+      
+      // Update user to remove profile picture path
+      const updatedUser = await storage.updateUser(id, { profile_picture: null });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to delete profile picture" });
+      }
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json({ 
+        message: "Profile picture deleted successfully", 
+        user: userWithoutPassword 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete profile picture" });
     }
   });
 

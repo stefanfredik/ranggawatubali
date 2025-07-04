@@ -27,15 +27,15 @@ export const appConfig = {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 
-  // Upload configuration (for future features)
+  // Upload configuration
   upload: {
     maxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '5242880'), // 5MB default
     allowedTypes: process.env.UPLOAD_ALLOWED_TYPES?.split(',') || [
       'image/jpeg',
       'image/png',
-      'image/gif',
-      'application/pdf'
+      'image/gif'
     ],
+    directory: process.env.UPLOAD_DIRECTORY || 'uploads/profile-pictures',
   },
 
   // Email configuration (for future features)
