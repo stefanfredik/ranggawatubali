@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
+  nickname: text("nickname"), // Nama panggilan
   phone: text("phone"),
   role: text("role").notNull().default("member"), // "admin", "member", "ketua", "bendahara", "sekretaris"
   status: text("status").notNull().default("active"), // "active", "inactive", "pending"

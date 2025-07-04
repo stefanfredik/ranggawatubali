@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Trash2, Calendar, Eye, Key, Upload, Camera, X } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Eye, Key, Upload, Camera, X, Mail, Phone, Gift, Plane, Home, Briefcase, GraduationCap, Users } from "lucide-react";
 import { format } from "date-fns";
 import { insertUserSchema } from "@shared/schema";
 import { apiRequest, apiFileUpload, queryClient } from "@/lib/queryClient";
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // Form schema for adding new members
 const addMemberSchema = insertUserSchema.extend({
+  nickname: z.string().optional(),
   role: z.enum(["admin", "member", "ketua", "bendahara", "sekretaris"]).default("member"),
   status: z.enum(["active", "inactive", "pending"]).default("active"),
   occupation: z.enum(["Mahasiswa", "Bekerja", "Bekerja Sambil Kuliah"]).optional(),
@@ -33,6 +34,7 @@ const addMemberSchema = insertUserSchema.extend({
 
 // Form schema for editing members (password is optional)
 const editMemberSchema = insertUserSchema.partial({ password: true }).extend({
+  nickname: z.string().optional(),
   role: z.enum(["admin", "member", "ketua", "bendahara", "sekretaris"]),
   status: z.enum(["active", "inactive", "pending"]),
   occupation: z.enum(["Mahasiswa", "Bekerja", "Bekerja Sambil Kuliah"]).optional(),
@@ -79,6 +81,7 @@ export function MembersTable() {
       email: "",
       password: "",
       fullName: "",
+      nickname: "",
       phone: "",
       role: "member",
       status: "active",
@@ -99,6 +102,7 @@ export function MembersTable() {
       email: "",
       password: "",
       fullName: "",
+      nickname: "",
       phone: "",
       role: "member",
       status: "active",
@@ -354,6 +358,17 @@ export function MembersTable() {
     }
   };
 
+  // Helper function to format dates consistently
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    try {
+      return format(new Date(dateString), "dd MMMM yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
   const getUserInitials = (name: string) => {
     return name
       .split(" ")
@@ -437,7 +452,7 @@ export function MembersTable() {
     }
   };
 
-  const filteredMembers = (members || []).filter((member: any) => {
+  const filteredMembers = Array.isArray(members) ? members.filter((member: any) => {
     const matchesSearch = member.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.username?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -445,7 +460,7 @@ export function MembersTable() {
     const matchesRole = roleFilter === "all" || member.role === roleFilter;
     
     return matchesSearch && matchesStatus && matchesRole;
-  });
+  }) : [];
 
   return (
     <div className="space-y-8">
@@ -505,6 +520,24 @@ export function MembersTable() {
                 <div className="form-section">
                   <h3 className="form-section-title">Kontak</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="nickname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Panggilan (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Masukkan nama panggilan" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="email"
@@ -829,6 +862,24 @@ export function MembersTable() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
+                    name="nickname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Panggilan (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Masukkan nama panggilan" 
+                            {...field} 
+                            value={field.value || ""} 
+                            className="glassmorphism border-0" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -1149,6 +1200,9 @@ export function MembersTable() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold">{viewingMember.fullName}</h3>
+                    {viewingMember.nickname && (
+                      <p className="text-sm text-indigo-600 dark:text-indigo-400">"{viewingMember.nickname}"</p>
+                    )}
                     <p className="text-muted-foreground">@{viewingMember.username}</p>
                     <div className="flex space-x-2 mt-2">
                       <Badge className={getRoleColor(viewingMember.role)}>
@@ -1164,8 +1218,8 @@ export function MembersTable() {
                   </div>
                 </div>
                 
-                {/* Tabs untuk mengorganisir informasi */}
-                <Tabs defaultValue="personal" className="w-full">
+                {/* Tabs untuk mengorganisir informasi - hanya tampil di desktop */}
+                <Tabs defaultValue="personal" className="w-full hidden md:block">
                   <TabsList className="grid w-full grid-cols-3 glassmorphism border-0">
                     <TabsTrigger value="personal">Informasi Pribadi</TabsTrigger>
                     <TabsTrigger value="academic">Akademik & Pekerjaan</TabsTrigger>
@@ -1174,6 +1228,10 @@ export function MembersTable() {
                   
                   {/* Tab Informasi Pribadi */}
                   <TabsContent value="personal" className="mt-4 space-y-4">
+                    {/* Tampilan mobile tanpa tab */}
+                    <div className="md:hidden mb-4">
+                      <h3 className="text-lg font-semibold mb-2">Informasi Pribadi</h3>
+                    </div>
                     <Card className="glassmorphism border-0">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Kontak</CardTitle>
@@ -1249,6 +1307,10 @@ export function MembersTable() {
                   
                   {/* Tab Akademik & Pekerjaan */}
                   <TabsContent value="academic" className="mt-4 space-y-4">
+                    {/* Tampilan mobile tanpa tab */}
+                    <div className="md:hidden mb-4">
+                      <h3 className="text-lg font-semibold mb-2">Akademik & Pekerjaan</h3>
+                    </div>
                     <Card className="glassmorphism border-0">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Informasi Akademik</CardTitle>
@@ -1288,6 +1350,10 @@ export function MembersTable() {
                   
                   {/* Tab Organisasi */}
                   <TabsContent value="organization" className="mt-4 space-y-4">
+                    {/* Tampilan mobile tanpa tab */}
+                    <div className="md:hidden mb-4">
+                      <h3 className="text-lg font-semibold mb-2">Organisasi</h3>
+                    </div>
                     <Card className="glassmorphism border-0">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-md">Informasi Keanggotaan</CardTitle>
@@ -1344,6 +1410,129 @@ export function MembersTable() {
                     </Card>
                   </TabsContent>
                 </Tabs>
+                
+                {/* Tampilan mobile - semua konten ditampilkan tanpa tab */}
+                <div className="md:hidden w-full space-y-6 mt-4">
+                  {/* Informasi Pribadi */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Informasi Pribadi</h3>
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Kontak</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center">
+                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{viewingMember.email}</span>
+                        </div>
+                        {viewingMember.phone && (
+                          <div className="flex items-center">
+                            <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>{viewingMember.phone}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glassmorphism border-0 mt-4">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Tanggal Penting</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        {viewingMember.birthday && (
+                          <div className="flex items-center">
+                            <Gift className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>Ulang Tahun: {formatDate(viewingMember.birthday)}</span>
+                          </div>
+                        )}
+                        {viewingMember.joinDate && (
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>Bergabung: {formatDate(viewingMember.joinDate)}</span>
+                          </div>
+                        )}
+                        {viewingMember.arrivalDate && (
+                          <div className="flex items-center">
+                            <Plane className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>Tiba di Bali: {formatDate(viewingMember.arrivalDate)}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glassmorphism border-0 mt-4">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Alamat</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {viewingMember.residence ? (
+                          <div className="flex items-center">
+                            <Home className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>{viewingMember.residence}</span>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">Tidak ada alamat</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Akademik & Pekerjaan */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Akademik & Pekerjaan</h3>
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Pekerjaan</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {viewingMember.occupation ? (
+                          <div className="flex items-center">
+                            <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>{viewingMember.occupation}</span>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">Tidak ada informasi pekerjaan</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glassmorphism border-0 mt-4">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Pendidikan</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {viewingMember.campus ? (
+                          <div className="flex items-center">
+                            <GraduationCap className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>{viewingMember.campus}</span>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">Tidak ada informasi pendidikan</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Organisasi */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Organisasi</h3>
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle>Posisi di Organisasi</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {viewingMember.position ? (
+                          <div className="flex items-center">
+                            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <span>{viewingMember.position}</span>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">Tidak ada posisi khusus</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
 
                 <div className="flex justify-end space-x-4 pt-4 border-t">
                   <Button
