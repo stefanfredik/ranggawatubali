@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Trash2, Calendar, Eye, Key } from "lucide-react";
 import { format } from "date-fns";
 import { insertUserSchema } from "@shared/schema";
@@ -955,136 +956,223 @@ export function MembersTable() {
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
           <DialogContent className="sm:max-w-[700px] md:max-w-[800px] glassmorphism border-0 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Member Details</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Detail Anggota</DialogTitle>
+              <DialogDescription>
+                Informasi lengkap tentang anggota
+              </DialogDescription>
             </DialogHeader>
             {viewingMember && (
               <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                    {viewingMember.fullName?.charAt(0).toUpperCase()}
+                {/* Header dengan foto profil dan nama */}
+                <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg">
+                  <div className="w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                    {getUserInitials(viewingMember.fullName)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">{viewingMember.fullName}</h3>
+                    <h3 className="text-xl font-semibold">{viewingMember.fullName}</h3>
                     <p className="text-muted-foreground">@{viewingMember.username}</p>
+                    <div className="flex space-x-2 mt-2">
+                      <Badge className={getRoleColor(viewingMember.role)}>
+                        {viewingMember.role === "admin" ? "Administrator" : 
+                         viewingMember.role === "ketua" ? "Ketua" : 
+                         viewingMember.role === "bendahara" ? "Bendahara" : 
+                         viewingMember.role === "sekretaris" ? "Sekretaris" : "Member"}
+                      </Badge>
+                      <Badge className={getStatusColor(viewingMember.status)}>
+                        {viewingMember.status}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Email</label>
-                        <p className="text-sm mt-1">{viewingMember.email}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                        <p className="text-sm mt-1">{viewingMember.phone || "Not provided"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Role</label>
-                        <div className="mt-1">
-                          <Badge className={getRoleColor(viewingMember.role)}>
-                            {viewingMember.role === "admin" ? "Administrator" : 
-                             viewingMember.role === "ketua" ? "Ketua" : 
-                             viewingMember.role === "bendahara" ? "Bendahara" : 
-                             viewingMember.role === "sekretaris" ? "Sekretaris" : "Member"}
-                          </Badge>
+                
+                {/* Tabs untuk mengorganisir informasi */}
+                <Tabs defaultValue="personal" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 glassmorphism border-0">
+                    <TabsTrigger value="personal">Informasi Pribadi</TabsTrigger>
+                    <TabsTrigger value="academic">Akademik & Pekerjaan</TabsTrigger>
+                    <TabsTrigger value="organization">Organisasi</TabsTrigger>
+                  </TabsList>
+                  
+                  {/* Tab Informasi Pribadi */}
+                  <TabsContent value="personal" className="mt-4 space-y-4">
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Kontak</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Email</label>
+                            <p className="text-sm flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              {viewingMember.email}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Telepon</label>
+                            <p className="text-sm flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              {viewingMember.phone || "Tidak tersedia"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Status</label>
-                        <div className="mt-1">
-                          <Badge className={getStatusColor(viewingMember.status)}>
-                            {viewingMember.status}
-                          </Badge>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Tanggal Penting</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Tanggal Lahir</label>
+                            <p className="text-sm flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+                              {viewingMember.birthday 
+                                ? format(new Date(viewingMember.birthday), "dd MMMM yyyy")
+                                : "Tidak tersedia"
+                              }
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Tiba Di Bali</label>
+                            <p className="text-sm flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+                              {viewingMember.arrivalDate || "Tidak tersedia"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Alamat</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-1">
+                          <label className="text-sm font-medium text-muted-foreground">Tempat Tinggal</label>
+                          <p className="text-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 mt-0.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            {viewingMember.residence || "Tidak tersedia"}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  
+                  {/* Tab Akademik & Pekerjaan */}
+                  <TabsContent value="academic" className="mt-4 space-y-4">
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Informasi Akademik</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-1">
+                          <label className="text-sm font-medium text-muted-foreground">Kampus</label>
+                          <p className="text-sm flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                              <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                            </svg>
+                            {viewingMember.campus || "Tidak tersedia"}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Informasi Pekerjaan</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-1">
+                          <label className="text-sm font-medium text-muted-foreground">Pekerjaan</label>
+                          <p className="text-sm flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {viewingMember.occupation || "Tidak tersedia"}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  
+                  {/* Tab Organisasi */}
+                  <TabsContent value="organization" className="mt-4 space-y-4">
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Informasi Keanggotaan</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Tanggal Bergabung</label>
+                            <p className="text-sm flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+                              {format(new Date(viewingMember.joinDate), "dd MMMM yyyy")}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Terdaftar Sejak</label>
+                            <p className="text-sm flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+                              {format(new Date(viewingMember.createdAt), "dd MMMM yyyy 'pukul' HH:mm")}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="glassmorphism border-0">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Posisi dalam Organisasi</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Peran</label>
+                            <p className="text-sm">
+                              <Badge className={getRoleColor(viewingMember.role)}>
+                                {viewingMember.role === "admin" ? "Administrator" : 
+                                 viewingMember.role === "ketua" ? "Ketua" : 
+                                 viewingMember.role === "bendahara" ? "Bendahara" : 
+                                 viewingMember.role === "sekretaris" ? "Sekretaris" : "Member"}
+                              </Badge>
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground">Fungsi/Jabatan</label>
+                            <p className="text-sm">
+                              {viewingMember.position ? (
+                                <Badge variant="outline" className="bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">
+                                  {viewingMember.position}
+                                </Badge>
+                              ) : "Tidak tersedia"}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
 
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Join Date</label>
-                        <p className="text-sm mt-1 flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {format(new Date(viewingMember.joinDate), "MMM dd, yyyy")}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Birthday</label>
-                        <p className="text-sm mt-1 flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {viewingMember.birthday 
-                            ? format(new Date(viewingMember.birthday), "MMM dd, yyyy")
-                            : "Not provided"
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Pekerjaan</label>
-                        <p className="text-sm mt-1">
-                          {viewingMember.occupation || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Kampus</label>
-                        <p className="text-sm mt-1">
-                          {viewingMember.campus || "Not provided"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Tiba Di Bali</label>
-                        <p className="text-sm mt-1">
-                          {viewingMember.arrivalDate || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Fungsi/Jabatan</label>
-                        <p className="text-sm mt-1">
-                          {viewingMember.position || "Not provided"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <label className="text-sm font-medium text-muted-foreground">Tempat Tinggal</label>
-                    <p className="text-sm mt-1">
-                      {viewingMember.residence || "Not provided"}
-                    </p>
-                  </div>
-
-                  <div className="glassmorphism p-4 rounded-lg">
-                    <label className="text-sm font-medium text-muted-foreground">Member Since</label>
-                    <p className="text-sm mt-1">
-                      {format(new Date(viewingMember.createdAt), "MMMM dd, yyyy 'at' HH:mm")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-4 pt-4">
+                <div className="flex justify-end space-x-4 pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setIsDetailDialogOpen(false)}
                     className="glassmorphism border-0"
                   >
-                    Close
+                    Tutup
                   </Button>
                   <Button
                     onClick={() => {
@@ -1093,7 +1181,7 @@ export function MembersTable() {
                     }}
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                   >
-                    Edit Member
+                    Edit Anggota
                   </Button>
                 </div>
               </div>
