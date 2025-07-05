@@ -76,24 +76,24 @@ export default function AuthPage() {
                 Rangga Watu Bali
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Organizational Management System
+                Sistem Manajemen Organisasi
               </p>
               <div className="space-y-4 text-left">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
-                  <span className="text-muted-foreground">Member Management</span>
+                  <span className="text-muted-foreground">Manajemen Anggota</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
-                  <span className="text-muted-foreground">Activity Planning</span>
+                  <span className="text-muted-foreground">Perencanaan Kegiatan</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
-                  <span className="text-muted-foreground">Payment Tracking</span>
+                  <span className="text-muted-foreground">Pelacakan Pembayaran</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
-                  <span className="text-muted-foreground">Birthday Reminders</span>
+                  <span className="text-muted-foreground">Pengingat Ulang Tahun</span>
                 </div>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function AuthPage() {
                   Rangga Watu Bali
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Organizational Management System
+                  Sistem Manajemen Organisasi
                 </p>
               </div>
 
@@ -119,14 +119,14 @@ export default function AuthPage() {
               <Card variant="glass" className="shadow-2xl">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl font-bold">
-                    Welcome
+                    Selamat Datang
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList className="grid w-full grid-cols-2" variant="glass">
-                      <TabsTrigger value="login">Sign In</TabsTrigger>
-                      <TabsTrigger value="register">Sign Up</TabsTrigger>
+                      <TabsTrigger value="login">Masuk</TabsTrigger>
+                      <TabsTrigger value="register">Daftar</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="login" className="space-y-4 mt-6">
@@ -137,7 +137,7 @@ export default function AuthPage() {
                             id="email"
                             type="email"
                             variant="glass"
-                            placeholder="Enter your email"
+                            placeholder="Masukkan email Anda"
                             {...loginForm.register("email")}
                           />
                           {loginForm.formState.errors.email && (
@@ -148,12 +148,12 @@ export default function AuthPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="password">Password</Label>
+                          <Label htmlFor="password">Kata Sandi</Label>
                           <Input
                             id="password"
                             type="password"
                             variant="glass"
-                            placeholder="Enter your password"
+                            placeholder="Masukkan kata sandi Anda"
                             {...loginForm.register("password")}
                           />
                           {loginForm.formState.errors.password && (
@@ -171,10 +171,10 @@ export default function AuthPage() {
                           {loginMutation.isPending ? (
                             <>
                               <Loading size="sm" variant="dots" text="" className="mr-2" />
-                              Signing In...
+                              Sedang Masuk...
                             </>
                           ) : (
-                            "Sign In"
+                            "Masuk"
                           )}
                         </Button>
                       </form>
@@ -184,11 +184,11 @@ export default function AuthPage() {
                       <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="fullName">Full Name</Label>
+                            <Label htmlFor="fullName">Nama Lengkap</Label>
                             <Input
                               id="fullName"
                               variant="glass"
-                              placeholder="Your full name"
+                              placeholder="Nama lengkap Anda"
                               {...registerForm.register("fullName")}
                             />
                             {registerForm.formState.errors.fullName && (
@@ -199,11 +199,11 @@ export default function AuthPage() {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
+                            <Label htmlFor="username">Nama Pengguna</Label>
                             <Input
                               id="username"
                               variant="glass"
-                              placeholder="Choose username"
+                              placeholder="Pilih nama pengguna"
                               {...registerForm.register("username")}
                             />
                             {registerForm.formState.errors.username && (
@@ -220,7 +220,7 @@ export default function AuthPage() {
                             id="reg-email"
                             type="email"
                             variant="glass"
-                            placeholder="Enter your email"
+                            placeholder="Masukkan email Anda"
                             {...registerForm.register("email")}
                           />
                           {registerForm.formState.errors.email && (
@@ -231,22 +231,22 @@ export default function AuthPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="phone">Phone (Optional)</Label>
+                          <Label htmlFor="phone">Telepon (Opsional)</Label>
                           <Input
                             id="phone"
                             variant="glass"
-                            placeholder="Your phone number"
+                            placeholder="Nomor telepon Anda"
                             {...registerForm.register("phone")}
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="reg-password">Password</Label>
+                          <Label htmlFor="reg-password">Kata Sandi</Label>
                           <Input
                             id="reg-password"
                             type="password"
                             variant="glass"
-                            placeholder="Create a password"
+                            placeholder="Buat kata sandi"
                             {...registerForm.register("password")}
                           />
                           {registerForm.formState.errors.password && (
@@ -264,10 +264,10 @@ export default function AuthPage() {
                           {registerMutation.isPending ? (
                             <>
                               <Loading size="sm" variant="dots" text="" className="mr-2" />
-                              Creating Account...
+                              Membuat Akun...
                             </>
                           ) : (
-                            "Create Account"
+                            "Buat Akun"
                           )}
                         </Button>
                       </form>

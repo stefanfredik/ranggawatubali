@@ -148,21 +148,21 @@ async function resetDatabase() {
     console.log('Membuat aktivitas contoh...');
     const activityData = [
       {
-        title: 'Gotong Royong Membersihkan Pura',
-        description: 'Kegiatan gotong royong membersihkan area pura dalam rangka persiapan upacara.',
+        title: 'Rapat Pembentukan Panitia',
+        description: 'Rapat pembentukan panitia baru untuk mengurus kegiatan organisasi.',
         date: '2023-08-20',
-        location: 'Pura Desa',
+        location: 'Kos Om Nox',
         maxParticipants: 30,
-        status: 'upcoming',
+        status: 'akan datang',
         createdBy: admin.id
       },
       {
-        title: 'Latihan Tari Tradisional',
-        description: 'Latihan rutin tari tradisional Bali untuk persiapan festival budaya.',
+        title: 'Latihan Futsal',
+        description: 'Latihan rutin futsal untuk anggota.',
         date: '2023-07-25',
-        location: 'Balai Banjar',
+        location: 'holic futsal',
         maxParticipants: 15,
-        status: 'upcoming',
+        status: 'akan datang',
         createdBy: admin.id
       }
     ];
@@ -181,7 +181,7 @@ async function resetDatabase() {
         amount: '50000',
         dueDate: '2023-07-30',
         period: '2023-07',
-        status: 'unpaid',
+        status: 'belum lunas',
         walletId: mainWallet.id
       });
     }
@@ -198,7 +198,7 @@ async function resetDatabase() {
       initialFeesData.push({
         userId: member.id,
         amount: '250000',
-        status: 'unpaid',
+        status: 'belum lunas',
         walletId: mainWallet.id
       });
     }

@@ -7,9 +7,9 @@ export default function PaymentsPage() {
       <NavHeader />
       <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-20 transition-all duration-300">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Payments</h1>
+          <h1 className="text-3xl font-bold">Pembayaran</h1>
           <p className="text-muted-foreground mt-1">
-            Manage organization payments here.
+            Kelola pembayaran organisasi di sini.
           </p>
         </div>
         <PaymentCards />

@@ -7,9 +7,9 @@ export default function AnnouncementsPage() {
       <NavHeader />
       <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-20 transition-all duration-300">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Announcements</h1>
+          <h1 className="text-3xl font-bold">Pengumuman</h1>
           <p className="text-muted-foreground mt-1">
-            View all organization announcements here.
+            Lihat semua pengumuman organisasi di sini.
           </p>
         </div>
         <Announcements showAll />

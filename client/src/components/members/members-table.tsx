@@ -166,15 +166,15 @@ export function MembersTable() {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       
       toast({
-        title: "Success",
-        description: "Profile picture updated successfully",
+        title: "Berhasil",
+        description: "Foto profil berhasil diperbarui",
       });
     },
     onError: (error: Error) => {
       console.error('Upload mutation error:', error);
       toast({
-        title: "Error",
-        description: error.message || 'Failed to upload profile picture',
+        title: "Kesalahan",
+        description: error.message || 'Gagal mengunggah foto profil',
         variant: "destructive",
       });
     },
@@ -194,13 +194,13 @@ export function MembersTable() {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       
       toast({
-        title: "Success",
-        description: "Profile picture deleted successfully",
+        title: "Berhasil",
+        description: "Foto profil berhasil dihapus",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Kesalahan",
         description: error.message,
         variant: "destructive",
       });
@@ -227,8 +227,8 @@ export function MembersTable() {
       setIsAddDialogOpen(false);
       form.reset();
       toast({
-        title: "Success",
-        description: "Member added successfully",
+        title: "Berhasil",
+        description: "Anggota berhasil ditambahkan",
       });
     },
     onError: (error: Error) => {
@@ -251,8 +251,8 @@ export function MembersTable() {
       setEditingMember(null);
       editForm.reset();
       toast({
-        title: "Success",
-        description: "Member updated successfully",
+        title: "Berhasil",
+        description: "Anggota berhasil diperbarui",
       });
     },
     onError: (error: Error) => {
@@ -273,8 +273,8 @@ export function MembersTable() {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
-        title: "Success",
-        description: "Member deleted successfully",
+        title: "Berhasil",
+        description: "Anggota berhasil dihapus",
       });
     },
     onError: (error: Error) => {
@@ -295,8 +295,8 @@ export function MembersTable() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Password changed successfully",
+        title: "Berhasil",
+        description: "Kata sandi berhasil diubah",
       });
       setIsPasswordDialogOpen(false);
       passwordForm.reset();
@@ -466,16 +466,16 @@ export function MembersTable() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Member Management</h2>
+          <h2 className="text-2xl font-bold">Manajemen Anggota</h2>
           <p className="text-muted-foreground mt-1">
-            Manage organization members and their profiles
+            Kelola anggota organisasi dan profil mereka
           </p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
               <Plus className="mr-2" size={16} />
-              Add Member
+              Tambah Anggota
             </Button>
           </DialogTrigger>
           <DialogContent variant="glass" className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto">
@@ -493,9 +493,9 @@ export function MembersTable() {
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>Nama Lengkap</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter full name" {...field} variant="glass" />
+                          <Input placeholder="Masukkan nama lengkap" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -508,7 +508,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter username" {...field} variant="glass" />
+                          <Input placeholder="Masukkan username" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -545,7 +545,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter email" {...field} variant="glass" />
+                          <Input type="email" placeholder="Masukkan email" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -556,10 +556,10 @@ export function MembersTable() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone (Optional)</FormLabel>
+                        <FormLabel>Telepon (Opsional)</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="Enter phone number" 
+                            placeholder="Masukkan nomor telepon" 
                             {...field} 
                             value={field.value || ""} 
                             variant="glass" 
@@ -579,9 +579,9 @@ export function MembersTable() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Kata Sandi</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter password" {...field} variant="glass" />
+                        <Input type="password" placeholder="Masukkan kata sandi" {...field} variant="glass" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -597,7 +597,7 @@ export function MembersTable() {
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Role</FormLabel>
+                        <FormLabel>Peran</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger variant="glass">
@@ -605,7 +605,7 @@ export function MembersTable() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="member">Anggota</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
                             <SelectItem value="ketua">Ketua</SelectItem>
                             <SelectItem value="bendahara">Bendahara</SelectItem>
@@ -629,9 +629,9 @@ export function MembersTable() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="active">Aktif</SelectItem>
+                            <SelectItem value="inactive">Tidak Aktif</SelectItem>
+                            <SelectItem value="pending">Tertunda</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -643,7 +643,7 @@ export function MembersTable() {
                     name="joinDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Join Date</FormLabel>
+                        <FormLabel>Tanggal Bergabung</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} variant="glass" />
                         </FormControl>
@@ -662,7 +662,7 @@ export function MembersTable() {
                     name="birthday"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Birthday (Optional)</FormLabel>
+                        <FormLabel>Tanggal Lahir (Opsional)</FormLabel>
                         <FormControl>
                           <Input 
                             type="date" 
@@ -832,9 +832,9 @@ export function MembersTable() {
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>Nama Lengkap</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter full name" {...field} variant="glass" />
+                          <Input placeholder="Masukkan nama lengkap" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -847,7 +847,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter username" {...field} variant="glass" />
+                          <Input placeholder="Masukkan username" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -884,7 +884,7 @@ export function MembersTable() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter email" {...field} variant="glass" />
+                          <Input type="email" placeholder="Masukkan email" {...field} variant="glass" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -895,10 +895,10 @@ export function MembersTable() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone (Optional)</FormLabel>
+                        <FormLabel>Telepon (Opsional)</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="Enter phone number" 
+                            placeholder="Masukkan nomor telepon" 
                             {...field} 
                             value={field.value || ""} 
                             variant="glass" 
@@ -919,15 +919,15 @@ export function MembersTable() {
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Role</FormLabel>
+                        <FormLabel>Peran</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger variant="glass">
-                              <SelectValue placeholder="Select role" />
+                              <SelectValue placeholder="Pilih peran" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="member">Anggota</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
                             <SelectItem value="ketua">Ketua</SelectItem>
                             <SelectItem value="bendahara">Bendahara</SelectItem>
@@ -947,7 +947,7 @@ export function MembersTable() {
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger variant="glass">
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Pilih status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -1558,7 +1558,7 @@ export function MembersTable() {
         <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
           <DialogContent variant="glass" className="sm:max-w-[400px]">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Change Password</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Ubah Kata Sandi</DialogTitle>
             </DialogHeader>
             {passwordMember && (
               <div className="space-y-4">
@@ -1579,11 +1579,11 @@ export function MembersTable() {
                       name="newPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>New Password</FormLabel>
+                          <FormLabel>Kata Sandi Baru</FormLabel>
                           <FormControl>
                             <Input 
                               type="password" 
-                              placeholder="Enter new password" 
+                              placeholder="Masukkan kata sandi baru" 
                               {...field} 
                               variant="glass" 
                             />
@@ -1597,11 +1597,11 @@ export function MembersTable() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
+                          <FormLabel>Konfirmasi Kata Sandi</FormLabel>
                           <FormControl>
                             <Input 
                               type="password" 
-                              placeholder="Confirm new password" 
+                              placeholder="Konfirmasi kata sandi baru" 
                               {...field} 
                               variant="glass" 
                             />
@@ -1619,14 +1619,14 @@ export function MembersTable() {
                           passwordForm.reset();
                         }}
                       >
-                        Cancel
+                        Batal
                       </Button>
                       <Button
                         type="submit"
                         disabled={changePasswordMutation.isPending}
                         className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                       >
-                        {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                        {changePasswordMutation.isPending ? "Mengubah..." : "Ubah Kata Sandi"}
                       </Button>
                     </div>
                   </form>
@@ -1643,7 +1643,7 @@ export function MembersTable() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Input
-                placeholder="Search members..."
+                placeholder="Cari anggota..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 variant="glass"
@@ -1652,23 +1652,23 @@ export function MembersTable() {
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-32" variant="glass">
-                  <SelectValue placeholder="All Status" />
+                  <SelectValue placeholder="Semua Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="active">Aktif</SelectItem>
+                  <SelectItem value="inactive">Tidak Aktif</SelectItem>
+                  <SelectItem value="pending">Tertunda</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
                 <SelectTrigger className="w-32" variant="glass">
-                  <SelectValue placeholder="All Roles" />
+                  <SelectValue placeholder="Semua Peran" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="all">Semua Peran</SelectItem>
                   <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="member">Anggota</SelectItem>
                   <SelectItem value="ketua">Ketua</SelectItem>
                   <SelectItem value="bendahara">Bendahara</SelectItem>
                   <SelectItem value="sekretaris">Sekretaris</SelectItem>
@@ -1703,19 +1703,19 @@ export function MembersTable() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-glass-border">
-                    <TableHead>Member</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Join Date</TableHead>
+                    <TableHead>Anggota</TableHead>
+                    <TableHead>Kontak</TableHead>
+                    <TableHead>Peran</TableHead>
+                    <TableHead>Tanggal Bergabung</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Tindakan</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {!filteredMembers?.length ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No members found
+                        Tidak ada anggota ditemukan
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -1738,7 +1738,7 @@ export function MembersTable() {
                         <TableCell>
                           <div className="text-sm">{member.email}</div>
                           <div className="text-sm text-muted-foreground">
-                            {member.phone || "No phone"}
+                            {member.phone || "Tidak ada telepon"}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -1747,7 +1747,7 @@ export function MembersTable() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">
-                          {format(new Date(member.joinDate), "MMM dd, yyyy")}
+                          {format(new Date(member.joinDate), "d MMM yyyy")}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(member.status)}>
@@ -1788,19 +1788,19 @@ export function MembersTable() {
                               </AlertDialogTrigger>
                               <AlertDialogContent variant="glass">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Member</AlertDialogTitle>
+                                  <AlertDialogTitle>Hapus Anggota</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete {member.fullName}? This action cannot be undone.
+                                    Apakah Anda yakin ingin menghapus {member.fullName}? Tindakan ini tidak dapat dibatalkan.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
                                   <AlertDialogAction 
                                     onClick={() => handleDeleteMember(member.id)}
                                     className="bg-destructive hover:bg-destructive/90"
                                     disabled={deleteMemberMutation.isPending}
                                   >
-                                    {deleteMemberMutation.isPending ? "Deleting..." : "Delete"}
+                                    {deleteMemberMutation.isPending ? "Menghapus..." : "Hapus"}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>

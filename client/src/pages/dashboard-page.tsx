@@ -11,9 +11,9 @@ export default function DashboardPage() {
       <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-20 transition-all duration-300">
         <div className="space-y-8">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-3xl font-bold">Dasbor</h1>
             <p className="text-muted-foreground mt-1">
-              Hallo bro/sis. Selamat datang di Web Management Ranggawatu Bali.
+              Halo bro/sis. Selamat datang di Web Manajemen Ranggawatu Bali.
             </p>
           </div>
           <StatsCards />

@@ -24,7 +24,7 @@ export function UpcomingBirthdays() {
     const birthdayThisYear = new Date(`${currentYear}-${birthday.slice(5)}`);
     
     if (birthdayThisYear < today) {
-      // Birthday already passed this year, calculate for next year
+      // Ulang tahun sudah lewat tahun ini, hitung untuk tahun depan
       const birthdayNextYear = new Date(`${currentYear + 1}-${birthday.slice(5)}`);
       return differenceInDays(birthdayNextYear, today);
     }
@@ -60,16 +60,16 @@ export function UpcomingBirthdays() {
     <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Ulang Tahun Akan Datang</CardTitle>
+          <CardTitle>Ultah yang Akan Datang</CardTitle>
           <Button variant="ghost" size="sm" className="text-primary">
-            View Calendar
+            Lihat Kalender
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {!birthdays?.length ? (
           <p className="text-muted-foreground text-center py-8">
-            No birthdays this month
+            Tidak ada ulang tahun bulan ini
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -88,14 +88,14 @@ export function UpcomingBirthdays() {
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{member.fullName}</h4>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(`2024-${member.birthday.slice(5)}`), "MMM dd")}
+                      {format(new Date(`2024-${member.birthday.slice(5)}`), "d MMM")}
                     </p>
                     <p className="text-xs text-purple-600 dark:text-purple-400">
                       {daysUntil === 0
-                        ? "Today!"
+                        ? "Hari ini!"
                         : daysUntil === 1
-                        ? "Tomorrow"
-                        : `in ${daysUntil} days`}
+                        ? "Besok"
+                        : `${daysUntil} hari lagi`}
                     </p>
                   </div>
                 </div>

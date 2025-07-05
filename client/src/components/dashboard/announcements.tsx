@@ -55,10 +55,10 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Latest Announcements</CardTitle>
+          <CardTitle>Pengumuman Terbaru</CardTitle>
           {!showAll && (
             <Button variant="ghost" size="sm" className="text-primary">
-              View All
+              Lihat Semua
             </Button>
           )}
         </div>
@@ -66,7 +66,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
       <CardContent>
         {!displayAnnouncements?.length ? (
           <p className="text-muted-foreground text-center py-8">
-            No announcements found
+            Tidak ada pengumuman ditemukan
           </p>
         ) : (
           <div className="space-y-4">
@@ -82,7 +82,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(announcement.createdAt), {
                         addSuffix: true,
-                      })}
+                      }).replace('about ', 'sekitar ').replace('less than a minute ago', 'kurang dari semenit yang lalu').replace('minutes ago', 'menit yang lalu').replace('minute ago', 'menit yang lalu').replace('hours ago', 'jam yang lalu').replace('hour ago', 'jam yang lalu').replace('days ago', 'hari yang lalu').replace('day ago', 'hari yang lalu').replace('months ago', 'bulan yang lalu').replace('month ago', 'bulan yang lalu').replace('years ago', 'tahun yang lalu').replace('year ago', 'tahun yang lalu').replace('in ', 'dalam ')}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
@@ -92,7 +92,10 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                   </p>
                   <div className="flex items-center">
                     <Badge className={typeColors.replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
-                      {announcement.type}
+                      {announcement.type === "important" ? "Penting" : 
+                       announcement.type === "event" ? "Acara" : 
+                       announcement.type === "system" ? "Sistem" : 
+                       announcement.type}
                     </Badge>
                   </div>
                 </div>

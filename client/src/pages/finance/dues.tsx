@@ -420,6 +420,7 @@ export default function FinanceDuesPage() {
       case "paid":
         return <Badge className="bg-green-500">Lunas</Badge>;
       case "unpaid":
+      case "belum lunas":
         return <Badge className="bg-red-500">Belum Lunas</Badge>;
       case "partial":
         return <Badge className="bg-yellow-500">Sebagian</Badge>;
@@ -524,7 +525,7 @@ export default function FinanceDuesPage() {
               <p className="text-3xl font-bold mb-2">{formatCurrency(summary.dueAmount)}</p>
               <p className="text-purple-100">per anggota</p>
               <div className="mt-2 pt-2 border-t border-purple-400">
-                <p className="text-sm text-purple-100">Target: {formatCurrency(summary.targetAmount)}</p>
+                <p className="text-sm text-purple-100">Sasaran: {formatCurrency(summary.targetAmount)}</p>
               </div>
             </CardContent>
           </Card>
@@ -538,7 +539,7 @@ export default function FinanceDuesPage() {
               <p className="text-3xl font-bold mb-2">{formatCurrency(summary.totalCollected)}</p>
               <div className="mt-2">
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Progress</span>
+                  <span>Kemajuan</span>
                   <span>{summary.collectionRate}%</span>
                 </div>
                 <Progress value={summary.collectionRate} className="h-2 bg-blue-300" />

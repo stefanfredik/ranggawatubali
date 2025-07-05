@@ -355,6 +355,7 @@ export default function FinanceInitialPage() {
       case "paid":
         return <Badge className="bg-green-500">Lunas</Badge>;
       case "unpaid":
+      case "belum lunas":
         return <Badge className="bg-red-500">Belum Lunas</Badge>;
       case "partial":
         return <Badge className="bg-yellow-500">Sebagian</Badge>;
@@ -413,7 +414,7 @@ export default function FinanceInitialPage() {
               <p className="text-3xl font-bold mb-2">{formatCurrency(summary.totalCollected)}</p>
               <div className="mt-2">
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Progress</span>
+                  <span>Kemajuan</span>
                   <span>{summary.collectionRate.toFixed(0)}%</span>
                 </div>
                 <Progress value={summary.collectionRate} className="h-2 bg-blue-300" />

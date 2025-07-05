@@ -29,10 +29,13 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
+      case "aktif":
         return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100";
       case "upcoming":
+      case "akan datang":
         return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100";
       case "completed":
+      case "selesai":
         return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100";
       default:
         return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100";
@@ -70,7 +73,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
           <CardTitle>Kegiatan Terbaru</CardTitle>
           {!showAll && (
             <Button variant="ghost" size="sm" className="text-primary">
-              View All
+              Lihat Semua
             </Button>
           )}
         </div>
@@ -78,7 +81,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
       <CardContent>
         {!displayActivities?.length ? (
           <p className="text-muted-foreground text-center py-8">
-            No activities found
+            Tidak ada kegiatan ditemukan
           </p>
         ) : (
           <div className="space-y-4">
@@ -95,14 +98,17 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
                   <div className="flex-1">
                     <h4 className="font-medium">{activity.title}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(activity.date), "MMM dd, yyyy")}
+                      {format(new Date(activity.date), "d MMMM yyyy").replace(/January/g, "Januari").replace(/February/g, "Februari").replace(/March/g, "Maret").replace(/April/g, "April").replace(/May/g, "Mei").replace(/June/g, "Juni").replace(/July/g, "Juli").replace(/August/g, "Agustus").replace(/September/g, "September").replace(/October/g, "Oktober").replace(/November/g, "November").replace(/December/g, "Desember")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {activity.participantCount} participants
+                      {activity.participantCount} peserta
                     </p>
                   </div>
                   <Badge className={getStatusColor(activity.status)}>
-                    {activity.status}
+                    {activity.status === "active" || activity.status === "aktif" ? "Aktif" : 
+                     activity.status === "upcoming" || activity.status === "akan datang" ? "Akan Datang" : 
+                     activity.status === "completed" || activity.status === "selesai" ? "Selesai" : 
+                     activity.status}
                   </Badge>
                 </div>
               );

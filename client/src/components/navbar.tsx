@@ -17,10 +17,10 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "members", label: "Members", icon: Users, adminOnly: true },
-    { id: "announcements", label: "Announcements", icon: Megaphone },
-    { id: "activities", label: "Activities", icon: Calendar },
-    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "members", label: "Anggota", icon: Users, adminOnly: true },
+    { id: "announcements", label: "Pengumuman", icon: Megaphone },
+    { id: "activities", label: "Kegiatan", icon: Calendar },
+    { id: "payments", label: "Pembayaran", icon: CreditCard },
   ] as const;
 
   const visibleItems = navigationItems.filter(
@@ -47,7 +47,7 @@ export function Navbar({ currentSection, onSectionChange }: NavbarProps) {
             </div>
             <div>
               <h1 className="text-lg font-bold">Rangga Watu Bali</h1>
-              <p className="text-xs text-muted-foreground">Organization Management</p>
+              <p className="text-xs text-muted-foreground">Manajemen Organisasi</p>
             </div>
           </div>
 

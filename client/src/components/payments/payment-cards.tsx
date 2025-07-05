@@ -53,9 +53,9 @@ export function PaymentCards() {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Payment Verification</h2>
+            <h2 className="text-2xl font-bold">Verifikasi Pembayaran</h2>
             <p className="text-muted-foreground mt-1">
-              Review and verify member payment submissions
+              Tinjau dan verifikasi pengajuan pembayaran anggota
             </p>
           </div>
         </div>
@@ -97,21 +97,21 @@ export function PaymentCards() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Payment Verification</h2>
+          <h2 className="text-2xl font-bold">Verifikasi Pembayaran</h2>
           <p className="text-muted-foreground mt-1">
-            Review and verify member payment submissions
+            Tinjau dan verifikasi pengajuan pembayaran anggota
           </p>
         </div>
         <div className="flex space-x-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40" variant="glass">
-              <SelectValue placeholder="All Payments" />
+              <SelectValue placeholder="Semua Pembayaran" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Payments</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="all">Semua Pembayaran</SelectItem>
+              <SelectItem value="pending">Tertunda</SelectItem>
+              <SelectItem value="approved">Disetujui</SelectItem>
+              <SelectItem value="rejected">Ditolak</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -120,7 +120,7 @@ export function PaymentCards() {
       {!filteredPayments?.length ? (
         <Card variant="glass">
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">No payment submissions found</p>
+            <p className="text-muted-foreground">Tidak ada pengajuan pembayaran ditemukan</p>
           </CardContent>
         </Card>
       ) : (
@@ -149,17 +149,17 @@ export function PaymentCards() {
 
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Amount:</span>
+                    <span className="text-sm text-muted-foreground">Jumlah:</span>
                     <span className="text-sm font-medium">
                       {formatCurrency(payment.amount)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Period:</span>
+                    <span className="text-sm text-muted-foreground">Periode:</span>
                     <span className="text-sm font-medium">{payment.period}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Submitted:</span>
+                    <span className="text-sm text-muted-foreground">Diajukan:</span>
                     <span className="text-sm font-medium">
                       {format(new Date(payment.submittedAt), "MMM dd, yyyy")}
                     </span>
@@ -171,7 +171,7 @@ export function PaymentCards() {
                   <div className="mb-4">
                     <img
                       src={payment.proofImageUrl}
-                      alt="Payment proof"
+                      alt="Bukti pembayaran"
                       className="w-full h-32 object-cover rounded-xl"
                     />
                   </div>
@@ -184,14 +184,14 @@ export function PaymentCards() {
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     >
                       <Check className="mr-1" size={14} />
-                      Approve
+                      Setujui
                     </Button>
                     <Button
                       size="sm"
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                     >
                       <X className="mr-1" size={14} />
-                      Reject
+                      Tolak
                     </Button>
                     <Button variant="ghost" size="sm" className="px-3">
                       <Eye size={14} />
@@ -202,12 +202,12 @@ export function PaymentCards() {
                     {payment.status === "approved" ? (
                       <span className="text-green-600 dark:text-green-400">
                         <Check className="inline mr-1" size={14} />
-                        Payment Verified
+                        Pembayaran Terverifikasi
                       </span>
                     ) : (
                       <span className="text-red-600 dark:text-red-400">
                         <X className="inline mr-1" size={14} />
-                        Payment Rejected
+                        Pembayaran Ditolak
                       </span>
                     )}
                     {payment.reviewedAt && (

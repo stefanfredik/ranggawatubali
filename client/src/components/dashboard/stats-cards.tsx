@@ -10,35 +10,35 @@ export function StatsCards() {
 
   const cards = [
     {
-      title: "Total Members",
+      title: "Total Anggota",
       value: stats?.totalMembers || 0,
       icon: Users,
       color: "from-blue-500 to-blue-600",
       change: "+12%",
-      changeText: "from last month",
+      changeText: "dari bulan lalu",
     },
     {
-      title: "Active Activities",
+      title: "Aktivitas Aktif",
       value: stats?.activeActivities || 0,
       icon: Calendar,
       color: "from-green-500 to-green-600",
       change: "+3",
-      changeText: "new this week",
+      changeText: "baru minggu ini",
     },
     {
-      title: "Pending Payments",
+      title: "Pembayaran Tertunda",
       value: stats?.pendingPayments || 0,
       icon: CreditCard,
       color: "from-yellow-500 to-yellow-600",
-      change: "Review needed",
+      change: "Perlu ditinjau",
       changeText: "",
     },
     {
-      title: "Birthday This Month",
+      title: "Ulang Tahun Bulan Ini",
       value: stats?.birthdaysThisMonth || 0,
       icon: Cake,
       color: "from-purple-500 to-purple-600",
-      change: "3 this week",
+      change: "Dalam 3 minggu ini",
       changeText: "",
     },
   ];
