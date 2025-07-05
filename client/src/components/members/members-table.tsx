@@ -1794,7 +1794,7 @@ export function MembersTable() {
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel variant="glass">Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction 
                                     onClick={() => handleDeleteMember(member.id)}
                                     className="bg-destructive hover:bg-destructive/90"
