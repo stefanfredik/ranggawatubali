@@ -42,9 +42,7 @@ export function AnnouncementManagement() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/announcements/${id}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/announcements/${id}`);
     },
     onSuccess: () => {
       toast.success("Pengumuman berhasil dihapus");

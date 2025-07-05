@@ -66,10 +66,7 @@ export function AnnouncementForm({
 
   const createMutation = useMutation({
     mutationFn: async (data: AnnouncementFormValues) => {
-      return apiRequest("/api/announcements", {
-        method: "POST",
-        data,
-      });
+      return apiRequest("POST", "/api/announcements", data);
     },
     onSuccess: () => {
       toast.success("Pengumuman berhasil dibuat");
@@ -86,10 +83,7 @@ export function AnnouncementForm({
 
   const updateMutation = useMutation({
     mutationFn: async (data: AnnouncementFormValues) => {
-      return apiRequest(`/api/announcements/${announcement?.id}`, {
-        method: "PUT",
-        data,
-      });
+      return apiRequest("PUT", `/api/announcements/${announcement?.id}`, data);
     },
     onSuccess: () => {
       toast.success("Pengumuman berhasil diperbarui");
