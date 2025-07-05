@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +22,15 @@ interface AnnouncementsProps {
 }
 
 export function Announcements({ showAll = false }: AnnouncementsProps) {
+  // Always define the same hooks in the same order regardless of props
   const { data: announcements, isLoading } = useQuery({
     queryKey: ["/api/announcements"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/announcements");
+      return response.json();
+    },
+    // Ensure consistent hook behavior regardless of props
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
   
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
@@ -70,6 +78,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     );
   }
 
+  // Always define all hooks and memoized values regardless of props
   // Filter announcements based on search term and type filter
   const filteredAnnouncements = useMemo(() => {
     if (!announcements) return [];
@@ -86,7 +95,11 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     });
   }, [announcements, searchTerm, typeFilter]);
   
-  const displayAnnouncements = showAll ? filteredAnnouncements : filteredAnnouncements?.slice(0, 3);
+  // Always compute this value in the same way regardless of render path
+  // This ensures consistent hook behavior across renders
+  const displayAnnouncements = useMemo(() => {
+    return showAll ? filteredAnnouncements : filteredAnnouncements?.slice(0, 3);
+  }, [showAll, filteredAnnouncements]);
 
   return (
     <>
@@ -104,36 +117,35 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
             )}
           </div>
           
-          {showAll && (
-            <div className="mt-4 space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari informasi..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                    variant="glass"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-[180px]" variant="glass">
-                      <SelectValue placeholder="Filter Tipe" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Semua Tipe</SelectItem>
-                      <SelectItem value="important">Penting</SelectItem>
-                      <SelectItem value="event">Acara</SelectItem>
-                      <SelectItem value="system">Sistem</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Always render the search and filter UI, but conditionally show/hide with CSS */}
+          <div className={`mt-4 space-y-4 ${showAll ? 'block' : 'hidden'}`}>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cari informasi..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                  variant="glass"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-[180px]" variant="glass">
+                    <SelectValue placeholder="Filter Tipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Tipe</SelectItem>
+                    <SelectItem value="important">Penting</SelectItem>
+                    <SelectItem value="event">Acara</SelectItem>
+                    <SelectItem value="system">Sistem</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
+          </div>
         </CardHeader>
         <CardContent>
           {!displayAnnouncements?.length ? (
