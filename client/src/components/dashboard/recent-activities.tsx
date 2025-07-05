@@ -43,7 +43,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
     return (
       <Card variant="glass">
         <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
+          <CardTitle>Kegiatan Terbaru</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -67,7 +67,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
     <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Recent Activities</CardTitle>
+          <CardTitle>Kegiatan Terbaru</CardTitle>
           {!showAll && (
             <Button variant="ghost" size="sm" className="text-primary">
               View All

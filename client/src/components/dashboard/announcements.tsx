@@ -31,7 +31,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     return (
       <Card variant="glass">
         <CardHeader>
-          <CardTitle>Latest Announcements</CardTitle>
+          <CardTitle>Informasi Terbaru</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (

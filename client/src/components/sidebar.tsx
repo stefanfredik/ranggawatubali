@@ -21,10 +21,10 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
-    { id: "members", label: "Members", icon: Users, adminOnly: true },
-    { id: "announcements", label: "Announcements", icon: Megaphone, adminOnly: false },
-    { id: "activities", label: "Activities", icon: Calendar, adminOnly: false },
-    { id: "payments", label: "Payments", icon: CreditCard, adminOnly: false },
+    { id: "members", label: "Anggota", icon: Users, adminOnly: true },
+    { id: "announcements", label: "Informasi", icon: Megaphone, adminOnly: false },
+    { id: "activities", label: "Kegiatan", icon: Calendar, adminOnly: false },
+    { id: "payments", label: "Pembayaran", icon: CreditCard, adminOnly: false },
     { 
       id: "finance", 
       label: "Keuangan", 

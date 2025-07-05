@@ -36,7 +36,7 @@ export function UpcomingBirthdays() {
     return (
       <Card variant="glass">
         <CardHeader>
-          <CardTitle>Upcoming Birthdays</CardTitle>
+          <CardTitle>Ulang Tahun Akan Datang</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -60,7 +60,7 @@ export function UpcomingBirthdays() {
     <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Upcoming Birthdays</CardTitle>
+          <CardTitle>Ulang Tahun Akan Datang</CardTitle>
           <Button variant="ghost" size="sm" className="text-primary">
             View Calendar
           </Button>
