@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster as SonnerToaster } from "sonner";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -68,6 +69,7 @@ function App() {
           <TooltipProvider>
             <Router hook={useHashLocation}>
               <Toaster />
+              <SonnerToaster position="top-right" richColors closeButton />
               <AppRoutes />
             </Router>
           </TooltipProvider>
