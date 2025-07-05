@@ -86,9 +86,16 @@ export function setupAuth(app: Express) {
     try {
       const validatedData = insertUserSchema.parse(req.body);
       
-      const existingUser = await storage.getUserByEmail(validatedData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "Email already exists" });
+      // Periksa apakah email sudah ada
+      const existingUserByEmail = await storage.getUserByEmail(validatedData.email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "Email sudah terdaftar" });
+      }
+
+      // Periksa apakah username sudah ada
+      const existingUserByUsername = await storage.getUserByUsername(validatedData.username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "Nama pengguna sudah digunakan" });
       }
 
       const hashedPassword = await hashPassword(validatedData.password);

@@ -248,8 +248,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
 }).extend({
-  password: z.string().min(5, "Password must be at least 5 characters"),
-  email: z.string().email("Invalid email address"),
+  password: z.string().min(5, "Kata sandi minimal 5 karakter"),
+  email: z.string().email("Alamat email tidak valid"),
+  username: z.string().min(3, "Nama pengguna minimal 3 karakter"),
+  fullName: z.string().min(3, "Nama lengkap minimal 3 karakter"),
 });
 
 export const insertWalletSchema = createInsertSchema(wallets).omit({

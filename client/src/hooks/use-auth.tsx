@@ -38,20 +38,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      try {
+        const res = await apiRequest("POST", "/api/login", credentials);
+        return await res.json();
+      } catch (error: any) {
+        // Menangkap pesan error dari server dan melemparkannya kembali
+        throw new Error(error.message || "Gagal masuk. Silakan coba lagi.");
+      }
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Welcome back!",
-        description: `Logged in as ${user.fullName}`,
+        title: "Selamat Datang Kembali!",
+        description: `Masuk sebagai ${user.fullName}`,
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: "Gagal Masuk",
+        description: error.message || "Email atau kata sandi tidak valid.",
         variant: "destructive",
       });
     },
@@ -59,20 +64,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+      try {
+        const res = await apiRequest("POST", "/api/register", credentials);
+        return await res.json();
+      } catch (error: any) {
+        // Menangkap pesan error dari server dan melemparkannya kembali
+        throw new Error(error.message || "Gagal mendaftar. Silakan coba lagi.");
+      }
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Welcome to Rangga Watu Bali!",
-        description: `Account created for ${user.fullName}`,
+        title: "Selamat Datang di Rangga Watu Bali!",
+        description: `Akun berhasil dibuat untuk ${user.fullName}`,
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Registration failed",
-        description: error.message,
+        title: "Pendaftaran Gagal",
+        description: error.message || "Terjadi kesalahan saat mendaftar. Silakan coba lagi.",
         variant: "destructive",
       });
     },
@@ -86,14 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
       toast({
-        title: "Logged out",
-        description: "See you next time!",
+        title: "Berhasil Keluar",
+        description: "Sampai jumpa kembali!",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Logout failed",
-        description: error.message,
+        title: "Gagal Keluar",
+        description: error.message || "Terjadi kesalahan saat keluar. Silakan coba lagi.",
         variant: "destructive",
       });
     },

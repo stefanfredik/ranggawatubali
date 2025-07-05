@@ -15,8 +15,8 @@ import { z } from "zod";
 import { useTheme } from "@/components/theme-provider";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().email("Alamat email tidak valid"),
+  password: z.string().min(1, "Kata sandi diperlukan"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -45,6 +45,7 @@ export default function AuthPage() {
       password: "",
       phone: "",
       role: "member",
+      joinDate: new Date().toISOString().split('T')[0],
     },
   });
 
