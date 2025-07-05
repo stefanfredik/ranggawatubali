@@ -5,14 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
-import { ChevronRight, Info } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Info, Search, Filter } from "lucide-react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AnnouncementsProps {
   showAll?: boolean;
@@ -25,6 +27,8 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
   
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -66,7 +70,23 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     );
   }
 
-  const displayAnnouncements = showAll ? announcements : announcements?.slice(0, 3);
+  // Filter announcements based on search term and type filter
+  const filteredAnnouncements = useMemo(() => {
+    if (!announcements) return [];
+    
+    return announcements.filter((announcement: any) => {
+      const matchesSearch = 
+        announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesType = 
+        typeFilter === "all" || announcement.type === typeFilter;
+      
+      return matchesSearch && matchesType;
+    });
+  }, [announcements, searchTerm, typeFilter]);
+  
+  const displayAnnouncements = showAll ? filteredAnnouncements : filteredAnnouncements?.slice(0, 3);
 
   return (
     <>
@@ -83,6 +103,37 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
               </Link>
             )}
           </div>
+          
+          {showAll && (
+            <div className="mt-4 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari informasi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                    variant="glass"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-[180px]" variant="glass">
+                      <SelectValue placeholder="Filter Tipe" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Tipe</SelectItem>
+                      <SelectItem value="important">Penting</SelectItem>
+                      <SelectItem value="event">Acara</SelectItem>
+                      <SelectItem value="system">Sistem</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {!displayAnnouncements?.length ? (
