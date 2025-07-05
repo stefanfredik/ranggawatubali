@@ -66,6 +66,7 @@ export default function FinancePage() {
           {financeModules.map((module) => (
             <Card 
               key={module.id} 
+              variant="glass"
               className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
               onClick={() => navigate(module.path)}
             >

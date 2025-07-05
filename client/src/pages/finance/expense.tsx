@@ -329,7 +329,7 @@ export default function FinanceExpensePage() {
         </div>
 
         {/* Summary Card */}
-        <Card className="mb-8 bg-gradient-to-r from-red-500 to-red-700 text-white">
+        <Card variant="glass" className="mb-8 bg-gradient-to-r from-red-500 to-red-700 text-white">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -375,7 +375,7 @@ export default function FinanceExpensePage() {
         </Card>
 
         {/* Filters */}
-        <Card className="mb-6">
+        <Card variant="glass" className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -425,7 +425,7 @@ export default function FinanceExpensePage() {
         </Card>
 
         {/* Transactions Table */}
-        <Card>
+        <Card variant="glass">
           <CardHeader>
             <CardTitle>Daftar Transaksi Pengeluaran</CardTitle>
           </CardHeader>

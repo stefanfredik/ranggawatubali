@@ -181,7 +181,7 @@ export default function EventDetailPage() {
 
             {/* Event Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card>
+              <Card variant="glass">
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">Rp {totalAmount.toLocaleString("id-ID")}</div>
                   <p className="text-muted-foreground">Total Donasi</p>
@@ -199,7 +199,7 @@ export default function EventDetailPage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card variant="glass">
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">{eventDonations.length}</div>
                   <p className="text-muted-foreground">Total Anggota</p>
@@ -212,7 +212,7 @@ export default function EventDetailPage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card variant="glass">
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">
                     {pendingDonations.length === 0 ? (
@@ -238,7 +238,7 @@ export default function EventDetailPage() {
             </div>
 
             {/* Members Table */}
-            <Card>
+            <Card variant="glass">
               <CardHeader className="pb-3">
                 <CardTitle>Daftar Anggota</CardTitle>
               </CardHeader>

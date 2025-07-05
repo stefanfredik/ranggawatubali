@@ -515,7 +515,7 @@ export default function FinanceDuesPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
+          <Card variant="glass" className="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium">Iuran {summary.currentMonth}</h3>
@@ -529,7 +529,7 @@ export default function FinanceDuesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
+          <Card variant="glass" className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium">Total Terkumpul</h3>
@@ -549,7 +549,7 @@ export default function FinanceDuesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-amber-500 to-amber-700 text-white">
+          <Card variant="glass" className="bg-gradient-to-r from-amber-500 to-amber-700 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium">Status Pembayaran</h3>
@@ -583,7 +583,7 @@ export default function FinanceDuesPage() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
+        <Card variant="glass" className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -637,7 +637,7 @@ export default function FinanceDuesPage() {
         </Card>
 
         {/* Members Dues Table */}
-        <Card>
+        <Card variant="glass">
           <CardHeader>
             <CardTitle>Daftar Iuran Anggota</CardTitle>
           </CardHeader>

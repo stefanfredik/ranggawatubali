@@ -51,7 +51,7 @@ export function EventCard({
   });
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col" onClick={onClick}>
+    <Card variant="glass" className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col" onClick={onClick}>
       <div className={`h-2 bg-gradient-to-r ${getColorClass()}`} />
       <CardHeader className="pb-2">
         <h3 className="text-xl font-bold truncate">{eventName}</h3>

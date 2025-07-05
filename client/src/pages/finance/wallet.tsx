@@ -371,7 +371,7 @@ export default function FinanceWalletPage() {
         </div>
 
         {/* Total Balance Card */}
-        <Card className="mb-8 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-lg border-0">
+        <Card variant="glass" className="mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -398,7 +398,7 @@ export default function FinanceWalletPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {wallets.map((wallet) => (
-            <Card key={wallet.id} className="hover:shadow-lg transition-all duration-300">
+            <Card key={wallet.id} variant="glass" className="hover:shadow-lg transition-all duration-300">
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
                   <span>{wallet.name}</span>
@@ -457,7 +457,7 @@ export default function FinanceWalletPage() {
           ))}
 
           {/* Add New Wallet Card */}
-          <Card className="border-dashed hover:shadow-lg transition-all duration-300 flex items-center justify-center cursor-pointer h-[250px]" onClick={() => setIsDialogOpen(true)}>
+          <Card variant="glass" className="border-dashed hover:shadow-lg transition-all duration-300 flex items-center justify-center cursor-pointer h-[250px]" onClick={() => setIsDialogOpen(true)}>
             <CardContent className="flex flex-col items-center justify-center p-6 text-center">
               <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-4">
                 <Plus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
