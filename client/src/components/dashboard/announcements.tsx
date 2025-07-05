@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "wouter";
+import { ChevronRight } from "lucide-react";
 
 interface AnnouncementsProps {
   showAll?: boolean;
@@ -31,7 +33,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     return (
       <Card variant="glass">
         <CardHeader>
-          <CardTitle>Informasi Terbaru</CardTitle>
+          <CardTitle>Pengumuman Terbaru</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -57,9 +59,12 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
         <div className="flex items-center justify-between">
           <CardTitle>Pengumuman Terbaru</CardTitle>
           {!showAll && (
-            <Button variant="ghost" size="sm" className="text-primary">
-              Lihat Semua
-            </Button>
+            <Link href="/announcements">
+              <Button variant="ghost" size="sm" className="text-primary flex items-center gap-1">
+                <span>Lihat Semua</span>
+                <ChevronRight size={16} />
+              </Button>
+            </Link>
           )}
         </div>
       </CardHeader>
@@ -85,11 +90,11 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                       }).replace('about ', 'sekitar ').replace('less than a minute ago', 'kurang dari semenit yang lalu').replace('minutes ago', 'menit yang lalu').replace('minute ago', 'menit yang lalu').replace('hours ago', 'jam yang lalu').replace('hour ago', 'jam yang lalu').replace('days ago', 'hari yang lalu').replace('day ago', 'hari yang lalu').replace('months ago', 'bulan yang lalu').replace('month ago', 'bulan yang lalu').replace('years ago', 'tahun yang lalu').replace('year ago', 'tahun yang lalu').replace('in ', 'dalam ')}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {announcement.content.length > 80
-                      ? `${announcement.content.slice(0, 80)}...`
-                      : announcement.content}
-                  </p>
+                  <div className="text-sm text-muted-foreground mb-3 prose dark:prose-invert max-w-none">
+                    {announcement.content.length > 150
+                      ? <div dangerouslySetInnerHTML={{ __html: `${announcement.content.slice(0, 150)}...` }} />
+                      : <div dangerouslySetInnerHTML={{ __html: announcement.content }} />}
+                  </div>
                   <div className="flex items-center">
                     <Badge className={typeColors.replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
                       {announcement.type === "important" ? "Penting" : 
