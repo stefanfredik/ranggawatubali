@@ -124,7 +124,7 @@ export function AnnouncementManagement() {
                   <span>Tambah</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[700px] md:max-w-[800px] lg:max-w-[900px]">
                 <DialogHeader>
                   <DialogTitle>
                     {selectedAnnouncement
@@ -202,7 +202,7 @@ export function AnnouncementManagement() {
                                 <Trash2 size={14} />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="sm:max-w-[600px]">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
                                   Hapus Pengumuman
