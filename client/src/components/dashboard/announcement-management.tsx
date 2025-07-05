@@ -199,16 +199,16 @@ export function AnnouncementManagement() {
                 Tidak ada pengumuman ditemukan dengan filter yang dipilih
               </p>
             ) : (
-          <div className="space-y-4">
-              {filteredAnnouncements.map((announcement: any) => {
-              const typeColors = getTypeColor(announcement.type);
-              return (
-                <div
-                  key={announcement.id}
-                  className={`p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4 ${typeColors
-                    .split(" ")
-                    .pop()}`}
-                >
+              <div className="space-y-4">
+                {filteredAnnouncements.map((announcement: any) => {
+                  const typeColors = getTypeColor(announcement.type);
+                  return (
+                    <div
+                      key={announcement.id}
+                      className={`p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4 ${typeColors
+                        .split(" ")
+                        .pop()}`}
+                    >
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{announcement.title}</h4>
                     <div className="flex items-center gap-2">
@@ -303,11 +303,12 @@ export function AnnouncementManagement() {
                       Oleh: {announcement.author?.fullName || "Admin"}
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })())}
       </CardContent>
     </Card>
   );
