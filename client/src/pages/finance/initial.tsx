@@ -631,7 +631,7 @@ export default function FinanceInitialPage() {
                   <Label htmlFor="wallet" className="text-right">Dompet</Label>
                   {isLoadingWallets ? (
                     <div className="col-span-3 flex items-center">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loading variant="dots" size="sm" />
                       <span>Memuat dompet...</span>
                     </div>
                   ) : (
@@ -807,7 +807,7 @@ export default function FinanceInitialPage() {
                         <SelectValue placeholder="Pilih anggota" />
                       </SelectTrigger>
                       <SelectContent>
-                        {members?.map((member) => (
+                        {members?.map((member: { id: number; fullName: string }) => (
                           <SelectItem key={member.id} value={member.id.toString()}>
                             {member.fullName}
                           </SelectItem>

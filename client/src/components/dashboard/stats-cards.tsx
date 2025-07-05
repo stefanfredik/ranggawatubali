@@ -11,7 +11,7 @@ export function StatsCards() {
   const cards = [
     {
       title: "Total Anggota",
-      value: stats?.totalMembers || 0,
+      value: (stats as { totalMembers?: number })?.totalMembers || 0,
       icon: Users,
       color: "from-blue-500 to-blue-600",
       change: "+12%",
@@ -19,7 +19,7 @@ export function StatsCards() {
     },
     {
       title: "Aktivitas Aktif",
-      value: stats?.activeActivities || 0,
+      value: (stats as { activeActivities?: number })?.activeActivities || 0,
       icon: Calendar,
       color: "from-green-500 to-green-600",
       change: "+3",
@@ -27,7 +27,7 @@ export function StatsCards() {
     },
     {
       title: "Pembayaran Tertunda",
-      value: stats?.pendingPayments || 0,
+      value: (stats as { pendingPayments?: number })?.pendingPayments || 0,
       icon: CreditCard,
       color: "from-yellow-500 to-yellow-600",
       change: "Perlu ditinjau",
@@ -35,7 +35,7 @@ export function StatsCards() {
     },
     {
       title: "Ulang Tahun Bulan Ini",
-      value: stats?.birthdaysThisMonth || 0,
+      value: (stats as { birthdaysThisMonth?: number })?.birthdaysThisMonth || 0,
       icon: Cake,
       color: "from-purple-500 to-purple-600",
       change: "Dalam 3 minggu ini",

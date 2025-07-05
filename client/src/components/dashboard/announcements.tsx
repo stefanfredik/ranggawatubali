@@ -24,7 +24,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
   const { data: announcements, isLoading } = useQuery({
     queryKey: ["/api/announcements"],
   });
-  
+
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,19 +73,19 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
   // Filter announcements based on search term and type filter
   const filteredAnnouncements = useMemo(() => {
     if (!announcements) return [];
-    
-    return announcements.filter((announcement: any) => {
-      const matchesSearch = 
+
+    return (announcements as any[]).filter((announcement: any) => {
+      const matchesSearch =
         announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesType = 
+
+      const matchesType =
         typeFilter === "all" || announcement.type === typeFilter;
-      
+
       return matchesSearch && matchesType;
     });
   }, [announcements, searchTerm, typeFilter]);
-  
+
   const displayAnnouncements = showAll ? filteredAnnouncements : filteredAnnouncements?.slice(0, 3);
 
   return (
@@ -103,7 +103,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
               </Link>
             )}
           </div>
-          
+
           {showAll && (
             <div className="mt-4 space-y-4">
               <div className="flex flex-col sm:flex-row gap-3">
@@ -160,10 +160,10 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                   </div>
                   <div className="flex items-center justify-between">
                     <Badge className={getTypeColor(displayAnnouncements[0].type).replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
-                      {displayAnnouncements[0].type === "important" ? "Penting" : 
-                       displayAnnouncements[0].type === "event" ? "Acara" : 
-                       displayAnnouncements[0].type === "system" ? "Sistem" : 
-                       displayAnnouncements[0].type}
+                      {displayAnnouncements[0].type === "important" ? "Penting" :
+                        displayAnnouncements[0].type === "event" ? "Acara" :
+                          displayAnnouncements[0].type === "system" ? "Sistem" :
+                            displayAnnouncements[0].type}
                     </Badge>
                     <div className="text-xs text-muted-foreground">
                       Oleh: {displayAnnouncements[0].author?.fullName || "Admin"}
@@ -171,7 +171,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                   </div>
                 </div>
               )}
-              
+
               {/* Informasi lainnya dalam bentuk list dengan 2 baris */}
               {displayAnnouncements.slice(1).map((announcement: any) => {
                 const typeColors = getTypeColor(announcement.type);
@@ -193,14 +193,14 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                     </div>
                     <div className="flex items-center justify-between">
                       <Badge className={typeColors.replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
-                        {announcement.type === "important" ? "Penting" : 
-                         announcement.type === "event" ? "Acara" : 
-                         announcement.type === "system" ? "Sistem" : 
-                         announcement.type}
+                        {announcement.type === "important" ? "Penting" :
+                          announcement.type === "event" ? "Acara" :
+                            announcement.type === "system" ? "Sistem" :
+                              announcement.type}
                       </Badge>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-xs flex items-center gap-1"
                         onClick={() => handleOpenDetail(announcement)}
                       >
@@ -224,16 +224,16 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
               {selectedAnnouncement?.title}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="mt-4">
             <div className="flex items-center justify-between mb-4">
-              <Badge 
+              <Badge
                 className={selectedAnnouncement ? getTypeColor(selectedAnnouncement.type).replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '') : ''}
               >
-                {selectedAnnouncement?.type === "important" ? "Penting" : 
-                 selectedAnnouncement?.type === "event" ? "Acara" : 
-                 selectedAnnouncement?.type === "system" ? "Sistem" : 
-                 selectedAnnouncement?.type}
+                {selectedAnnouncement?.type === "important" ? "Penting" :
+                  selectedAnnouncement?.type === "event" ? "Acara" :
+                    selectedAnnouncement?.type === "system" ? "Sistem" :
+                      selectedAnnouncement?.type}
               </Badge>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
@@ -246,7 +246,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
                 </span>
               </div>
             </div>
-            
+
             <div className="bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg p-5 prose dark:prose-invert max-w-none">
               {selectedAnnouncement && (
                 <div dangerouslySetInnerHTML={{ __html: selectedAnnouncement.content }} />

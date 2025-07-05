@@ -145,7 +145,7 @@ export function AnnouncementManagement() {
             </Dialog>
           )}
         </div>
-        
+
         <div className="mt-4 space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -176,7 +176,7 @@ export function AnnouncementManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        {!announcements?.length ? (
+        {!Array.isArray(announcements) || announcements.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">
             Tidak ada pengumuman ditemukan
           </p>
@@ -184,16 +184,16 @@ export function AnnouncementManagement() {
           // Filter announcements based on search term and type filter
           (() => {
             const filteredAnnouncements = announcements.filter((announcement: any) => {
-              const matchesSearch = 
+              const matchesSearch =
                 announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
-              
-              const matchesType = 
+
+              const matchesType =
                 typeFilter === "all" || announcement.type === typeFilter;
-              
+
               return matchesSearch && matchesType;
             });
-            
+
             return !filteredAnnouncements.length ? (
               <p className="text-muted-foreground text-center py-8">
                 Tidak ada pengumuman ditemukan dengan filter yang dipilih
@@ -209,100 +209,100 @@ export function AnnouncementManagement() {
                         .split(" ")
                         .pop()}`}
                     >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">{announcement.title}</h4>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(announcement.createdAt), {
-                          addSuffix: true,
-                        })
-                          .replace("about ", "sekitar ")
-                          .replace(
-                            "less than a minute ago",
-                            "kurang dari semenit yang lalu"
-                          )
-                          .replace("minutes ago", "menit yang lalu")
-                          .replace("minute ago", "menit yang lalu")
-                          .replace("hours ago", "jam yang lalu")
-                          .replace("hour ago", "jam yang lalu")
-                          .replace("days ago", "hari yang lalu")
-                          .replace("day ago", "hari yang lalu")
-                          .replace("months ago", "bulan yang lalu")
-                          .replace("month ago", "bulan yang lalu")
-                          .replace("years ago", "tahun yang lalu")
-                          .replace("year ago", "tahun yang lalu")
-                          .replace("in ", "dalam ")}
-                      </span>
-                      {isAdmin && (
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleEdit(announcement)}
-                          >
-                            <Pencil size={14} />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{announcement.title}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(announcement.createdAt), {
+                              addSuffix: true,
+                            })
+                              .replace("about ", "sekitar ")
+                              .replace(
+                                "less than a minute ago",
+                                "kurang dari semenit yang lalu"
+                              )
+                              .replace("minutes ago", "menit yang lalu")
+                              .replace("minute ago", "menit yang lalu")
+                              .replace("hours ago", "jam yang lalu")
+                              .replace("hour ago", "jam yang lalu")
+                              .replace("days ago", "hari yang lalu")
+                              .replace("day ago", "hari yang lalu")
+                              .replace("months ago", "bulan yang lalu")
+                              .replace("month ago", "bulan yang lalu")
+                              .replace("years ago", "tahun yang lalu")
+                              .replace("year ago", "tahun yang lalu")
+                              .replace("in ", "dalam ")}
+                          </span>
+                          {isAdmin && (
+                            <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-destructive"
+                                className="h-6 w-6"
+                                onClick={() => handleEdit(announcement)}
                               >
-                                <Trash2 size={14} />
+                                <Pencil size={14} />
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="sm:max-w-[600px]">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Hapus Pengumuman
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Apakah Anda yakin ingin menghapus pengumuman
-                                  ini? Tindakan ini tidak dapat dibatalkan.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() =>
-                                    handleDelete(announcement.id)
-                                  }
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-destructive"
+                                  >
+                                    <Trash2 size={14} />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="sm:max-w-[600px]">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Hapus Pengumuman
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Apakah Anda yakin ingin menghapus pengumuman
+                                      ini? Tindakan ini tidak dapat dibatalkan.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleDelete(announcement.id)
+                                      }
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Hapus
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-3 prose dark:prose-invert max-w-none">
-                    <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      className={typeColors
-                        .replace("border-l-red-500", "")
-                        .replace("border-l-green-500", "")
-                        .replace("border-l-blue-500", "")
-                        .replace("border-l-gray-500", "")}
-                    >
-                      {announcement.type === "important"
-                        ? "Penting"
-                        : announcement.type === "event"
-                        ? "Acara"
-                        : announcement.type === "system"
-                        ? "Sistem"
-                        : "Umum"}
-                    </Badge>
-                    <div className="text-xs text-muted-foreground">
-                      Oleh: {announcement.author?.fullName || "Admin"}
-                    </div>
-                  </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-3 prose dark:prose-invert max-w-none">
+                        <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Badge
+                          className={typeColors
+                            .replace("border-l-red-500", "")
+                            .replace("border-l-green-500", "")
+                            .replace("border-l-blue-500", "")
+                            .replace("border-l-gray-500", "")}
+                        >
+                          {announcement.type === "important"
+                            ? "Penting"
+                            : announcement.type === "event"
+                              ? "Acara"
+                              : announcement.type === "system"
+                                ? "Sistem"
+                                : "Umum"}
+                        </Badge>
+                        <div className="text-xs text-muted-foreground">
+                          Oleh: {announcement.author?.fullName || "Admin"}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}

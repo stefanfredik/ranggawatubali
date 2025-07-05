@@ -64,7 +64,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
     );
   }
 
-  const displayActivities = showAll ? activities : activities?.slice(0, 3);
+  const displayActivities = showAll ? activities : (activities as any[] || []).slice(0, 3);
 
   return (
     <Card variant="glass">
@@ -79,7 +79,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {!displayActivities?.length ? (
+        {!Array.isArray(displayActivities) || displayActivities.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">
             Tidak ada kegiatan ditemukan
           </p>
