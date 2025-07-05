@@ -29,13 +29,10 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-      case "aktif":
         return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100";
       case "upcoming":
-      case "akan datang":
         return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100";
       case "completed":
-      case "selesai":
         return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100";
       default:
         return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100";
@@ -105,10 +102,7 @@ export function RecentActivities({ showAll = false }: RecentActivitiesProps) {
                     </p>
                   </div>
                   <Badge className={getStatusColor(activity.status)}>
-                    {activity.status === "active" || activity.status === "aktif" ? "Aktif" : 
-                     activity.status === "upcoming" || activity.status === "akan datang" ? "Akan Datang" : 
-                     activity.status === "completed" || activity.status === "selesai" ? "Selesai" : 
-                     activity.status}
+                    {activity.status}
                   </Badge>
                 </div>
               );
