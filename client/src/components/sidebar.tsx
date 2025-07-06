@@ -149,7 +149,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                 {!isCollapsed && (
                   <div>
                     <h1 className="text-lg font-bold">Rangga Watu Bali</h1>
-                    <p className="text-xs text-muted-foreground">Manajemen Organisasi</p>
+                    <p className="text-xs text-muted-foreground">Organization Management</p>
                   </div>
                 )}
               </div>
@@ -258,7 +258,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                   <Sun size={18} className="text-amber-400 hover:rotate-45 transition-transform duration-300" /> : 
                   <Moon size={18} className="text-indigo-400 hover:rotate-12 transition-transform duration-300" />
                 }
-                {!isCollapsed && <span className="ml-2">Tema</span>}
+                {!isCollapsed && <span className="ml-2">Theme</span>}
               </Button>
               
 

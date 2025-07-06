@@ -17,13 +17,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+interface Author {
+  fullName: string;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: "important" | "event" | "system" | string;
+  createdAt: string;
+  author?: Author;
+}
+
 interface AnnouncementsProps {
   showAll?: boolean;
 }
 
 export function Announcements({ showAll = false }: AnnouncementsProps) {
   // Always define the same hooks in the same order regardless of props
-  const { data: announcements, isLoading } = useQuery({
+  const { data: announcements, isLoading } = useQuery<Announcement[]>({
     queryKey: ["/api/announcements"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/announcements");
@@ -33,12 +46,12 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
   
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "important" | "event" | "system">("all");
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: string): string => {
     switch (type) {
       case "important":
         return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 border-l-red-500";
@@ -51,17 +64,58 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
     }
   };
 
-  const handleOpenDetail = (announcement: any) => {
+  const getBorderColor = (type: string): string => {
+    switch (type) {
+      case "important":
+        return "border-l-red-500";
+      case "event":
+        return "border-l-green-500";
+      case "system":
+        return "border-l-blue-500";
+      default:
+        return "border-l-gray-500";
+    }
+  };
+
+  const getTypeLabel = (type: string): string => {
+    switch (type) {
+      case "important":
+        return "Penting";
+      case "event":
+        return "Acara";
+      case "system":
+        return "Sistem";
+      default:
+        return type;
+    }
+  };
+
+  const formatTimeAgo = (dateString: string): string => {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true })
+      .replace('about ', 'sekitar ')
+      .replace('less than a minute ago', 'kurang dari semenit yang lalu')
+      .replace('minutes ago', 'menit yang lalu')
+      .replace('minute ago', 'menit yang lalu')
+      .replace('hours ago', 'jam yang lalu')
+      .replace('hour ago', 'jam yang lalu')
+      .replace('days ago', 'hari yang lalu')
+      .replace('day ago', 'hari yang lalu')
+      .replace('months ago', 'bulan yang lalu')
+      .replace('month ago', 'bulan yang lalu')
+      .replace('years ago', 'tahun yang lalu')
+      .replace('year ago', 'tahun yang lalu')
+      .replace('in ', 'dalam ');
+  };
+
+  const handleOpenDetail = (announcement: Announcement) => {
     setSelectedAnnouncement(announcement);
     setIsDetailOpen(true);
   };
 
-  if (isLoading) {
-    return (
-      <Card variant="glass">
-        <CardHeader>
-          <CardTitle>Pengumuman Terbaru</CardTitle>
-        </CardHeader>
+  // Loading state - render UI dengan skeleton
+  const renderContent = () => {
+    if (isLoading) {
+      return (
         <CardContent className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4">
@@ -74,16 +128,87 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
             </div>
           ))}
         </CardContent>
-      </Card>
+      );
+    }
+
+    if (!displayAnnouncements?.length) {
+      return (
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">
+            Tidak ada pengumuman ditemukan
+          </p>
+        </CardContent>
+      );
+    }
+
+    return (
+      <CardContent>
+        <div className="space-y-6">
+          {/* Informasi terbaru dalam bentuk full */}
+          {displayAnnouncements.length > 0 && (
+            <div className={`p-5 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-md rounded-xl border-l-4 ${getBorderColor(displayAnnouncements[0].type)}`}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-lg">{displayAnnouncements[0].title}</h3>
+                <span className="text-xs text-muted-foreground">
+                  {formatTimeAgo(displayAnnouncements[0].createdAt)}
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground mb-4 prose dark:prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={{ __html: displayAnnouncements[0].content }} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Badge className={getTypeColor(displayAnnouncements[0].type)}>
+                  {getTypeLabel(displayAnnouncements[0].type)}
+                </Badge>
+                <div className="text-xs text-muted-foreground">
+                  Oleh: {displayAnnouncements[0].author?.fullName || "Admin"}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Informasi lainnya dalam bentuk list dengan 2 baris */}
+          {displayAnnouncements.slice(1).map((announcement: Announcement) => (
+            <div
+              key={announcement.id}
+              className={`p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4 ${getBorderColor(announcement.type)}`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">{announcement.title}</h4>
+                <span className="text-xs text-muted-foreground">
+                  {formatTimeAgo(announcement.createdAt)}
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground mb-3 prose dark:prose-invert max-w-none line-clamp-2">
+                <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Badge className={getTypeColor(announcement.type)}>
+                  {getTypeLabel(announcement.type)}
+                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs flex items-center gap-1"
+                  onClick={() => handleOpenDetail(announcement)}
+                >
+                  <Info size={12} />
+                  <span>Detail</span>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
     );
-  }
+  };
 
   // Always define all hooks and memoized values regardless of props
   // Filter announcements based on search term and type filter
   const filteredAnnouncements = useMemo(() => {
     if (!announcements) return [];
     
-    return announcements.filter((announcement: any) => {
+    return announcements.filter((announcement: Announcement) => {
       const matchesSearch = 
         announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
@@ -98,7 +223,8 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
   // Always compute this value in the same way regardless of render path
   // This ensures consistent hook behavior across renders
   const displayAnnouncements = useMemo(() => {
-    return showAll ? filteredAnnouncements : filteredAnnouncements?.slice(0, 3);
+    if (!filteredAnnouncements) return [];
+    return showAll ? filteredAnnouncements : filteredAnnouncements.slice(0, 3);
   }, [showAll, filteredAnnouncements]);
 
   return (
@@ -132,7 +258,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <Select value={typeFilter} onValueChange={(value: "all" | "important" | "event" | "system") => setTypeFilter(value)}>
                   <SelectTrigger className="w-[180px]" variant="glass">
                     <SelectValue placeholder="Filter Tipe" />
                   </SelectTrigger>
@@ -147,85 +273,7 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          {!displayAnnouncements?.length ? (
-            <p className="text-muted-foreground text-center py-8">
-              Tidak ada pengumuman ditemukan
-            </p>
-          ) : (
-            <div className="space-y-6">
-              {/* Informasi terbaru dalam bentuk full */}
-              {displayAnnouncements.length > 0 && (
-                <div
-                  className={`p-5 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-md rounded-xl border-l-4 ${getTypeColor(displayAnnouncements[0].type).split(' ').pop()}`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-lg">{displayAnnouncements[0].title}</h3>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(displayAnnouncements[0].createdAt), {
-                        addSuffix: true,
-                      }).replace('about ', 'sekitar ').replace('less than a minute ago', 'kurang dari semenit yang lalu').replace('minutes ago', 'menit yang lalu').replace('minute ago', 'menit yang lalu').replace('hours ago', 'jam yang lalu').replace('hour ago', 'jam yang lalu').replace('days ago', 'hari yang lalu').replace('day ago', 'hari yang lalu').replace('months ago', 'bulan yang lalu').replace('month ago', 'bulan yang lalu').replace('years ago', 'tahun yang lalu').replace('year ago', 'tahun yang lalu').replace('in ', 'dalam ')}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-4 prose dark:prose-invert max-w-none">
-                    <div dangerouslySetInnerHTML={{ __html: displayAnnouncements[0].content }} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getTypeColor(displayAnnouncements[0].type).replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
-                      {displayAnnouncements[0].type === "important" ? "Penting" : 
-                       displayAnnouncements[0].type === "event" ? "Acara" : 
-                       displayAnnouncements[0].type === "system" ? "Sistem" : 
-                       displayAnnouncements[0].type}
-                    </Badge>
-                    <div className="text-xs text-muted-foreground">
-                      Oleh: {displayAnnouncements[0].author?.fullName || "Admin"}
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Informasi lainnya dalam bentuk list dengan 2 baris */}
-              {displayAnnouncements.slice(1).map((announcement: any) => {
-                const typeColors = getTypeColor(announcement.type);
-                return (
-                  <div
-                    key={announcement.id}
-                    className={`p-4 bg-background bg-opacity-50 backdrop-blur-sm border border-border/50 shadow-sm rounded-xl border-l-4 ${typeColors.split(' ').pop()}`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{announcement.title}</h4>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(announcement.createdAt), {
-                          addSuffix: true,
-                        }).replace('about ', 'sekitar ').replace('less than a minute ago', 'kurang dari semenit yang lalu').replace('minutes ago', 'menit yang lalu').replace('minute ago', 'menit yang lalu').replace('hours ago', 'jam yang lalu').replace('hour ago', 'jam yang lalu').replace('days ago', 'hari yang lalu').replace('day ago', 'hari yang lalu').replace('months ago', 'bulan yang lalu').replace('month ago', 'bulan yang lalu').replace('years ago', 'tahun yang lalu').replace('year ago', 'tahun yang lalu').replace('in ', 'dalam ')}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground mb-3 prose dark:prose-invert max-w-none line-clamp-2">
-                      <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Badge className={typeColors.replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '')}>
-                        {announcement.type === "important" ? "Penting" : 
-                         announcement.type === "event" ? "Acara" : 
-                         announcement.type === "system" ? "Sistem" : 
-                         announcement.type}
-                      </Badge>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-xs flex items-center gap-1"
-                        onClick={() => handleOpenDetail(announcement)}
-                      >
-                        <Info size={12} />
-                        <span>Detail</span>
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
+        {renderContent()}
       </Card>
 
       {/* Dialog untuk menampilkan detail informasi */}
@@ -239,22 +287,15 @@ export function Announcements({ showAll = false }: AnnouncementsProps) {
           
           <div className="mt-4">
             <div className="flex items-center justify-between mb-4">
-              <Badge 
-                className={selectedAnnouncement ? getTypeColor(selectedAnnouncement.type).replace('border-l-red-500', '').replace('border-l-green-500', '').replace('border-l-blue-500', '').replace('border-l-gray-500', '') : ''}
-              >
-                {selectedAnnouncement?.type === "important" ? "Penting" : 
-                 selectedAnnouncement?.type === "event" ? "Acara" : 
-                 selectedAnnouncement?.type === "system" ? "Sistem" : 
-                 selectedAnnouncement?.type}
+              <Badge className={selectedAnnouncement ? getTypeColor(selectedAnnouncement.type) : ''}>
+                {selectedAnnouncement ? getTypeLabel(selectedAnnouncement.type) : ''}
               </Badge>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
                   Oleh: {selectedAnnouncement?.author?.fullName || "Admin"}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  {selectedAnnouncement && formatDistanceToNow(new Date(selectedAnnouncement.createdAt), {
-                    addSuffix: true,
-                  }).replace('about ', 'sekitar ').replace('less than a minute ago', 'kurang dari semenit yang lalu').replace('minutes ago', 'menit yang lalu').replace('minute ago', 'menit yang lalu').replace('hours ago', 'jam yang lalu').replace('hour ago', 'jam yang lalu').replace('days ago', 'hari yang lalu').replace('day ago', 'hari yang lalu').replace('months ago', 'bulan yang lalu').replace('month ago', 'bulan yang lalu').replace('years ago', 'tahun yang lalu').replace('year ago', 'tahun yang lalu').replace('in ', 'dalam ')}
+                  {selectedAnnouncement && formatTimeAgo(selectedAnnouncement.createdAt)}
                 </span>
               </div>
             </div>
