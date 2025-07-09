@@ -23,6 +23,7 @@ async function rollbackAllTables() {
       const rollbackFiles = [
         'rollback_campus_column.sql',
         'rollback_donations_table.sql',
+        'rollback_donation_table.sql',
         'rollback_session_table.sql'
       ];
       

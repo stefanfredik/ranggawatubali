@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +19,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Calendar, Users, Coins } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Coins, Plus, Pencil } from "lucide-react";
 import { useLocation } from "wouter";
 import { Donation } from './donation-list';
+import { DonationContributorForm } from './donation-contributor-form';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from "@/components/ui/use-toast";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Tipe data untuk kontributor donasi
 interface Contributor {
@@ -74,66 +78,7 @@ const getStatusName = (status: string) => {
   }
 };
 
-// Data dummy untuk donasi detail
-const dummyDonation: Donation = {
-  id: '2',
-  title: 'Pembangunan Gereja',
-  description: 'Penggalangan dana untuk pembangunan gereja di desa Ranggawatu Bali. Dana ini akan digunakan untuk membeli material bangunan dan membayar tukang.',
-  type: 'fundraising',
-  amount: 15000000,
-  target_amount: 50000000,
-  status: 'active',
-  created_at: '2023-09-01',
-  updated_at: '2023-10-10'
-};
-
-// Data dummy untuk kontributor
-const dummyContributors: Contributor[] = [
-  {
-    id: '1',
-    user_id: '101',
-    donation_id: '2',
-    name: 'Budi Santoso',
-    amount: 5000000,
-    message: 'Semoga pembangunan gereja berjalan lancar',
-    created_at: '2023-09-05'
-  },
-  {
-    id: '2',
-    user_id: '102',
-    donation_id: '2',
-    name: 'Ani Wijaya',
-    amount: 3000000,
-    message: 'Untuk kemajuan desa kita',
-    created_at: '2023-09-10'
-  },
-  {
-    id: '3',
-    user_id: '103',
-    donation_id: '2',
-    name: 'Dedi Kurniawan',
-    amount: 2000000,
-    created_at: '2023-09-15'
-  },
-  {
-    id: '4',
-    user_id: '104',
-    donation_id: '2',
-    name: 'Siti Rahayu',
-    amount: 1500000,
-    message: 'Semoga cepat selesai',
-    created_at: '2023-09-20'
-  },
-  {
-    id: '5',
-    user_id: '105',
-    donation_id: '2',
-    name: 'Joko Widodo',
-    amount: 3500000,
-    message: 'Untuk kemajuan spiritual masyarakat',
-    created_at: '2023-10-01'
-  }
-];
+// Tidak lagi menggunakan data dummy, data akan diambil dari API
 
 interface DonationDetailProps {
   id: string;
@@ -141,28 +86,127 @@ interface DonationDetailProps {
 
 export function DonationDetail({ id }: DonationDetailProps) {
   const [, navigate] = useLocation();
-  // Dalam aplikasi nyata, kita akan mengambil data dari API berdasarkan ID
-  const [donation] = useState<Donation>(dummyDonation);
-  const [contributors] = useState<Contributor[]>(dummyContributors);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showContributorForm, setShowContributorForm] = useState(false);
+  
+  // Fetch donation data
+  const { data: donation, isLoading: isLoadingDonation, error: donationError } = useQuery<Donation>({
+    queryKey: [`/api/donations/${id}`],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', `/api/donations/${id}`);
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching donation:', error);
+        throw error;
+      }
+    },
+    enabled: !!id,
+  });
+
+  // Fetch contributors data
+  const { data: contributors, isLoading: isLoadingContributors, error: contributorsError } = useQuery<Contributor[]>({
+    queryKey: [`/api/donations/${id}/contributors`],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', `/api/donations/${id}/contributors`);
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching contributors:', error);
+        throw error;
+      }
+    },
+    enabled: !!id,
+  });
+
+  // Handle errors
+  useEffect(() => {
+    if (donationError) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat data donasi. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
+    }
+    if (contributorsError) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat data kontributor. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
+    }
+  }, [donationError, contributorsError, toast]);
 
   // Menghitung persentase progres untuk donasi penggalangan dana
-  const progressPercentage = donation.target_amount
+  const progressPercentage = donation?.target_amount
     ? Math.min(Math.round((donation.amount / donation.target_amount) * 100), 100)
     : 100;
 
   // Menghitung total kontributor
-  const totalContributors = contributors.length;
+  const totalContributors = contributors?.length || 0;
+  
+  // Handle successful contribution
+  const handleContributionSuccess = () => {
+    setShowContributorForm(false);
+    // Refresh data
+    queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}/contributors`] });
+    toast({
+      title: "Sukses",
+      description: "Kontribusi Anda telah berhasil ditambahkan. Terima kasih!",
+    });
+  };
+
+  // Tampilkan loading state jika data sedang dimuat
+  if (isLoadingDonation) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => navigate('/donation')}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-center items-center h-40">
+              <p>Memuat data donasi...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Tampilkan pesan error jika gagal memuat data
+  if (donationError || !donation) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => navigate('/donation')}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-center items-center h-40">
+              <p className="text-red-500">Gagal memuat data donasi. Silakan coba lagi nanti.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={() => navigate('/donation')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Kembali
+          <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
         </Button>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={() => navigate(`/donation/edit/${id}`)}>
-            Edit
+            <Pencil className="mr-2 h-4 w-4" /> Edit
           </Button>
         </div>
       </div>
@@ -250,28 +294,58 @@ export function DonationDetail({ id }: DonationDetailProps) {
               <TabsTrigger value="activity">Aktivitas</TabsTrigger>
             </TabsList>
             <TabsContent value="contributors" className="space-y-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nama</TableHead>
-                    <TableHead>Jumlah</TableHead>
-                    <TableHead>Pesan</TableHead>
-                    <TableHead>Tanggal</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {contributors.map((contributor) => (
-                    <TableRow key={contributor.id}>
-                      <TableCell className="font-medium">{contributor.name}</TableCell>
-                      <TableCell>
-                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(contributor.amount)}
-                      </TableCell>
-                      <TableCell>{contributor.message || '-'}</TableCell>
-                      <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+              {!showContributorForm ? (
+                <div className="flex justify-end mb-4">
+                  <Button 
+                    onClick={() => setShowContributorForm(true)}
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Tambah Kontribusi
+                  </Button>
+                </div>
+              ) : (
+                <div className="mb-6">
+                  <DonationContributorForm 
+                    donationId={id} 
+                    onSuccess={handleContributionSuccess}
+                    onCancel={() => setShowContributorForm(false)}
+                  />
+                </div>
+              )}
+              
+              {isLoadingContributors ? (
+                <div className="text-center py-4">Memuat data kontributor...</div>
+              ) : contributorsError ? (
+                <div className="text-center text-red-500 py-4">Gagal memuat data kontributor. Silakan coba lagi nanti.</div>
+              ) : contributors && contributors.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nama</TableHead>
+                      <TableHead>Jumlah</TableHead>
+                      <TableHead>Pesan</TableHead>
+                      <TableHead>Tanggal</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {contributors.map((contributor) => (
+                      <TableRow key={contributor.id}>
+                        <TableCell className="font-medium">{contributor.name}</TableCell>
+                        <TableCell>
+                          {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(contributor.amount)}
+                        </TableCell>
+                        <TableCell>{contributor.message || '-'}</TableCell>
+                        <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  Belum ada kontributor. Jadilah yang pertama berkontribusi!
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="activity" className="space-y-4">
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">

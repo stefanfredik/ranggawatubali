@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +25,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Trash2, MoreHorizontal, Search, Filter } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -90,40 +93,7 @@ const getStatusName = (status: string) => {
   }
 };
 
-// Data dummy untuk donasi
-const dummyDonations: Donation[] = [
-  {
-    id: '1',
-    title: 'Nikah Fred',
-    description: 'Donasi untuk pernikahan Fred',
-    type: 'happy',
-    amount: 2500000,
-    status: 'active',
-    created_at: '2023-10-15',
-    updated_at: '2023-10-15'
-  },
-  {
-    id: '2',
-    title: 'Pembangunan Gereja',
-    description: 'Penggalangan dana untuk pembangunan gereja',
-    type: 'fundraising',
-    amount: 15000000,
-    target_amount: 50000000,
-    status: 'active',
-    created_at: '2023-09-01',
-    updated_at: '2023-10-10'
-  },
-  {
-    id: '3',
-    title: 'Duka Keluarga Budi',
-    description: 'Donasi untuk keluarga Budi yang berduka',
-    type: 'sad',
-    amount: 3000000,
-    status: 'completed',
-    created_at: '2023-08-20',
-    updated_at: '2023-09-05'
-  }
-];
+// Tidak lagi menggunakan data dummy, data akan diambil dari API
 
 interface DonationListProps {
   type?: 'happy' | 'sad' | 'fundraising';
@@ -132,21 +102,62 @@ interface DonationListProps {
 
 export function DonationList({ type, showFilters = true }: DonationListProps) {
   const [, navigate] = useLocation();
-  const [donations, setDonations] = useState<Donation[]>(
-    type ? dummyDonations.filter(d => d.type === type) : dummyDonations
-  );
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // State untuk pencarian dan filter
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>(type || 'all');
 
+  // Mengambil data donasi dari API
+  const { data: donationsData, isLoading, error } = useQuery({
+    queryKey: type ? [`/api/donations/type/${type}`] : ['/api/donations'],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', type ? `/api/donations/type/${type}` : '/api/donations');
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching donations:', error);
+        throw error;
+      }
+    }
+  });
+
+  // Menampilkan error jika gagal mengambil data
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat data donasi. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
+
   // Fungsi untuk menangani penghapusan donasi
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     // Konfirmasi penghapusan
     if (window.confirm('Apakah Anda yakin ingin menghapus donasi ini?')) {
-      // Filter donasi yang akan dihapus
-      setDonations(donations.filter(donation => donation.id !== id));
+      try {
+        await apiRequest('DELETE', `/api/donations/${id}`);
+        // Invalidate query untuk memperbarui data
+        queryClient.invalidateQueries({ queryKey: ['/api/donations'] });
+        if (type) {
+          queryClient.invalidateQueries({ queryKey: [`/api/donations/type/${type}`] });
+        }
+        toast({
+          title: "Sukses",
+          description: "Donasi berhasil dihapus.",
+        });
+      } catch (error) {
+        console.error('Error deleting donation:', error);
+        toast({
+          title: "Error",
+          description: "Gagal menghapus donasi. Silakan coba lagi nanti.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -163,14 +174,16 @@ export function DonationList({ type, showFilters = true }: DonationListProps) {
   };
 
   // Filter donasi berdasarkan pencarian dan filter
-  const filteredDonations = donations.filter((donation) => {
-    const matchesSearch = donation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         donation.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
-    const matchesType = typeFilter === 'all' || donation.type === typeFilter;
-    
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const filteredDonations = donationsData
+    ? donationsData.filter((donation) => {
+        const matchesSearch = donation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           donation.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
+        const matchesType = typeFilter === 'all' || donation.type === typeFilter;
+        
+        return matchesSearch && matchesStatus && matchesType;
+      })
+    : [];
 
   return (
     <Card>
@@ -250,7 +263,11 @@ export function DonationList({ type, showFilters = true }: DonationListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredDonations.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">Memuat data donasi...</TableCell>
+              </TableRow>
+            ) : filteredDonations.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center">Tidak ada data donasi</TableCell>
               </TableRow>

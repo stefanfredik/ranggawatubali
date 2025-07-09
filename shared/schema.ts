@@ -290,3 +290,74 @@ export type Dues = typeof dues.$inferSelect;
 export type InsertDues = z.infer<typeof insertDuesSchema>;
 export type InitialFee = typeof initialFees.$inferSelect;
 export type InsertInitialFee = z.infer<typeof insertInitialFeeSchema>;
+
+// Tabel untuk donasi
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // "happy", "sad", "fundraising"
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull().default("0"),
+  targetAmount: decimal("target_amount", { precision: 15, scale: 2 }),
+  status: text("status").notNull().default("active"), // "active", "completed", "cancelled"
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Tabel untuk kontributor donasi
+export const donationContributors = pgTable("donation_contributors", {
+  id: serial("id").primaryKey(),
+  donationId: integer("donation_id").references(() => donations.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Relasi untuk donasi
+export const donationsRelations = relations(donations, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [donations.createdBy],
+    references: [users.id],
+  }),
+  contributors: many(donationContributors),
+}));
+
+// Relasi untuk kontributor donasi
+export const donationContributorsRelations = relations(donationContributors, ({ one }) => ({
+  donation: one(donations, {
+    fields: [donationContributors.donationId],
+    references: [donations.id],
+  }),
+  user: one(users, {
+    fields: [donationContributors.userId],
+    references: [users.id],
+  }),
+}));
+
+// Schema untuk validasi input donasi
+export const insertDonationSchema = createInsertSchema(donations, {
+  type: z.enum(["happy", "sad", "fundraising"]),
+  status: z.enum(["active", "completed", "cancelled"]).default("active"),
+  amount: z.coerce.number().min(0),
+  targetAmount: z.coerce.number().min(0).optional(),
+  createdBy: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.id
+});
+
+// Schema untuk validasi input kontributor donasi
+export const insertDonationContributorSchema = createInsertSchema(donationContributors, {
+  amount: z.coerce.number().min(0),
+  userId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.id
+  donationId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari parameter URL
+  name: z.string().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.fullName
+});
+
+// Tipe untuk donasi
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+
+// Tipe untuk kontributor donasi
+export type DonationContributor = typeof donationContributors.$inferSelect;
+export type InsertDonationContributor = z.infer<typeof insertDonationContributorSchema>;

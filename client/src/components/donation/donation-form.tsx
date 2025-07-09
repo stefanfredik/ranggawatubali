@@ -32,6 +32,8 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { Donation } from './donation-list';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from "@/components/ui/use-toast";
 
 // Skema validasi untuk form donasi
 const donationFormSchema = z.object({
@@ -59,19 +61,6 @@ const donationFormSchema = z.object({
 // Tipe data untuk form donasi
 type DonationFormValues = z.infer<typeof donationFormSchema>;
 
-// Data dummy untuk donasi yang akan diedit
-const dummyDonation: Donation = {
-  id: '2',
-  title: 'Pembangunan Gereja',
-  description: 'Penggalangan dana untuk pembangunan gereja di desa Ranggawatu Bali. Dana ini akan digunakan untuk membeli material bangunan dan membayar tukang.',
-  type: 'fundraising',
-  amount: 15000000,
-  target_amount: 50000000,
-  status: 'active',
-  created_at: '2023-09-01',
-  updated_at: '2023-10-10'
-};
-
 interface DonationFormProps {
   id?: string; // Jika ada ID, berarti mode edit
 }
@@ -80,6 +69,7 @@ export function DonationForm({ id }: DonationFormProps) {
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditMode = !!id;
+  const { toast } = useToast();
 
   // Inisialisasi form dengan react-hook-form dan zod resolver
   const form = useForm<DonationFormValues>({
@@ -95,40 +85,79 @@ export function DonationForm({ id }: DonationFormProps) {
 
   // Jika mode edit, isi form dengan data yang ada
   useEffect(() => {
-    if (isEditMode) {
-      // Dalam aplikasi nyata, kita akan mengambil data dari API berdasarkan ID
-      const donation = dummyDonation;
+    if (isEditMode && id) {
+      // Ambil data donasi dari API berdasarkan ID
+      const fetchDonation = async () => {
+        try {
+          const response = await apiRequest('GET', `/api/donations/${id}`);
+          const donation = await response.json();
+          
+          // Log data yang diterima dari server untuk debugging
+          console.log('Data donasi dari server:', donation);
+          
+          form.reset({
+            title: donation.title,
+            description: donation.description,
+            type: donation.type,
+            target_amount: donation.targetAmount ? donation.targetAmount.toString() : "",
+            status: donation.status,
+          });
+        } catch (error) {
+          console.error('Error fetching donation:', error);
+          toast({
+            title: "Error",
+            description: "Gagal memuat data donasi. Silakan coba lagi nanti.",
+            variant: "destructive",
+          });
+          navigate('/donation');
+        }
+      };
       
-      form.reset({
-        title: donation.title,
-        description: donation.description,
-        type: donation.type,
-        target_amount: donation.target_amount ? donation.target_amount.toString() : "",
-        status: donation.status,
-      });
+      fetchDonation();
     }
-  }, [isEditMode, form]);
+  }, [isEditMode, id, form, toast, navigate]);
 
   // Fungsi untuk menangani submit form
   const onSubmit = async (values: DonationFormValues) => {
     setIsSubmitting(true);
     try {
-      // Konversi target_amount dari string ke number jika ada
+      // Konversi target_amount dari string ke number jika ada dan ubah ke camelCase untuk server
       const formattedValues = {
-        ...values,
-        target_amount: values.target_amount ? Number(values.target_amount.replace(/[^0-9]/g, '')) : undefined,
+        title: values.title,
+        description: values.description,
+        type: values.type,
+        amount: 0, // Nilai awal amount adalah 0 untuk donasi baru
+        targetAmount: values.target_amount ? Number(values.target_amount.replace(/[^0-9]/g, '')) : undefined,
+        status: values.status
       };
-
-      // Simulasi pengiriman data ke server
-      console.log('Form values:', formattedValues);
       
-      // Simulasi delay untuk menunjukkan loading state
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Log data yang akan dikirim untuk debugging
+      console.log('Data donasi yang akan dikirim:', formattedValues);
+  
+      // Kirim data ke server menggunakan API
+      if (isEditMode) {
+        // Jika mode edit, gunakan PUT request
+        await apiRequest('PUT', `/api/donations/${id}`, formattedValues);
+      } else {
+        // Jika mode tambah baru, gunakan POST request
+        await apiRequest('POST', '/api/donations', formattedValues);
+      }
+      
+      // Tampilkan notifikasi sukses
+      toast({
+        title: "Sukses",
+        description: isEditMode ? "Donasi berhasil diperbarui." : "Donasi berhasil ditambahkan.",
+      });
       
       // Redirect ke halaman donasi setelah berhasil
       navigate('/donation');
     } catch (error) {
       console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan donasi. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

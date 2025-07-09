@@ -1,4 +1,4 @@
-import { users, announcements, activities, payments, activityParticipants, wallets, transactions, dues, initialFees, type User, type InsertUser, type Announcement, type InsertAnnouncement, type Activity, type InsertActivity, type Payment, type InsertPayment, type Wallet, type InsertWallet, type Transaction, type InsertTransaction, type Dues, type InsertDues, type InitialFee, type InsertInitialFee } from "@shared/schema";
+import { users, announcements, activities, payments, activityParticipants, wallets, transactions, dues, initialFees, donations, donationContributors, type User, type InsertUser, type Announcement, type InsertAnnouncement, type Activity, type InsertActivity, type Payment, type InsertPayment, type Wallet, type InsertWallet, type Transaction, type InsertTransaction, type Dues, type InsertDues, type InitialFee, type InsertInitialFee, type Donation, type InsertDonation, type DonationContributor, type InsertDonationContributor } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, or } from "drizzle-orm";
 import session from "express-session";
@@ -64,7 +64,18 @@ export interface IStorage {
   createInitialFee(initialFee: InsertInitialFee): Promise<InitialFee>;
   updateInitialFeeStatus(id: number, status: string, paymentDate?: Date, paymentMethod?: string, walletId?: number): Promise<InitialFee | undefined>;
 
+  // Donation methods
+  getDonations(): Promise<(Donation & { creator: User })[]>;
+  getDonation(id: number): Promise<(Donation & { creator: User }) | undefined>;
+  getDonationsByType(type: string): Promise<(Donation & { creator: User })[]>;
+  createDonation(donation: InsertDonation & { createdBy: number }): Promise<Donation>;
+  updateDonation(id: number, updates: Partial<Donation>): Promise<Donation | undefined>;
+  deleteDonation(id: number): Promise<boolean>;
+  updateDonationAmount(id: number, contributionAmount: number): Promise<Donation | undefined>;
 
+  // Donation contributor methods
+  getDonationContributors(donationId: number): Promise<(DonationContributor & { user: User })[]>;
+  createDonationContributor(contributor: InsertDonationContributor & { donationId: number; userId: number; name: string }): Promise<DonationContributor>;
 
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -716,7 +727,148 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Donation methods have been removed
+  // Donation methods
+  async getDonations(): Promise<(Donation & { creator: User })[]> {
+
+    return await db
+      .select({
+        id: donations.id,
+        title: donations.title,
+        description: donations.description,
+        type: donations.type,
+        amount: donations.amount,
+        targetAmount: donations.targetAmount,
+        status: donations.status,
+        createdBy: donations.createdBy,
+        createdAt: donations.createdAt,
+        updatedAt: donations.updatedAt,
+        creator: users,
+      })
+      .from(donations)
+      .leftJoin(users, eq(donations.createdBy, users.id))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getDonation(id: number): Promise<(Donation & { creator: User }) | undefined> {
+    const [donation] = await db
+      .select({
+        id: donations.id,
+        title: donations.title,
+        description: donations.description,
+        type: donations.type,
+        amount: donations.amount,
+        targetAmount: donations.targetAmount,
+        status: donations.status,
+        createdBy: donations.createdBy,
+        createdAt: donations.createdAt,
+        updatedAt: donations.updatedAt,
+        creator: users,
+      })
+      .from(donations)
+      .leftJoin(users, eq(donations.createdBy, users.id))
+      .where(eq(donations.id, id));
+    
+    return donation || undefined;
+  }
+
+  async getDonationsByType(type: string): Promise<(Donation & { creator: User })[]> {
+    return await db
+      .select({
+        id: donations.id,
+        title: donations.title,
+        description: donations.description,
+        type: donations.type,
+        amount: donations.amount,
+        targetAmount: donations.targetAmount,
+        status: donations.status,
+        createdBy: donations.createdBy,
+        createdAt: donations.createdAt,
+        updatedAt: donations.updatedAt,
+        creator: users,
+      })
+      .from(donations)
+      .leftJoin(users, eq(donations.createdBy, users.id))
+      .where(eq(donations.type, type))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async createDonation(donationData: InsertDonation & { createdBy: number }): Promise<Donation> {
+    const [newDonation] = await db
+      .insert(donations)
+      .values(donationData)
+      .returning();
+    return newDonation;
+  }
+
+  async updateDonation(id: number, updates: Partial<Donation>): Promise<Donation | undefined> {
+    const [updatedDonation] = await db
+      .update(donations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(donations.id, id))
+      .returning();
+    return updatedDonation || undefined;
+  }
+
+  async deleteDonation(id: number): Promise<boolean> {
+    const result = await db.delete(donations).where(eq(donations.id, id));
+    return result.rowCount > 0;
+  }
+
+  async updateDonationAmount(id: number, contributionAmount: number): Promise<Donation | undefined> {
+    // Start a transaction to update donation amount
+    return await db.transaction(async (tx) => {
+      // Get the current donation
+      const [donationRecord] = await tx
+        .select()
+        .from(donations)
+        .where(eq(donations.id, id));
+      
+      if (!donationRecord) return undefined;
+      
+      // Update the donation amount by adding the contribution amount
+      const [updatedDonation] = await tx
+        .update(donations)
+        .set({
+          amount: sql`${donations.amount} + ${contributionAmount}`,
+          updatedAt: new Date(),
+          // If donation is fundraising and amount reaches or exceeds target, mark as completed
+          status: donationRecord.type === 'fundraising' && donationRecord.targetAmount && 
+                 (Number(donationRecord.amount) + contributionAmount >= Number(donationRecord.targetAmount)) ? 
+                 'completed' : donations.status,
+        })
+        .where(eq(donations.id, id))
+        .returning();
+      
+      return updatedDonation;
+    });
+  }
+
+  // Donation contributor methods
+  async getDonationContributors(donationId: number): Promise<(DonationContributor & { user: User })[]> {
+    return await db
+      .select({
+        id: donationContributors.id,
+        donationId: donationContributors.donationId,
+        userId: donationContributors.userId,
+        name: donationContributors.name,
+        amount: donationContributors.amount,
+        message: donationContributors.message,
+        createdAt: donationContributors.createdAt,
+        user: users,
+      })
+      .from(donationContributors)
+      .leftJoin(users, eq(donationContributors.userId, users.id))
+      .where(eq(donationContributors.donationId, donationId))
+      .orderBy(desc(donationContributors.createdAt));
+  }
+
+  async createDonationContributor(contributorData: InsertDonationContributor & { donationId: number; userId: number; name: string }): Promise<DonationContributor> {
+    const [newContributor] = await db
+      .insert(donationContributors)
+      .values(contributorData)
+      .returning();
+    return newContributor;
+  }
 }
 
 export const storage = new DatabaseStorage();

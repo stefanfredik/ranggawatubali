@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
 import passport from "passport";
-import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema } from "@shared/schema";
+import { insertAnnouncementSchema, insertActivitySchema, insertPaymentSchema, insertUserSchema, insertWalletSchema, insertTransactionSchema, insertDuesSchema, insertInitialFeeSchema, insertDonationSchema, insertDonationContributorSchema } from "@shared/schema";
 import upload, { handleMulterError, deleteProfilePicture } from "./upload";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -737,6 +737,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Donation routes
+  app.get("/api/donations", requireAuth, async (req, res) => {
+    try {
+      const donations = await storage.getDonations();
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  app.get("/api/donations/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const donation = await storage.getDonation(id);
+      
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      res.json(donation);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donation" });
+    }
+  });
+
+  app.get("/api/donations/type/:type", requireAuth, async (req, res) => {
+    try {
+      const type = req.params.type;
+      if (!['happy', 'sad', 'fundraising'].includes(type)) {
+        return res.status(400).json({ message: "Invalid donation type" });
+      }
+      
+      const donations = await storage.getDonationsByType(type);
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donations by type" });
+    }
+  });
+
+  app.post("/api/donations", requireAuth, async (req, res) => {
+    try {
+      console.log('Received donation data:', req.body);
+      
+      const validatedData = insertDonationSchema.parse(req.body);
+      console.log('Validated donation data:', validatedData);
+      
+      const donation = await storage.createDonation({
+        ...validatedData,
+        createdBy: req.user!.id,
+      });
+      
+      console.log('Created donation:', donation);
+      res.status(201).json(donation);
+    } catch (error) {
+      console.error('Error creating donation:', error);
+      
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create donation" });
+    }
+  });
+
+  app.put("/api/donations/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      // Verify ownership or admin status
+      const donation = await storage.getDonation(id);
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      if (donation.createdBy !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ message: "You can only update your own donations" });
+      }
+      
+      const updatedDonation = await storage.updateDonation(id, updates);
+      res.json(updatedDonation);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to update donation" });
+    }
+  });
+
+  app.delete("/api/donations/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verify ownership or admin status
+      const donation = await storage.getDonation(id);
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      if (donation.createdBy !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ message: "You can only delete your own donations" });
+      }
+      
+      const success = await storage.deleteDonation(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete donation" });
+    }
+  });
+
+  // Donation contributors routes
+  app.get("/api/donations/:id/contributors", requireAuth, async (req, res) => {
+    try {
+      const donationId = parseInt(req.params.id);
+      const contributors = await storage.getDonationContributors(donationId);
+      res.json(contributors);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donation contributors" });
+    }
+  });
+
+  app.post("/api/donations/:id/contributors", requireAuth, async (req, res) => {
+    try {
+      const donationId = parseInt(req.params.id);
+      
+      // Check if donation exists
+      const donation = await storage.getDonation(donationId);
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      // Validate and create contributor
+      const validatedData = insertDonationContributorSchema.parse(req.body);
+      const contributor = await storage.createDonationContributor({
+        ...validatedData,
+        donationId,
+        userId: req.user!.id,
+        name: req.user!.fullName, // Use user's full name from session
+      });
+      
+      // Update donation amount
+      await storage.updateDonationAmount(donationId, validatedData.amount);
+      
+      res.status(201).json(contributor);
+    } catch (error) {
+      if (error.issues) {
+        return res.status(400).json({ message: error.issues[0].message });
+      }
+      res.status(500).json({ message: "Failed to create donation contribution" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
