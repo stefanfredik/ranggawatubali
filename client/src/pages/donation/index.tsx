@@ -9,8 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DonationList } from "@/components/donation/donation-list";
-import { Plus, Gift, HandHeart, HandHelping, Coins } from "lucide-react";
+import { Plus, Gift, HandHeart, HandHelping, Coins, Search } from "lucide-react";
 import { useLocation } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 export default function DonationIndexPage() {
   const [, navigate] = useLocation();
@@ -18,17 +21,22 @@ export default function DonationIndexPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Donasi</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Donasi</h2>
           <p className="text-muted-foreground">
             Kelola semua donasi dan sumbangan dalam satu tempat.
           </p>
         </div>
-        <Button onClick={() => navigate('/donation/create')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Donasi
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => navigate('/donation/create')}
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Donasi
+          </Button>
+        </div>
       </div>
 
       <Card>

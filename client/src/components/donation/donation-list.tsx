@@ -23,8 +23,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { Eye, Pencil, Trash2, MoreHorizontal, Search, Filter } from "lucide-react";
 import { useLocation } from "wouter";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+
 
 // Tipe data untuk donasi
 export interface Donation {
@@ -116,13 +127,19 @@ const dummyDonations: Donation[] = [
 
 interface DonationListProps {
   type?: 'happy' | 'sad' | 'fundraising';
+  showFilters?: boolean;
 }
 
-export function DonationList({ type }: DonationListProps) {
+export function DonationList({ type, showFilters = true }: DonationListProps) {
   const [, navigate] = useLocation();
   const [donations, setDonations] = useState<Donation[]>(
     type ? dummyDonations.filter(d => d.type === type) : dummyDonations
   );
+  
+  // State untuk pencarian dan filter
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>(type || 'all');
 
   // Fungsi untuk menangani penghapusan donasi
   const handleDelete = (id: string) => {
@@ -145,6 +162,16 @@ export function DonationList({ type }: DonationListProps) {
     navigate(`/donation/detail/${id}`);
   };
 
+  // Filter donasi berdasarkan pencarian dan filter
+  const filteredDonations = donations.filter((donation) => {
+    const matchesSearch = donation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         donation.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
+    const matchesType = typeFilter === 'all' || donation.type === typeFilter;
+    
+    return matchesSearch && matchesStatus && matchesType;
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -154,6 +181,63 @@ export function DonationList({ type }: DonationListProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {showFilters && (
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <Label htmlFor="search" className="mb-2 block">Cari Donasi</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    type="search"
+                    placeholder="Cari berdasarkan judul atau deskripsi..."
+                    className="pl-8"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="w-full md:w-[180px]">
+                <Label htmlFor="status-filter" className="mb-2 block">Status</Label>
+                <Select
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                >
+                  <SelectTrigger id="status-filter">
+                    <SelectValue placeholder="Filter Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Status</SelectItem>
+                    <SelectItem value="active">Aktif</SelectItem>
+                    <SelectItem value="completed">Selesai</SelectItem>
+                    <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {!type && (
+                <div className="w-full md:w-[180px]">
+                  <Label htmlFor="type-filter" className="mb-2 block">Kategori</Label>
+                  <Select
+                    value={typeFilter}
+                    onValueChange={setTypeFilter}
+                  >
+                    <SelectTrigger id="type-filter">
+                      <SelectValue placeholder="Filter Kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Kategori</SelectItem>
+                      <SelectItem value="happy">Suka</SelectItem>
+                      <SelectItem value="sad">Duka</SelectItem>
+                      <SelectItem value="fundraising">Penggalangan Dana</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <Separator />
+          </div>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
@@ -166,12 +250,12 @@ export function DonationList({ type }: DonationListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {donations.length === 0 ? (
+            {filteredDonations.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center">Tidak ada data donasi</TableCell>
               </TableRow>
             ) : (
-              donations.map((donation) => (
+              filteredDonations.map((donation) => (
                 <TableRow key={donation.id}>
                   <TableCell className="font-medium">{donation.title}</TableCell>
                   <TableCell>
