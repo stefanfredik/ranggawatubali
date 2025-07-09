@@ -26,6 +26,7 @@ import { DonationContributorForm } from './donation-contributor-form';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Tipe data untuk kontributor donasi
 interface Contributor {
@@ -88,7 +89,7 @@ export function DonationDetail({ id }: DonationDetailProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showContributorForm, setShowContributorForm] = useState(false);
+  const [isContributorDialogOpen, setIsContributorDialogOpen] = useState(false);
   
   // Fetch donation data
   const { data: donation, isLoading: isLoadingDonation, error: donationError } = useQuery<Donation>({
@@ -148,7 +149,7 @@ export function DonationDetail({ id }: DonationDetailProps) {
   
   // Handle successful contribution
   const handleContributionSuccess = () => {
-    setShowContributorForm(false);
+    setIsContributorDialogOpen(false);
     // Refresh data
     queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}`] });
     queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}/contributors`] });
@@ -294,25 +295,15 @@ export function DonationDetail({ id }: DonationDetailProps) {
               <TabsTrigger value="activity">Aktivitas</TabsTrigger>
             </TabsList>
             <TabsContent value="contributors" className="space-y-4">
-              {!showContributorForm ? (
-                <div className="flex justify-end mb-4">
-                  <Button 
-                    onClick={() => setShowContributorForm(true)}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Tambah Kontribusi
-                  </Button>
-                </div>
-              ) : (
-                <div className="mb-6">
-                  <DonationContributorForm 
-                    donationId={id} 
-                    onSuccess={handleContributionSuccess}
-                    onCancel={() => setShowContributorForm(false)}
-                  />
-                </div>
-              )}
+              <div className="flex justify-end mb-4">
+                <Button 
+                  onClick={() => setIsContributorDialogOpen(true)}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Tambah Kontribusi
+                </Button>
+              </div>
               
               {isLoadingContributors ? (
                 <div className="text-center py-4">Memuat data kontributor...</div>
@@ -355,6 +346,23 @@ export function DonationDetail({ id }: DonationDetailProps) {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Dialog untuk form kontributor */}
+      <Dialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Tambah Kontribusi</DialogTitle>
+            <DialogDescription>
+              Isi formulir berikut untuk menambahkan kontribusi Anda pada donasi ini
+            </DialogDescription>
+          </DialogHeader>
+          <DonationContributorForm 
+            donationId={id} 
+            onSuccess={handleContributionSuccess}
+            onCancel={() => setIsContributorDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

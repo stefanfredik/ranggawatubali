@@ -871,13 +871,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Donation not found" });
       }
       
+      // Get the contributor data from request body
+      const { contributorType, memberId, ...contributorData } = req.body;
+      
+      // Determine which user ID to use based on contributor type
+      let userId = req.user!.id;
+      let name = req.user!.fullName;
+      
+      // If contributing on behalf of another member
+      if (contributorType === 'member' && memberId) {
+        const member = await storage.getUser(parseInt(memberId));
+        if (!member) {
+          return res.status(404).json({ message: "Member not found" });
+        }
+        userId = member.id;
+        name = member.fullName;
+      }
+      
       // Validate and create contributor
-      const validatedData = insertDonationContributorSchema.parse(req.body);
+      const validatedData = insertDonationContributorSchema.parse(contributorData);
       const contributor = await storage.createDonationContributor({
         ...validatedData,
         donationId,
-        userId: req.user!.id,
-        name: req.user!.fullName, // Use user's full name from session
+        userId,
+        name,
       });
       
       // Update donation amount

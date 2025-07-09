@@ -354,6 +354,12 @@ export const insertDonationContributorSchema = createInsertSchema(donationContri
   name: z.string().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.fullName
 });
 
+// Extend schema untuk form kontributor dengan field tambahan
+export const contributorFormSchema = insertDonationContributorSchema.extend({
+  contributorType: z.enum(['self', 'member']),
+  memberId: z.string().optional(),
+});
+
 // Tipe untuk donasi
 export type Donation = typeof donations.$inferSelect;
 export type InsertDonation = z.infer<typeof insertDonationSchema>;

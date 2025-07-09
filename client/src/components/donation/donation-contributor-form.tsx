@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,21 +12,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from '@tanstack/react-query';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DialogFooter } from "@/components/ui/dialog";
 
 // Skema validasi untuk form kontributor donasi
 const contributorFormSchema = z.object({
+  contributorType: z.enum(['self', 'member']),
+  memberId: z.string().optional().refine(val => {
+    // If contributorType is 'member', memberId is required
+    return val !== undefined && val !== '' || true;
+  }, {
+    message: "Silakan pilih anggota",
+  }),
   name: z.string().min(3, {
     message: "Nama harus minimal 3 karakter.",
   }),
@@ -54,15 +62,44 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Fetch members data
+  const { data: members, isLoading: isLoadingMembers } = useQuery({
+    queryKey: ["/api/members"],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', '/api/members');
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching members:', error);
+        throw error;
+      }
+    },
+  });
+
   // Inisialisasi form dengan react-hook-form dan zod resolver
   const form = useForm<ContributorFormValues>({
     resolver: zodResolver(contributorFormSchema),
     defaultValues: {
+      contributorType: 'self',
       name: "",
       amount: "",
       message: "",
     },
   });
+
+  // Watch the contributorType field to update the name field
+  const contributorType = form.watch('contributorType');
+  const selectedMemberId = form.watch('memberId');
+
+  // Update the name field when a member is selected
+  useEffect(() => {
+    if (contributorType === 'member' && selectedMemberId && members) {
+      const selectedMember = members.find(member => member.id.toString() === selectedMemberId);
+      if (selectedMember) {
+        form.setValue('name', selectedMember.fullName);
+      }
+    }
+  }, [contributorType, selectedMemberId, members, form]);
 
   // Fungsi untuk menangani submit form
   const onSubmit = async (values: ContributorFormValues) => {
@@ -128,94 +165,155 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tambah Kontribusi</CardTitle>
-        <CardDescription>
-          Isi formulir berikut untuk menambahkan kontribusi Anda
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Masukkan nama Anda" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Nama Anda yang akan ditampilkan sebagai kontributor.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Jumlah Donasi</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Masukkan jumlah donasi" 
-                      value={formatCurrency(value)}
-                      onChange={(e) => {
-                        // Simpan nilai asli (tanpa format) ke state form
-                        onChange(e.target.value);
-                      }}
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Jumlah donasi yang ingin Anda kontribusikan.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pesan (Opsional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Masukkan pesan Anda" 
-                      className="min-h-[80px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Pesan yang ingin Anda sampaikan bersama donasi ini.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <CardFooter className="flex justify-between px-0">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onCancel}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="contributorType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Jenis Kontributor</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
               >
-                Batal
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Menyimpan...' : 'Kirim Kontribusi'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih jenis kontributor" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="self">Diri Sendiri</SelectItem>
+                  <SelectItem value="member">Anggota Lain</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Pilih apakah kontribusi ini dari Anda sendiri atau atas nama anggota lain.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {contributorType === 'member' && (
+          <FormField
+            control={form.control}
+            name="memberId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pilih Anggota</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih anggota" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {isLoadingMembers ? (
+                      <SelectItem value="loading" disabled>Memuat data anggota...</SelectItem>
+                    ) : members && members.length > 0 ? (
+                      members.map((member) => (
+                        <SelectItem key={member.id} value={member.id.toString()}>
+                          {member.fullName}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="empty" disabled>Tidak ada anggota</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Pilih anggota yang akan menjadi kontributor.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nama</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Masukkan nama Anda" 
+                  {...field} 
+                  disabled={contributorType === 'member'}
+                />
+              </FormControl>
+              <FormDescription>
+                Nama Anda yang akan ditampilkan sebagai kontributor.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field: { value, onChange, ...field } }) => (
+            <FormItem>
+              <FormLabel>Jumlah Donasi</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Masukkan jumlah donasi" 
+                  value={formatCurrency(value)}
+                  onChange={(e) => {
+                    // Simpan nilai asli (tanpa format) ke state form
+                    onChange(e.target.value);
+                  }}
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                Jumlah donasi yang ingin Anda kontribusikan.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="message"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pesan (Opsional)</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Masukkan pesan Anda" 
+                  className="min-h-[80px]"
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                Pesan yang ingin Anda sampaikan bersama donasi ini.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <DialogFooter className="mt-6">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+          >
+            Batal
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Menyimpan...' : 'Kirim Kontribusi'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }
