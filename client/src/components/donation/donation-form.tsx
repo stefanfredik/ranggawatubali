@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -53,12 +54,15 @@ const donationFormSchema = z.object({
   }, {
     message: "Target jumlah harus berupa angka positif.",
   }),
+  walletId: z.string().min(1, {
+    message: "Dompet harus dipilih.",
+  }),
   status: z.enum(['active', 'completed', 'cancelled'], {
     required_error: "Silakan pilih status donasi.",
   }),
 });
 
-// Tipe data untuk form donasi
+// Tipe untuk nilai form donasi
 type DonationFormValues = z.infer<typeof donationFormSchema>;
 
 interface DonationFormProps {
@@ -70,6 +74,20 @@ export function DonationForm({ id }: DonationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditMode = !!id;
   const { toast } = useToast();
+  
+  // Fetch wallets data
+  const { data: wallets, isLoading: isLoadingWallets } = useQuery({
+    queryKey: ["/api/wallets"],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', '/api/wallets');
+        return res.json();
+      } catch (error) {
+        console.error('Error fetching wallets:', error);
+        throw error;
+      }
+    },
+  });
 
   // Inisialisasi form dengan react-hook-form dan zod resolver
   const form = useForm<DonationFormValues>({
@@ -79,6 +97,7 @@ export function DonationForm({ id }: DonationFormProps) {
       description: "",
       type: "happy" as const,
       target_amount: "",
+      walletId: "",
       status: "active" as const,
     },
   });
@@ -100,6 +119,7 @@ export function DonationForm({ id }: DonationFormProps) {
             description: donation.description,
             type: donation.type,
             target_amount: donation.targetAmount ? donation.targetAmount.toString() : "",
+            walletId: donation.walletId ? donation.walletId.toString() : "",
             status: donation.status,
           });
         } catch (error) {
@@ -128,6 +148,7 @@ export function DonationForm({ id }: DonationFormProps) {
         type: values.type,
         amount: 0, // Nilai awal amount adalah 0 untuk donasi baru
         targetAmount: values.target_amount ? Number(values.target_amount.replace(/[^0-9]/g, '')) : undefined,
+        walletId: Number(values.walletId),
         status: values.status
       };
       
@@ -290,6 +311,38 @@ export function DonationForm({ id }: DonationFormProps) {
                       </FormControl>
                       <FormDescription>
                         Target jumlah yang ingin dicapai (khusus untuk Penggalangan Dana).
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="walletId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dompet</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isLoadingWallets}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih dompet untuk menyimpan donasi ini" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {wallets?.map((wallet: any) => (
+                            <SelectItem key={wallet.id} value={wallet.id.toString()}>
+                              {wallet.name} - {wallet.balance.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Pilih dompet untuk menyimpan donasi ini.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

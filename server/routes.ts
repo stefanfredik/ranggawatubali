@@ -872,7 +872,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the contributor data from request body
-      const { contributorType, memberId, ...contributorData } = req.body;
+      const { contributorType, memberId, paymentMethod, ...contributorData } = req.body;
+      
+      // Pastikan paymentMethod memiliki nilai default
+      const validPaymentMethod = paymentMethod === 'transfer' ? 'transfer' : 'cash';
       
       // Determine which user ID to use based on contributor type
       let userId = req.user!.id;
@@ -888,6 +891,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name = member.fullName;
       }
       
+      // Check if wallet exists if walletId is provided
+      if (contributorData.walletId) {
+        const wallet = await storage.getWallet(contributorData.walletId);
+        if (!wallet) {
+          return res.status(404).json({ message: "Wallet not found" });
+        }
+      }
+      
       // Validate and create contributor
       const validatedData = insertDonationContributorSchema.parse(contributorData);
       const contributor = await storage.createDonationContributor({
@@ -895,6 +906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         donationId,
         userId,
         name,
+        paymentMethod: validPaymentMethod,
       });
       
       // Update donation amount

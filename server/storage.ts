@@ -863,11 +863,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDonationContributor(contributorData: InsertDonationContributor & { donationId: number; userId: number; name: string }): Promise<DonationContributor> {
-    const [newContributor] = await db
-      .insert(donationContributors)
-      .values(contributorData)
-      .returning();
-    return newContributor;
+    return await db.transaction(async (tx) => {
+      // Periksa status donasi terlebih dahulu
+      const [donationRecord] = await tx
+        .select()
+        .from(donations)
+        .where(eq(donations.id, contributorData.donationId));
+      
+      if (!donationRecord) {
+        throw new Error("Donation not found");
+      }
+      
+      // Periksa apakah donasi masih aktif
+      if (donationRecord.status !== 'active') {
+        throw new Error(`Donation is ${donationRecord.status} and cannot receive new contributions`);
+      }
+      
+      // Periksa apakah donasi tipe fundraising sudah mencapai target
+      if (donationRecord.type === 'fundraising' && donationRecord.targetAmount && 
+          Number(donationRecord.amount) >= Number(donationRecord.targetAmount)) {
+        throw new Error("Fundraising target has already been reached");
+      }
+      
+      // Pastikan jumlah donasi positif
+      if (Number(contributorData.amount) <= 0) {
+        throw new Error("Contribution amount must be greater than zero");
+      }
+      
+      // Insert the donation contributor
+      const [newContributor] = await tx
+        .insert(donationContributors)
+        .values({
+          ...contributorData,
+          // Pastikan paymentMethod memiliki nilai default jika tidak disediakan
+          paymentMethod: contributorData.paymentMethod || 'cash'
+        })
+        .returning();
+      
+      // If walletId is provided, update the wallet balance and record transaction
+      if (contributorData.walletId) {
+        // Update wallet balance
+        await tx
+          .update(wallets)
+          .set({
+            balance: sql`${wallets.balance} + ${contributorData.amount}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, contributorData.walletId));
+        
+        // Record transaction for this donation contribution
+        await tx
+          .insert(transactions)
+          .values({
+            walletId: contributorData.walletId,
+            amount: contributorData.amount,
+            type: "income",
+            category: "donation",
+            description: `Kontribusi donasi: ${donationRecord.title} oleh ${contributorData.name}`,
+            date: new Date(),
+            createdBy: contributorData.userId
+          });
+      }
+      
+      // Update donation amount
+      await tx
+        .update(donations)
+        .set({
+          amount: sql`${donations.amount} + ${contributorData.amount}`,
+          updatedAt: new Date(),
+          // If donation is fundraising and amount reaches or exceeds target, mark as completed
+          status: donationRecord.type === 'fundraising' && donationRecord.targetAmount && 
+                 (Number(donationRecord.amount) + Number(contributorData.amount) >= Number(donationRecord.targetAmount)) ? 
+                 'completed' : donations.status,
+        })
+        .where(eq(donations.id, contributorData.donationId));
+      
+      return newContributor;
+    });
   }
 }
 

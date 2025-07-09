@@ -300,6 +300,7 @@ export const donations = pgTable("donations", {
   amount: decimal("amount", { precision: 15, scale: 2 }).notNull().default("0"),
   targetAmount: decimal("target_amount", { precision: 15, scale: 2 }),
   status: text("status").notNull().default("active"), // "active", "completed", "cancelled"
+  walletId: integer("wallet_id").references(() => wallets.id),
   createdBy: integer("created_by").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -312,6 +313,8 @@ export const donationContributors = pgTable("donation_contributors", {
   userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  walletId: integer("wallet_id").references(() => wallets.id),
+  paymentMethod: text("payment_method").default("cash"), // "cash" atau "transfer"
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -321,6 +324,10 @@ export const donationsRelations = relations(donations, ({ one, many }) => ({
   creator: one(users, {
     fields: [donations.createdBy],
     references: [users.id],
+  }),
+  wallet: one(wallets, {
+    fields: [donations.walletId],
+    references: [wallets.id],
   }),
   contributors: many(donationContributors),
 }));
@@ -335,6 +342,10 @@ export const donationContributorsRelations = relations(donationContributors, ({ 
     fields: [donationContributors.userId],
     references: [users.id],
   }),
+  wallet: one(wallets, {
+    fields: [donationContributors.walletId],
+    references: [wallets.id],
+  }),
 }));
 
 // Schema untuk validasi input donasi
@@ -343,6 +354,7 @@ export const insertDonationSchema = createInsertSchema(donations, {
   status: z.enum(["active", "completed", "cancelled"]).default("active"),
   amount: z.coerce.number().min(0),
   targetAmount: z.coerce.number().min(0).optional(),
+  walletId: z.number().optional(), // ID dompet untuk menyimpan donasi
   createdBy: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.id
 });
 
@@ -352,6 +364,8 @@ export const insertDonationContributorSchema = createInsertSchema(donationContri
   userId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.id
   donationId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari parameter URL
   name: z.string().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.fullName
+  walletId: z.number().optional(), // ID dompet untuk menyimpan donasi
+  paymentMethod: z.enum(["cash", "transfer"]).default("cash"),
 });
 
 // Extend schema untuk form kontributor dengan field tambahan

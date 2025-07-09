@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 // Skema validasi untuk form kontributor donasi
 const contributorFormSchema = z.object({
@@ -46,11 +47,19 @@ const contributorFormSchema = z.object({
   }, {
     message: "Jumlah donasi harus berupa angka positif.",
   }),
+  paymentMethod: z.enum(["cash", "transfer"]).default("cash"),
   message: z.string().optional(),
 });
 
 // Tipe data untuk form kontributor
 type ContributorFormValues = z.infer<typeof contributorFormSchema>;
+
+interface Wallet {
+  id: number;
+  name: string;
+  balance: string;
+  description: string | null;
+}
 
 interface DonationContributorFormProps {
   donationId: string;
@@ -75,6 +84,8 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
       }
     },
   });
+  
+  // Tidak perlu fetch wallets data untuk form kontributor
 
   // Inisialisasi form dengan react-hook-form dan zod resolver
   const form = useForm<ContributorFormValues>({
@@ -83,6 +94,7 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
       contributorType: 'self',
       name: "",
       amount: "",
+      paymentMethod: "cash",
       message: "",
     },
   });
@@ -110,6 +122,7 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
       const formattedValues = {
         name: values.name,
         amount: Number(values.amount.replace(/[^0-9]/g, '')),
+        paymentMethod: values.paymentMethod,
         message: values.message,
       };
 
@@ -274,6 +287,34 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
               </FormControl>
               <FormDescription>
                 Jumlah donasi yang ingin Anda kontribusikan.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="paymentMethod"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Metode Pembayaran</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih metode pembayaran" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="cash">Tunai</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Pilih metode pembayaran yang Anda gunakan.
               </FormDescription>
               <FormMessage />
             </FormItem>
