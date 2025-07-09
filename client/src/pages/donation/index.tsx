@@ -1,105 +1,111 @@
-import { useEffect } from "react";
-import { useLocation } from "wouter";
-import { NavHeader } from "@/components/nav-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Gift, HandHeart, HandHelping, Coins, List } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DonationList } from "@/components/donation/donation-list";
+import { Plus, Gift, HandHeart, HandHelping, Coins } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function DonationIndexPage() {
   const [, navigate] = useLocation();
-  
-  const donationModules = [
-    {
-      id: "happy",
-      title: "Suka",
-      description: "Kelola donasi untuk acara suka",
-      icon: HandHeart,
-      color: "from-pink-500 to-pink-700",
-      path: "/donation/happy"
-    },
-    {
-      id: "sad",
-      title: "Duka",
-      description: "Kelola donasi untuk acara duka",
-      icon: HandHelping,
-      color: "from-blue-500 to-blue-700",
-      path: "/donation/sad"
-    },
-    {
-      id: "fundraising",
-      title: "Penggalangan Dana",
-      description: "Kelola penggalangan dana",
-      icon: Coins,
-      color: "from-amber-500 to-amber-700",
-      path: "/donation/fundraising"
-    }
-  ];
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-300">
-      <NavHeader />
-      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-20 transition-all duration-300">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Donasi</h1>
-          <p className="text-muted-foreground mt-1">
-            Kelola donasi dan pengumpulan dana di sini.
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Donasi</h2>
+          <p className="text-muted-foreground">
+            Kelola semua donasi dan sumbangan dalam satu tempat.
           </p>
         </div>
+        <Button onClick={() => navigate('/donation/create')}>
+          <Plus className="mr-2 h-4 w-4" />
+          Tambah Donasi
+        </Button>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {donationModules.map((module) => (
-            <Card 
-              key={module.id} 
-              className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
-              onClick={() => navigate(module.path)}
-            >
-              <div className={`h-2 bg-gradient-to-r ${module.color}`} />
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">{module.title}</h3>
-                    <p className="text-muted-foreground">{module.description}</p>
-                  </div>
-                  <div className={`p-3 rounded-full bg-gradient-to-r ${module.color} text-white`}>
-                    <module.icon size={24} />
-                  </div>
-                </div>
-                <Button 
-                  className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                  onClick={() => navigate(module.path)}
-                >
-                  Buka
-                </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ringkasan Donasi</CardTitle>
+          <CardDescription>
+            Lihat ringkasan donasi berdasarkan kategori.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Suka
+                </CardTitle>
+                <HandHeart className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2</div>
+                <p className="text-xs text-muted-foreground">
+                  Total donasi untuk acara suka
+                </p>
               </CardContent>
             </Card>
-          ))}
-          
-          {/* Donation List Card */}
-          <Card 
-            className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
-            onClick={() => navigate("/donation/list")}
-          >
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-700" />
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Daftar Donasi</h3>
-                  <p className="text-muted-foreground">Lihat daftar donasi berdasarkan acara</p>
-                </div>
-                <div className="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-700 text-white">
-                  <List size={24} />
-                </div>
-              </div>
-              <Button 
-                className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                onClick={() => navigate("/donation/list")}
-              >
-                Buka
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Duka
+                </CardTitle>
+                <HandHelping className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1</div>
+                <p className="text-xs text-muted-foreground">
+                  Total donasi untuk acara duka
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Penggalangan Dana
+                </CardTitle>
+                <Coins className="h-4 w-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1</div>
+                <p className="text-xs text-muted-foreground">
+                  Total penggalangan dana aktif
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="all" onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">Semua</TabsTrigger>
+          <TabsTrigger value="happy">Suka</TabsTrigger>
+          <TabsTrigger value="sad">Duka</TabsTrigger>
+          <TabsTrigger value="fundraising">Penggalangan Dana</TabsTrigger>
+        </TabsList>
+        <TabsContent value="all">
+          <DonationList />
+        </TabsContent>
+        <TabsContent value="happy">
+          <DonationList type="happy" />
+        </TabsContent>
+        <TabsContent value="sad">
+          <DonationList type="sad" />
+        </TabsContent>
+        <TabsContent value="fundraising">
+          <DonationList type="fundraising" />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

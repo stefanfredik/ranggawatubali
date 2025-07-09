@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sun, Moon, LogOut, Users, Megaphone, Calendar, CreditCard, LayoutDashboard, Menu, X, Wallet, DollarSign, PiggyBank, Receipt, ArrowDownCircle, ArrowUpCircle, Gift, HandHeart, HandHelping, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { useLocation, useRoute } from "wouter";
+import { useLocation } from "wouter";
 
 type Section = "dashboard" | "members" | "announcements" | "activities" | "payments" | "finance" | "finance-wallet" | "finance-income" | "finance-expense" | "finance-dues" | "finance-initial" | "donation" | "donation-happy" | "donation-sad" | "donation-fundraising";
 
@@ -48,7 +48,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         { id: "donation-sad", label: "Duka", icon: HandHelping, adminOnly: false },
         { id: "donation-fundraising", label: "Penggalangan Dana", icon: Coins, adminOnly: false },
       ]
-    },
+    }
   ];
 
   const visibleItems = navigationItems.filter(

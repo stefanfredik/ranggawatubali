@@ -23,13 +23,7 @@ import FinanceExpensePage from "@/pages/finance/expense";
 import FinanceDuesPage from "@/pages/finance/dues";
 import FinanceInitialPage from "@/pages/finance/initial";
 import DonationPage from "@/pages/donation-page";
-import DonationHappyPage from "@/pages/donation/happy";
-import DonationSadPage from "@/pages/donation/sad";
-import DonationFundraisingPage from "@/pages/donation/fundraising";
-import DonationEventDetailPage from "@/pages/donation/events/event-detail";
-import DonationHappyEventsPage from "@/pages/donation/events/happy";
-import DonationSadEventsPage from "@/pages/donation/events/sad";
-import DonationFundraisingEventsPage from "@/pages/donation/events/fundraising";
+
 
 function AppRoutes() {
   return (
@@ -47,14 +41,13 @@ function AppRoutes() {
       <ProtectedRoute path="/finance/dues" component={FinanceDuesPage} />
       <ProtectedRoute path="/finance/initial" component={FinanceInitialPage} />
       <ProtectedRoute path="/donation" component={DonationPage} />
-      <ProtectedRoute path="/donation-page" component={DonationPage} />
-      <ProtectedRoute path="/donation/happy" component={DonationHappyPage} />
-      <ProtectedRoute path="/donation/sad" component={DonationSadPage} />
-      <ProtectedRoute path="/donation/fundraising" component={DonationFundraisingPage} />
-      <ProtectedRoute path="/donation/:type/event/:eventName" component={DonationEventDetailPage} />
-      <ProtectedRoute path="/donation/events/happy" component={DonationHappyEventsPage} />
-      <ProtectedRoute path="/donation/events/sad" component={DonationSadEventsPage} />
-      <ProtectedRoute path="/donation/events/fundraising" component={DonationFundraisingEventsPage} />
+      <ProtectedRoute path="/donation/happy" component={DonationPage} />
+      <ProtectedRoute path="/donation/sad" component={DonationPage} />
+      <ProtectedRoute path="/donation/fundraising" component={DonationPage} />
+      <ProtectedRoute path="/donation/detail/:id" component={DonationPage} />
+      <ProtectedRoute path="/donation/create" component={DonationPage} />
+      <ProtectedRoute path="/donation/edit/:id" component={DonationPage} />
+
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
