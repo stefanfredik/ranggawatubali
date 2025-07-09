@@ -464,13 +464,14 @@ export function MembersTable() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Manajemen Anggota</h2>
           <p className="text-muted-foreground mt-1">
             Kelola anggota organisasi dan profil mereka
           </p>
         </div>
+        
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
@@ -478,6 +479,7 @@ export function MembersTable() {
               Tambah Anggota
             </Button>
           </DialogTrigger>
+
           <DialogContent variant="glass" className="sm:max-w-[700px] md:max-w-[800px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Tambah Anggota Baru</DialogTitle>
@@ -1232,7 +1234,7 @@ export function MembersTable() {
                     </div>
                     <Card variant="glass">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-md">Kontak</CardTitle>
+                        <CardTitle className="text-md sm:text-sm">Kontak</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1246,7 +1248,7 @@ export function MembersTable() {
                             </p>
                           </div>
                           <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground">Telepon</label>
+                            <label className="text-md font-medium text-muted-foreground">Telepon</label>
                             <p className="text-sm flex items-center">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -1413,10 +1415,11 @@ export function MembersTable() {
                 <div className="md:hidden w-full space-y-6 mt-4">
                   {/* Informasi Pribadi */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Informasi Pribadi</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-center">Informasi Pribadi</h3>
                     <Card variant="glass">
                       <CardHeader className="pb-2">
-                        <CardTitle>Kontak</CardTitle>
+                        <CardTitle className="text-lg">Kontak</CardTitle>
+
                       </CardHeader>
                       <CardContent className="space-y-2">
                         <div className="flex items-center">
@@ -1434,7 +1437,7 @@ export function MembersTable() {
 
                     <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
-                        <CardTitle>Tanggal Penting</CardTitle>
+                        <CardTitle className="text-lg">Tanggal Penting</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
                         {viewingMember.birthday && (
@@ -1460,7 +1463,7 @@ export function MembersTable() {
 
                     <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
-                        <CardTitle>Alamat</CardTitle>
+                        <CardTitle className="text-lg">Alamat</CardTitle>
                       </CardHeader>
                       <CardContent>
                         {viewingMember.residence ? (
@@ -1477,10 +1480,10 @@ export function MembersTable() {
 
                   {/* Akademik & Pekerjaan */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Akademik & Pekerjaan</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-center">Akademik & Pekerjaan</h3>
                     <Card variant="glass">
                       <CardHeader className="pb-2">
-                        <CardTitle>Pekerjaan</CardTitle>
+                        <CardTitle className="text-lg">Pekerjaan</CardTitle>
                       </CardHeader>
                       <CardContent>
                         {viewingMember.occupation ? (
@@ -1496,7 +1499,8 @@ export function MembersTable() {
 
                     <Card variant="glass" className="mt-4">
                       <CardHeader className="pb-2">
-                        <CardTitle>Pendidikan</CardTitle>
+                        <CardTitle className="text-lg">Pendidikan</CardTitle>
+
                       </CardHeader>
                       <CardContent>
                         {viewingMember.campus ? (
@@ -1513,10 +1517,10 @@ export function MembersTable() {
 
                   {/* Organisasi */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Organisasi</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-center">Organisasi</h3>
                     <Card variant="glass">
                       <CardHeader className="pb-2">
-                        <CardTitle>Posisi di Organisasi</CardTitle>
+                        <CardTitle className="text-lg">Posisi di Organisasi</CardTitle>
                       </CardHeader>
                       <CardContent>
                         {viewingMember.position ? (

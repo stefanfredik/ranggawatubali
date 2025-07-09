@@ -70,14 +70,6 @@ export function NavHeader() {
     <>
       <header className="fixed top-0 left-0 right-0 h-16 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm border-b z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden mr-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <Menu size={20} />
-          </Button>
           <h1 className="text-xl font-bold">Rangga Watu Bali</h1>
         </div>
         

@@ -110,8 +110,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         variant="ghost"
         size="sm"
         className={cn(
-          "md:hidden fixed top-4 z-50 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm transition-all duration-300 shadow-lg hover:shadow-xl",
-          !isCollapsed && !isMobileOpen ? "left-[68px]" : "left-4"
+          "md:hidden fixed top-4 left-3 z-50 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm transition-all duration-300 shadow-lg hover:shadow-xl"
         )}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
@@ -119,6 +118,19 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
           <X size={20} className="text-destructive animate-fadeIn" /> : 
           <Menu size={20} className="text-primary animate-fadeIn" />
         }
+      </Button>
+      
+      {/* Sidebar Toggle Button (Always Visible) */}
+      <Button
+        variant="neomorphic"
+        size="sm"
+        className={cn(
+          "fixed top-4 left-4 z-50 bg-background bg-opacity-50 backdrop-blur-sm border border-border border-opacity-50 shadow-sm transition-all duration-300 shadow-lg hover:shadow-xl",
+          isMobileOpen ? "hidden" : "hidden md:flex"
+        )}
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        <Menu size={16} className={cn("transition-transform duration-300", isCollapsed ? "rotate-180" : "rotate-0")} />
       </Button>
 
       {/* Mobile Overlay */}
@@ -142,7 +154,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
           {/* Header */}
           <div className="p-4 border-b border-glass-border bg-gradient-to-r from-transparent to-primary/10 shadow-sm">
             <div className="flex items-center justify-between">
-              <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>
+              <div className={cn("flex items-center space-x-3", isCollapsed && "justify-center")}>                
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-bold text-sm">RWB</span>
                 </div>
@@ -153,16 +165,6 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
                   </div>
                 )}
               </div>
-              {!isMobileOpen && (
-                <Button
-                  variant="neomorphic"
-                  size="sm"
-                  onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="hidden md:flex p-2 hover:text-primary transition-all duration-300"
-                >
-                  <Menu size={16} className={cn("transition-transform duration-300", isCollapsed ? "rotate-180" : "rotate-0")} />
-                </Button>
-              )}
             </div>
           </div>
 

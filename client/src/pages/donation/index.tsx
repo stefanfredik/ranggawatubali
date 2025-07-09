@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gift, HandHeart, HandHelping, Coins } from "lucide-react";
+import { Gift, HandHeart, HandHelping, Coins, List } from "lucide-react";
 
 export default function DonationIndexPage() {
   const [, navigate] = useLocation();
@@ -46,7 +46,7 @@ export default function DonationIndexPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {donationModules.map((module) => (
             <Card 
               key={module.id} 
@@ -73,6 +73,31 @@ export default function DonationIndexPage() {
               </CardContent>
             </Card>
           ))}
+          
+          {/* Donation List Card */}
+          <Card 
+            className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+            onClick={() => navigate("/donation/list")}
+          >
+            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-700" />
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Daftar Donasi</h3>
+                  <p className="text-muted-foreground">Lihat daftar donasi berdasarkan acara</p>
+                </div>
+                <div className="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-700 text-white">
+                  <List size={24} />
+                </div>
+              </div>
+              <Button 
+                className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                onClick={() => navigate("/donation/list")}
+              >
+                Buka
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

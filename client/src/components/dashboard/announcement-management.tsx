@@ -119,7 +119,7 @@ export function AnnouncementManagement() {
   return (
     <Card variant="glass">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:items-center justify-between sm:flex-row gap-4">
           <CardTitle>Kelola Pengumuman</CardTitle>
           {isAdmin && (
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -129,7 +129,7 @@ export function AnnouncementManagement() {
                   className="flex items-center gap-1"
                   onClick={() => setSelectedAnnouncement(null)}
                 >
-                  <Plus size={16} />
+                  <Plus className="" size={16} />
                   <span>Tambah</span>
                 </Button>
               </DialogTrigger>
@@ -150,7 +150,7 @@ export function AnnouncementManagement() {
             </Dialog>
           )}
         </div>
-        
+      
         <div className="mt-4 space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">

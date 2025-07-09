@@ -1,7 +1,7 @@
 import { NavHeader } from "@/components/nav-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, CalendarIcon, Pencil, Trash2 } from "lucide-react";
+import { HandHeart, Plus, Filter, Download, CheckCircle, AlertCircle, CalendarIcon, Pencil, Trash2, Users } from "lucide-react";
 import { Loading } from "@/components/ui/loading";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -1183,82 +1183,133 @@ export default function HappyDonationPage() {
         
         {/* Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Detail Donasi</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="sm:max-w-[600px]">
             {selectedDonation && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Anggota</p>
-                    <p className="font-medium">{selectedDonation.user.fullName}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Acara</p>
-                    <p className="font-medium">{selectedDonation.eventName}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Tanggal Acara</p>
-                    <p className="font-medium">{new Date(selectedDonation.eventDate).toLocaleDateString('id-ID')}</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Nominal</p>
-                    <p className="font-medium">Rp {selectedDonation.amount.toLocaleString('id-ID')}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge className={selectedDonation.status === "collected" ? 
-                      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : 
-                      "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100"}>
-                      {selectedDonation.status === "collected" ? "Terkumpul" : "Belum Terkumpul"}
+              <>
+                <div className="h-2 bg-gradient-to-r from-pink-500 to-pink-700" />
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">{selectedDonation.eventName}</DialogTitle>
+                  <DialogDescription className="flex items-center gap-2">
+                    <Badge className="bg-gradient-to-r from-pink-500 to-pink-700 text-white">
+                      Suka
                     </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Tanggal Dibuat</p>
-                    <p className="font-medium">{new Date(selectedDonation.createdAt).toLocaleDateString('id-ID')}</p>
-                  </div>
-                </div>
+                    <span className="flex items-center text-sm text-muted-foreground">
+                      <CalendarIcon className="mr-1 h-4 w-4" />
+                      {new Date(selectedDonation.eventDate).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </DialogDescription>
+                </DialogHeader>
 
-                {selectedDonation.status === "collected" && (
-                  <>
-                    <div className="pt-2 border-t">
-                      <h4 className="font-medium mb-2">Informasi Pengumpulan</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-1">
-                          <p className="text-sm text-muted-foreground">Tanggal Pengumpulan</p>
-                          <p className="font-medium">{selectedDonation.collectionDate && 
-                            new Date(selectedDonation.collectionDate).toLocaleDateString('id-ID')}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-muted-foreground">Metode Pengumpulan</p>
-                          <p className="font-medium">{selectedDonation.collectionMethod}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-muted-foreground">Dompet</p>
-                          <p className="font-medium">{wallets?.find(w => w.id === selectedDonation.walletId)?.name || '-'}</p>
-                        </div>
+                <div className="space-y-6">
+                  {/* Progress */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Progress</span>
+                      <span className="text-sm font-medium">
+                        {selectedDonation.targetAmount > 0
+                          ? Math.min(Math.round((selectedDonation.amount / selectedDonation.targetAmount) * 100), 100)
+                          : 0}%
+                      </span>
+                    </div>
+                    <Progress
+                      value={
+                        selectedDonation.targetAmount > 0
+                          ? Math.min(Math.round((selectedDonation.amount / selectedDonation.targetAmount) * 100), 100)
+                          : 0
+                      }
+                      className="h-2"
+                    />
+                    <div className="flex justify-between text-sm pt-1">
+                      <span>Rp {selectedDonation.amount.toLocaleString("id-ID")}</span>
+                      <span className="text-muted-foreground">
+                        dari Rp {selectedDonation.targetAmount.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    {selectedDonation.status === "collected" ? (
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                        Terkumpul
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100">
+                        Belum Terkumpul
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Collection Details */}
+                  {selectedDonation.status === "collected" && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Detail Pengumpulan:</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <span className="text-muted-foreground">Tanggal Pengumpulan:</span>
+                        <span>
+                          {selectedDonation.collectionDate
+                            ? new Date(selectedDonation.collectionDate).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })
+                            : "-"}
+                        </span>
+                        <span className="text-muted-foreground">Metode Pengumpulan:</span>
+                        <span>{selectedDonation.collectionMethod || "-"}</span>
+                        <span className="text-muted-foreground">Dompet:</span>
+                        <span>{wallets?.find(w => w.id === selectedDonation.walletId)?.name || '-'}</span>
                       </div>
                     </div>
+                  )}
 
-                    {selectedDonation.notes && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Catatan</p>
-                        <p className="font-medium">{selectedDonation.notes}</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+                  {/* Notes */}
+                  {selectedDonation.notes && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Catatan:</h4>
+                      <p className="text-sm whitespace-pre-wrap p-3 bg-muted rounded-md">
+                        {selectedDonation.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Created By */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Anggota:</span>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{selectedDonation.user.fullName}</span>
+                    </div>
+                  </div>
+
+                  {/* Created At */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Dibuat pada:</span>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(selectedDonation.createdAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    onClick={() => setIsDetailDialogOpen(false)}
+                    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white hover:opacity-90"
+                  >
+                    Tutup
+                  </Button>
+                </DialogFooter>
+              </>
             )}
-            <DialogFooter>
-              <Button onClick={() => setIsDetailDialogOpen(false)}>
-                Tutup
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>
