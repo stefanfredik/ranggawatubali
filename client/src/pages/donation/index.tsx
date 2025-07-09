@@ -6,14 +6,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DonationList } from "@/components/donation/donation-list";
 import { Plus, Gift, HandHeart, HandHelping, Coins, Search } from "lucide-react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 export default function DonationIndexPage() {
   const [, navigate] = useLocation();
@@ -94,26 +95,87 @@ export default function DonationIndexPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="all" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">Semua</TabsTrigger>
-          <TabsTrigger value="happy">Suka</TabsTrigger>
-          <TabsTrigger value="sad">Duka</TabsTrigger>
-          <TabsTrigger value="fundraising">Penggalangan Dana</TabsTrigger>
-        </TabsList>
-        <TabsContent value="all">
+      <div className="space-y-6">
+        <h3 className="text-xl font-semibold">Kategori Donasi</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card Donasi Suka */}
+          <Card 
+            className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 border-l-4 border-l-green-500"
+            onClick={() => navigate('/donation/happy')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-semibold">Donasi Suka</CardTitle>
+              <HandHeart className="h-5 w-5 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Donasi untuk acara bahagia seperti pernikahan, kelahiran, dan perayaan lainnya.
+              </p>
+              <div className="flex justify-between items-center">
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                  2 Donasi Aktif
+                </Badge>
+                <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-950">
+                  Lihat Semua
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card Donasi Duka */}
+          <Card 
+            className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 border-l-4 border-l-blue-500"
+            onClick={() => navigate('/donation/sad')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-semibold">Donasi Duka</CardTitle>
+              <HandHelping className="h-5 w-5 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Donasi untuk membantu keluarga yang sedang berduka atau mengalami musibah.
+              </p>
+              <div className="flex justify-between items-center">
+                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                  1 Donasi Aktif
+                </Badge>
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950">
+                  Lihat Semua
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card Penggalangan Dana */}
+          <Card 
+            className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 border-l-4 border-l-amber-500"
+            onClick={() => navigate('/donation/fundraising')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-semibold">Penggalangan Dana</CardTitle>
+              <Coins className="h-5 w-5 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Penggalangan dana untuk proyek, pembangunan, atau kebutuhan organisasi.
+              </p>
+              <div className="flex justify-between items-center">
+                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+                  1 Penggalangan Aktif
+                </Badge>
+                <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-800 hover:bg-amber-50 dark:hover:bg-amber-950">
+                  Lihat Semua
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4">Semua Donasi</h3>
           <DonationList />
-        </TabsContent>
-        <TabsContent value="happy">
-          <DonationList type="happy" />
-        </TabsContent>
-        <TabsContent value="sad">
-          <DonationList type="sad" />
-        </TabsContent>
-        <TabsContent value="fundraising">
-          <DonationList type="fundraising" />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

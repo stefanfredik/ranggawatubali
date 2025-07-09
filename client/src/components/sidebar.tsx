@@ -38,17 +38,10 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
         { id: "finance-initial", label: "Uang Pangkal", icon: PiggyBank, adminOnly: false },
       ]
     },
-    { 
-      id: "donation", 
-      label: "Donasi", 
-      icon: Gift, 
-      adminOnly: false,
-      submenu: [
-        { id: "donation-happy", label: "Suka", icon: HandHeart, adminOnly: false },
-        { id: "donation-sad", label: "Duka", icon: HandHelping, adminOnly: false },
-        { id: "donation-fundraising", label: "Penggalangan Dana", icon: Coins, adminOnly: false },
-      ]
-    }
+    { id: "donation", label: "Donasi", icon: Gift, adminOnly: false },
+    { id: "donation-happy", label: "Donasi Suka", icon: HandHeart, adminOnly: false },
+    { id: "donation-sad", label: "Donasi Duka", icon: HandHelping, adminOnly: false },
+    { id: "donation-fundraising", label: "Penggalangan Dana", icon: Coins, adminOnly: false }
   ];
 
   const visibleItems = navigationItems.filter(
@@ -81,7 +74,7 @@ export function Sidebar({ currentSection, onSectionChange }: SidebarProps) {
       // Navigate to main finance page
       navigate("/finance");
     } else if (section.startsWith("donation-")) {
-      // Handle donation submenu navigation
+      // Handle donation navigation
       const subSection = section.replace("donation-", "");
       navigate(`/donation/${subSection}`);
     } else if (section === "donation") {

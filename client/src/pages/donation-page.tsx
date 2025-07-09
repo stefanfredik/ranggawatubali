@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRoute } from 'wouter';
-import { Sidebar } from '@/components/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { NavHeader } from '@/components/nav-header';
 import DonationIndexPage from '@/pages/donation/index';
 import DonationHappyPage from '@/pages/donation/happy';
 import DonationSadPage from '@/pages/donation/sad';
@@ -34,18 +34,11 @@ export default function DonationPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar 
-        currentSection={section} 
-        onSectionChange={setSection} 
-      />
-      <div className="flex-1">
-        <ScrollArea className="h-screen">
-          <main className="flex-1 p-6 md:p-10">
-            {renderContent()}
-          </main>
-        </ScrollArea>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-300">
+      <NavHeader />
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-20 transition-all duration-300">
+        {renderContent()}
+      </main>
     </div>
   );
 }
