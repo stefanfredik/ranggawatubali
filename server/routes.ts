@@ -861,18 +861,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/donations/:id/contributors", requireAuth, async (req, res) => {
+  // Endpoint untuk menambahkan kontributor donasi
+  app.post('/api/donations/:donationId/contributors', requireAuth, async (req, res) => {
     try {
-      const donationId = parseInt(req.params.id);
+      // Konversi donationId dari string ke number
+      const donationId = parseInt(req.params.donationId);
+      if (isNaN(donationId)) {
+        return res.status(400).json({ message: "ID donasi tidak valid" });
+      }
       
-      // Check if donation exists
+      // Cek apakah donasi ada
       const donation = await storage.getDonation(donationId);
       if (!donation) {
-        return res.status(404).json({ message: "Donation not found" });
+        return res.status(404).json({ message: "Donasi tidak ditemukan" });
       }
       
       // Get the contributor data from request body
       const { contributorType, memberId, paymentMethod, ...contributorData } = req.body;
+      
+      // Log data yang diterima untuk debugging
+      console.log('Received contributor data:', req.body);
       
       // Pastikan paymentMethod memiliki nilai default
       const validPaymentMethod = paymentMethod === 'transfer' ? 'transfer' : 'cash';
@@ -885,7 +893,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (contributorType === 'member' && memberId) {
         const member = await storage.getUser(parseInt(memberId));
         if (!member) {
-          return res.status(404).json({ message: "Member not found" });
+          return res.status(404).json({ message: "Anggota tidak ditemukan" });
         }
         userId = member.id;
         name = member.fullName;
@@ -895,29 +903,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (contributorData.walletId) {
         const wallet = await storage.getWallet(contributorData.walletId);
         if (!wallet) {
-          return res.status(404).json({ message: "Wallet not found" });
+          return res.status(404).json({ message: "Dompet tidak ditemukan" });
         }
       }
       
       // Validate and create contributor
-      const validatedData = insertDonationContributorSchema.parse(contributorData);
-      const contributor = await storage.createDonationContributor({
-        ...validatedData,
-        donationId,
-        userId,
-        name,
-        paymentMethod: validPaymentMethod,
-      });
-      
-      // Update donation amount
-      await storage.updateDonationAmount(donationId, validatedData.amount);
-      
-      res.status(201).json(contributor);
-    } catch (error) {
-      if (error.issues) {
-        return res.status(400).json({ message: error.issues[0].message });
+      try {
+        // Log data yang akan divalidasi untuk debugging
+        console.log('Data yang akan divalidasi:', {
+          ...contributorData,
+          donationId,
+          userId,
+          name,
+          paymentMethod: validPaymentMethod,
+        });
+        
+        const validatedData = insertDonationContributorSchema.parse({
+          ...contributorData,
+          donationId,
+          userId,
+          name,
+          paymentMethod: validPaymentMethod,
+        });
+        
+        const contributor = await storage.createDonationContributor({
+          ...validatedData,
+          donationId,
+          userId,
+          name,
+          paymentMethod: validPaymentMethod,
+        });
+        
+        // Update donation amount sudah dilakukan di dalam createDonationContributor
+        
+        return res.status(201).json(contributor);
+      } catch (validationError) {
+        console.error('Validation error:', validationError);
+        
+        // Periksa apakah error berasal dari Zod
+        if (validationError.issues || validationError.errors) {
+          return res.status(400).json({ 
+            message: "Validasi data gagal", 
+            error: validationError.message || "Validation failed", 
+            details: validationError.issues || validationError.errors || validationError
+          });
+        }
+        
+        // Error lainnya
+        return res.status(500).json({ 
+          message: "Terjadi kesalahan saat memproses kontribusi", 
+          error: validationError.message || "Internal server error"
+        });
       }
-      res.status(500).json({ message: "Failed to create donation contribution" });
+    } catch (error) {
+      console.error('Error creating donation contribution:', error);
+      
+      // Handle Zod validation errors
+      if (error.issues) {
+        return res.status(400).json({ 
+          message: "Validasi data gagal",
+          error: error.issues[0].message,
+          details: error.issues
+        });
+      }
+      
+      // Handle other specific errors
+      if (error.message) {
+        return res.status(400).json({ 
+          message: "Gagal menambahkan kontribusi",
+          error: error.message 
+        });
+      }
+      
+      // Generic error
+      return res.status(500).json({ 
+        message: "Gagal menambahkan kontribusi",
+        error: "Terjadi kesalahan pada server" 
+      });
     }
   });
 

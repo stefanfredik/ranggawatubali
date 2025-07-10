@@ -360,18 +360,35 @@ export const insertDonationSchema = createInsertSchema(donations, {
 
 // Schema untuk validasi input kontributor donasi
 export const insertDonationContributorSchema = createInsertSchema(donationContributors, {
-  amount: z.coerce.number().min(0),
+  amount: z.coerce.number().min(1, {
+    message: "Jumlah donasi harus lebih dari 0"
+  }),
   userId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.id
   donationId: z.number().optional(), // Ditambahkan sebagai opsional karena akan diisi dari parameter URL
-  name: z.string().optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.fullName
+  name: z.string().min(3, {
+    message: "Nama harus minimal 3 karakter"
+  }).optional(), // Ditambahkan sebagai opsional karena akan diisi dari req.user.fullName
   walletId: z.number().optional(), // ID dompet untuk menyimpan donasi
-  paymentMethod: z.enum(["cash", "transfer"]).default("cash"),
+  paymentMethod: z.enum(["cash", "transfer"], {
+    errorMap: (issue, ctx) => ({ message: "Metode pembayaran harus cash atau transfer" })
+  }).default("cash"),
 });
 
 // Extend schema untuk form kontributor dengan field tambahan
 export const contributorFormSchema = insertDonationContributorSchema.extend({
-  contributorType: z.enum(['self', 'member']),
-  memberId: z.string().optional(),
+  contributorType: z.enum(['self', 'member'], {
+    errorMap: (issue, ctx) => ({ message: "Tipe kontributor harus self atau member" })
+  }),
+  memberId: z.string().optional().superRefine((val, ctx) => {
+    // Validasi tambahan: jika contributorType adalah 'member', memberId harus diisi
+    if (ctx.parent.contributorType === 'member' && (!val || val === '')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Silakan pilih anggota",
+        path: ["memberId"]
+      });
+    }
+  }),
 });
 
 // Tipe untuk donasi

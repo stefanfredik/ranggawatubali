@@ -2,8 +2,41 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // Buat custom error dengan properti response
+    const error: any = new Error(`${res.status}: ${res.statusText}`);
+    error.response = res.clone(); // Clone response agar bisa dibaca lagi nanti
+    
+    // Coba parse response body untuk debugging
+    try {
+      const errorData = await res.json();
+      console.log('Error response body:', errorData);
+      error.data = errorData;
+      
+      // Tambahkan pesan error yang lebih deskriptif
+      if (errorData.message) {
+        error.message = errorData.message;
+        
+        // Jika ada detail validasi, tambahkan ke pesan error
+        if (errorData.details) {
+          if (Array.isArray(errorData.details)) {
+            const detailMessages = errorData.details
+              .map((detail: any) => {
+                if (detail.message) return detail.message;
+                if (detail.path && detail.message) return `${detail.path.join('.')}: ${detail.message}`;
+                return detail.toString();
+              })
+              .join(', ');
+            error.detailMessage = detailMessages;
+          } else {
+            error.detailMessage = errorData.details.toString();
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Could not parse error response body');
+    }
+    
+    throw error;
   }
 }
 

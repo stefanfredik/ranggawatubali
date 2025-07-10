@@ -30,12 +30,7 @@ import { Loader2 } from "lucide-react";
 // Skema validasi untuk form kontributor donasi
 const contributorFormSchema = z.object({
   contributorType: z.enum(['self', 'member']),
-  memberId: z.string().optional().refine(val => {
-    // If contributorType is 'member', memberId is required
-    return val !== undefined && val !== '' || true;
-  }, {
-    message: "Silakan pilih anggota",
-  }),
+  memberId: z.string().optional(),
   name: z.string().min(3, {
     message: "Nama harus minimal 3 karakter.",
   }),
@@ -49,6 +44,15 @@ const contributorFormSchema = z.object({
   }),
   paymentMethod: z.enum(["cash", "transfer"]).default("cash"),
   message: z.string().optional(),
+}).superRefine((data, ctx) => {
+  // Validasi tambahan: jika contributorType adalah 'member', memberId harus diisi
+  if (data.contributorType === 'member' && (!data.memberId || data.memberId === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Silakan pilih anggota",
+      path: ["memberId"]
+    });
+  }
 });
 
 // Tipe data untuk form kontributor
@@ -117,18 +121,25 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
   const onSubmit = async (values: ContributorFormValues) => {
     setIsSubmitting(true);
     try {
-      // Konversi amount dari string ke number
+      // Konversi amount dari string ke number dan pastikan nilai positif
+      const amountValue = Number(values.amount.replace(/[^0-9]/g, ''));
+      if (isNaN(amountValue) || amountValue <= 0) {
+        throw new Error("Jumlah donasi harus berupa angka positif");
+      }
+      
       // Pastikan nama field sesuai dengan yang diharapkan server
       const formattedValues = {
+        contributorType: values.contributorType,
+        memberId: values.contributorType === 'member' ? values.memberId : undefined,
         name: values.name,
-        amount: Number(values.amount.replace(/[^0-9]/g, '')),
-        paymentMethod: values.paymentMethod,
+        amount: amountValue,
+        paymentMethod: values.paymentMethod || 'cash', // Pastikan paymentMethod selalu ada
         message: values.message,
       };
-
+  
       // Log data yang akan dikirim untuk debugging
       console.log('Data kontributor yang akan dikirim:', formattedValues);
-
+  
       // Kirim data ke server
       await apiRequest('POST', `/api/donations/${donationId}/contributors`, formattedValues);
       
@@ -138,19 +149,48 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
         description: "Terima kasih atas kontribusi Anda.",
         variant: "default",
       });
-
+  
       // Reset form
       form.reset();
-
+  
       // Panggil callback onSuccess jika ada
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+      
+      // Coba ekstrak pesan error dari respons API
+      let errorMessage = "Terjadi kesalahan saat menambahkan kontribusi.";
+      
+      if (error && error.response) {
+        try {
+          const errorData = await error.response.json();
+          console.log('Error data from server:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          
+          // Jika ada detail validasi, tambahkan ke pesan error
+          if (errorData.details) {
+            const detailMessages = Array.isArray(errorData.details) 
+              ? errorData.details.map(detail => {
+                  // Handle Zod validation errors yang memiliki struktur berbeda
+                  if (detail.message) return detail.message;
+                  if (detail.path && detail.message) return `${detail.path.join('.')}: ${detail.message}`;
+                  return detail.toString();
+                }).join(', ')
+              : errorData.details;
+            errorMessage = `${errorMessage}: ${detailMessages}`;
+          }
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Gagal menambahkan kontribusi",
-        description: error instanceof Error ? error.message : "Terjadi kesalahan saat menambahkan kontribusi.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
