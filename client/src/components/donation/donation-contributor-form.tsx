@@ -132,7 +132,7 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
         contributorType: values.contributorType,
         memberId: values.contributorType === 'member' ? values.memberId : undefined,
         name: values.name,
-        amount: amountValue,
+        amount: amountValue.toString(), // Kirim sebagai string untuk memastikan kompatibilitas dengan z.coerce.number()
         paymentMethod: values.paymentMethod || 'cash', // Pastikan paymentMethod selalu ada
         message: values.message,
       };

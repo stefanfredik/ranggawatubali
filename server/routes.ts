@@ -918,8 +918,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentMethod: validPaymentMethod,
         });
         
+        // Pastikan amount adalah number atau string yang dapat dikonversi ke number
+        let amount = contributorData.amount;
+        if (typeof amount === 'string') {
+          amount = parseFloat(amount);
+          if (isNaN(amount)) {
+            return res.status(400).json({ message: "Jumlah donasi harus berupa angka" });
+          }
+        }
+        
         const validatedData = insertDonationContributorSchema.parse({
           ...contributorData,
+          amount,
           donationId,
           userId,
           name,
