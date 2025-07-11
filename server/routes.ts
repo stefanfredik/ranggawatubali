@@ -1021,6 +1021,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint untuk menghapus kontributor donasi
+  app.delete('/api/donations/:donationId/contributors/:contributorId', requireAuth, async (req, res) => {
+    try {
+      const contributorId = parseInt(req.params.contributorId);
+      if (isNaN(contributorId)) {
+        return res.status(400).json({ message: "ID kontributor tidak valid" });
+      }
+      
+      // Hapus kontributor dan perbarui jumlah donasi
+      const success = await storage.deleteDonationContributor(contributorId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Kontributor tidak ditemukan" });
+      }
+      
+      res.sendStatus(204);
+    } catch (error) {
+      console.error('Error deleting donation contributor:', error);
+      res.status(500).json({ message: "Gagal menghapus kontributor donasi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

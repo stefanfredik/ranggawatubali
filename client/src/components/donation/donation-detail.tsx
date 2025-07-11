@@ -161,6 +161,29 @@ export function DonationDetail({ id }: DonationDetailProps) {
     });
   };
 
+  // Handle delete contributor
+  const handleDeleteContributor = async (contributorId: string) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus kontributor ini?')) {
+      try {
+        await apiRequest('DELETE', `/api/donations/${id}/contributors/${contributorId}`);
+        // Refresh data
+        queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}/contributors`] });
+        toast({
+          title: "Sukses",
+          description: "Kontributor berhasil dihapus.",
+        });
+      } catch (error) {
+        console.error('Error deleting contributor:', error);
+        toast({
+          title: "Error",
+          description: "Gagal menghapus kontributor. Silakan coba lagi nanti.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   // Tampilkan loading state jika data sedang dimuat
   if (isLoadingDonation) {
     return (
@@ -316,12 +339,13 @@ export function DonationDetail({ id }: DonationDetailProps) {
                   <Table>
                     <TableHeader className="sticky top-0 bg-background z-10">
                       <TableRow>
-                        <TableHead>Nama</TableHead>
-                        <TableHead>Jumlah</TableHead>
-                        <TableHead>Metode</TableHead>
+                        <TableHead>Nama Kontributor</TableHead>
+                        <TableHead>Jumlah Kontribusi</TableHead>
+                        <TableHead>Metode Pembayaran</TableHead>
                         <TableHead>Tanggal Pembayaran</TableHead>
                         <TableHead>Pesan</TableHead>
                         <TableHead>Tanggal Dibuat</TableHead>
+                        <TableHead className="text-right">Aksi</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -335,6 +359,22 @@ export function DonationDetail({ id }: DonationDetailProps) {
                           <TableCell>{contributor.payment_date ? new Date(contributor.payment_date).toLocaleDateString('id-ID') : '-'}</TableCell>
                           <TableCell>{contributor.message || '-'}</TableCell>
                           <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteContributor(contributor.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                <line x1="14" y1="11" x2="14" y2="17"/>
+                              </svg>
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

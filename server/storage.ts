@@ -962,6 +962,36 @@ export class DatabaseStorage implements IStorage {
       return newContributor;
     });
   }
+
+  async deleteDonationContributor(id: number): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      // Get the contributor data first to update donation amount
+      const [contributor] = await tx
+        .select()
+        .from(donationContributors)
+        .where(eq(donationContributors.id, id));
+      
+      if (!contributor) return false;
+      
+      // Delete the contributor
+      const result = await tx
+        .delete(donationContributors)
+        .where(eq(donationContributors.id, id));
+      
+      if (result.rowCount === 0) return false;
+      
+      // Update donation amount by subtracting the contribution amount
+      await tx
+        .update(donations)
+        .set({
+          amount: sql`${donations.amount} - ${contributor.amount}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(donations.id, contributor.donationId));
+      
+      return true;
+    });
+  }
 }
 
 export const storage = new DatabaseStorage();
