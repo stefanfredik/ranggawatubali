@@ -916,6 +916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId,
           name,
           paymentMethod: validPaymentMethod,
+          paymentDate: contributorData.paymentDate ? new Date(contributorData.paymentDate) : new Date(),
         });
         
         // Pastikan amount adalah number atau string yang dapat dikonversi ke number
@@ -927,6 +928,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
+        // Pastikan paymentDate adalah objek Date yang valid
+        let paymentDate = contributorData.paymentDate;
+        if (paymentDate && !(paymentDate instanceof Date)) {
+          try {
+            // Log untuk debugging
+            console.log('PaymentDate before conversion:', paymentDate, typeof paymentDate);
+            
+            // Konversi ke Date object
+            paymentDate = new Date(paymentDate);
+            
+            // Validasi hasil konversi
+            if (isNaN(paymentDate.getTime())) {
+              console.log('Invalid date after conversion');
+              throw new Error("Invalid date");
+            }
+            
+            console.log('PaymentDate after conversion:', paymentDate, typeof paymentDate);
+            // Update contributorData dengan Date yang valid
+            contributorData.paymentDate = paymentDate;
+          } catch (error) {
+            console.error('Error converting paymentDate:', error);
+            return res.status(400).json({ message: "Tanggal pembayaran tidak valid" });
+          }
+        }
+        
         const validatedData = insertDonationContributorSchema.parse({
           ...contributorData,
           amount,
@@ -934,6 +960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId,
           name,
           paymentMethod: validPaymentMethod,
+          paymentDate: paymentDate || new Date(),
         });
         
         const contributor = await storage.createDonationContributor({
@@ -942,6 +969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId,
           name,
           paymentMethod: validPaymentMethod,
+          paymentDate: contributorData.paymentDate || new Date(),
         });
         
         // Update donation amount sudah dilakukan di dalam createDonationContributor

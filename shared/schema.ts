@@ -315,6 +315,7 @@ export const donationContributors = pgTable("donation_contributors", {
   amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
   walletId: integer("wallet_id").references(() => wallets.id),
   paymentMethod: text("payment_method").default("cash"), // "cash" atau "transfer"
+  paymentDate: date("payment_date"), // Tanggal pembayaran kontribusi
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -372,6 +373,7 @@ export const insertDonationContributorSchema = createInsertSchema(donationContri
   paymentMethod: z.enum(["cash", "transfer"], {
     errorMap: (issue, ctx) => ({ message: "Metode pembayaran harus cash atau transfer" })
   }).default("cash"),
+  paymentDate: z.date().optional(), // Tanggal pembayaran kontribusi
 });
 
 // Extend schema untuk form kontributor dengan field tambahan

@@ -852,6 +852,8 @@ export class DatabaseStorage implements IStorage {
         userId: donationContributors.userId,
         name: donationContributors.name,
         amount: donationContributors.amount,
+        paymentMethod: donationContributors.paymentMethod,
+        paymentDate: donationContributors.paymentDate,
         message: donationContributors.message,
         createdAt: donationContributors.createdAt,
         user: users,
@@ -896,7 +898,26 @@ export class DatabaseStorage implements IStorage {
         .values({
           ...contributorData,
           // Pastikan paymentMethod memiliki nilai default jika tidak disediakan
-          paymentMethod: contributorData.paymentMethod || 'cash'
+          paymentMethod: contributorData.paymentMethod || 'cash',
+          // Pastikan paymentDate adalah objek Date yang valid
+          paymentDate: contributorData.paymentDate instanceof Date ? 
+                      contributorData.paymentDate : 
+                      (contributorData.paymentDate ? 
+                        (() => {
+                          try {
+                            const date = new Date(contributorData.paymentDate);
+                            console.log('Storage - Converting paymentDate:', contributorData.paymentDate, 'to Date:', date);
+                            if (isNaN(date.getTime())) {
+                              console.log('Storage - Invalid date, using current date');
+                              return new Date();
+                            }
+                            return date;
+                          } catch (e) {
+                            console.error('Storage - Error converting date:', e);
+                            return new Date();
+                          }
+                        })() : 
+                        new Date())
         })
         .returning();
       

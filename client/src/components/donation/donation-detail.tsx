@@ -35,6 +35,8 @@ interface Contributor {
   donation_id: string;
   name: string;
   amount: number;
+  payment_method: string;
+  payment_date?: string;
   message?: string;
   created_at: string;
 }
@@ -310,28 +312,34 @@ export function DonationDetail({ id }: DonationDetailProps) {
               ) : contributorsError ? (
                 <div className="text-center text-red-500 py-4">Gagal memuat data kontributor. Silakan coba lagi nanti.</div>
               ) : contributors && contributors.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nama</TableHead>
-                      <TableHead>Jumlah</TableHead>
-                      <TableHead>Pesan</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {contributors.map((contributor) => (
-                      <TableRow key={contributor.id}>
-                        <TableCell className="font-medium">{contributor.name}</TableCell>
-                        <TableCell>
-                          {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(contributor.amount)}
-                        </TableCell>
-                        <TableCell>{contributor.message || '-'}</TableCell>
-                        <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+                <div className="max-h-[400px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <TableHead>Nama</TableHead>
+                        <TableHead>Jumlah</TableHead>
+                        <TableHead>Metode</TableHead>
+                        <TableHead>Tanggal Pembayaran</TableHead>
+                        <TableHead>Pesan</TableHead>
+                        <TableHead>Tanggal Dibuat</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {contributors.map((contributor) => (
+                        <TableRow key={contributor.id}>
+                          <TableCell className="font-medium">{contributor.name}</TableCell>
+                          <TableCell>
+                            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(contributor.amount)}
+                          </TableCell>
+                          <TableCell>{contributor.payment_method === 'cash' ? 'Tunai' : 'Transfer'}</TableCell>
+                          <TableCell>{contributor.payment_date ? new Date(contributor.payment_date).toLocaleDateString('id-ID') : '-'}</TableCell>
+                          <TableCell>{contributor.message || '-'}</TableCell>
+                          <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                   Belum ada kontributor. Jadilah yang pertama berkontribusi!
@@ -349,7 +357,7 @@ export function DonationDetail({ id }: DonationDetailProps) {
 
       {/* Dialog untuk form kontributor */}
       <Dialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Tambah Kontribusi</DialogTitle>
             <DialogDescription>

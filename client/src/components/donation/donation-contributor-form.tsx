@@ -43,6 +43,7 @@ const contributorFormSchema = z.object({
     message: "Jumlah donasi harus berupa angka positif.",
   }),
   paymentMethod: z.enum(["cash", "transfer"]).default("cash"),
+  paymentDate: z.date().optional(),
   message: z.string().optional(),
 }).superRefine((data, ctx) => {
   // Validasi tambahan: jika contributorType adalah 'member', memberId harus diisi
@@ -99,6 +100,7 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
       name: "",
       amount: "",
       paymentMethod: "cash",
+      paymentDate: new Date(), // Default ke tanggal hari ini
       message: "",
     },
   });
@@ -134,6 +136,7 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
         name: values.name,
         amount: amountValue.toString(), // Kirim sebagai string untuk memastikan kompatibilitas dengan z.coerce.number()
         paymentMethod: values.paymentMethod || 'cash', // Pastikan paymentMethod selalu ada
+        paymentDate: values.paymentDate, // Tanggal pembayaran
         message: values.message,
       };
   
@@ -355,6 +358,49 @@ export function DonationContributorForm({ donationId, onSuccess, onCancel }: Don
               </Select>
               <FormDescription>
                 Pilih metode pembayaran yang Anda gunakan.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="paymentDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Tanggal Pembayaran</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  placeholder="Pilih tanggal pembayaran"
+                  {...field}
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => {
+                    // Pastikan tanggal diproses dengan benar
+                    if (e.target.value) {
+                      // Buat objek Date dengan waktu lokal untuk menghindari masalah timezone
+                      const dateStr = e.target.value; // Format: YYYY-MM-DD
+                      const [year, month, day] = dateStr.split('-').map(Number);
+                      
+                      // Buat objek Date dengan waktu lokal
+                      // Bulan di JavaScript dimulai dari 0 (Januari = 0)
+                      const date = new Date(year, month - 1, day, 12, 0, 0);
+                      
+                      // Log untuk debugging
+                      console.log('Date input value:', e.target.value);
+                      console.log('Parsed date object:', date);
+                      console.log('Date ISO string:', date.toISOString());
+                      
+                      field.onChange(date);
+                    } else {
+                      field.onChange(undefined);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormDescription>
+                Tanggal saat pembayaran dilakukan.
               </FormDescription>
               <FormMessage />
             </FormItem>
