@@ -19,14 +19,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Calendar, Users, Coins, Plus, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Coins, Plus, Pencil, Search, Filter, Eye } from "lucide-react";
 import { useLocation } from "wouter";
 import { Donation } from './donation-list';
 import { DonationContributorForm } from './donation-contributor-form';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 // Tipe data untuk kontributor donasi
 interface Contributor {
@@ -48,6 +57,23 @@ const getTypeName = (type: string) => {
     case 'sad': return 'Duka';
     case 'fundraising': return 'Penggalangan Dana';
     default: return type;
+  }
+};
+
+// Fungsi untuk memformat tanggal dengan aman
+const formatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Invalid Date';
+  
+  try {
+    const date = new Date(dateString);
+    // Periksa apakah tanggal valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    return date.toLocaleDateString('id-ID');
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
   }
 };
 
@@ -92,6 +118,14 @@ export function DonationDetail({ id }: DonationDetailProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isContributorDialogOpen, setIsContributorDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [contributorToDelete, setContributorToDelete] = useState<string | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [selectedContributor, setSelectedContributor] = useState<Contributor | null>(null);
+  
+  // State untuk pencarian dan filter
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('all');
   
   // Fetch donation data
   const { data: donation, isLoading: isLoadingDonation, error: donationError } = useQuery<Donation>({
@@ -142,12 +176,30 @@ export function DonationDetail({ id }: DonationDetailProps) {
   }, [donationError, contributorsError, toast]);
 
   // Menghitung persentase progres untuk donasi penggalangan dana
+  const totalAmount = contributors?.reduce((total, contributor) => total + contributor.amount, 0) || 0;
   const progressPercentage = donation?.target_amount
-    ? Math.min(Math.round((donation.amount / donation.target_amount) * 100), 100)
+    ? Math.min(Math.round((totalAmount / donation.target_amount) * 100), 100)
     : 100;
 
   // Menghitung total kontributor
   const totalContributors = contributors?.length || 0;
+  
+  // Filter kontributor berdasarkan pencarian dan filter
+  const filteredContributors = contributors
+    ? contributors.filter((contributor) => {
+        const matchesSearch = contributor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (contributor.message && contributor.message.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesPaymentMethod = paymentMethodFilter === 'all' || contributor.payment_method === paymentMethodFilter;
+        
+        return matchesSearch && matchesPaymentMethod;
+      })
+    : [];
+    
+  // Handle view contributor detail
+  const handleViewContributorDetail = (contributor: Contributor) => {
+    setSelectedContributor(contributor);
+    setIsDetailDialogOpen(true);
+  };
   
   // Handle successful contribution
   const handleContributionSuccess = () => {
@@ -162,25 +214,34 @@ export function DonationDetail({ id }: DonationDetailProps) {
   };
 
   // Handle delete contributor
-  const handleDeleteContributor = async (contributorId: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus kontributor ini?')) {
-      try {
-        await apiRequest('DELETE', `/api/donations/${id}/contributors/${contributorId}`);
-        // Refresh data
-        queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}/contributors`] });
-        toast({
-          title: "Sukses",
-          description: "Kontributor berhasil dihapus.",
-        });
-      } catch (error) {
-        console.error('Error deleting contributor:', error);
-        toast({
-          title: "Error",
-          description: "Gagal menghapus kontributor. Silakan coba lagi nanti.",
-          variant: "destructive",
-        });
-      }
+  const handleDeleteContributor = (contributorId: string) => {
+    setContributorToDelete(contributorId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm delete contributor
+  const confirmDeleteContributor = async () => {
+    if (!contributorToDelete) return;
+    
+    try {
+      await apiRequest('DELETE', `/api/donations/${id}/contributors/${contributorToDelete}`);
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/donations/${id}/contributors`] });
+      toast({
+        title: "Sukses",
+        description: "Kontributor berhasil dihapus.",
+      });
+    } catch (error) {
+      console.error('Error deleting contributor:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus kontributor. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setContributorToDelete(null);
     }
   };
 
@@ -266,7 +327,7 @@ export function DonationDetail({ id }: DonationDetailProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(donation.amount)}
+                  {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(totalAmount)}
                 </div>
                 {donation.target_amount && (
                   <div className="mt-2 space-y-1">
@@ -305,10 +366,10 @@ export function DonationDetail({ id }: DonationDetailProps) {
               <CardContent>
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 mr-2 text-gray-500" />
-                  <div className="text-2xl font-bold">{new Date(donation.created_at).toLocaleDateString('id-ID')}</div>
+                  <div className="text-2xl font-bold">{formatDate(donation.created_at)}</div>
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Terakhir diperbarui: {new Date(donation.updated_at).toLocaleDateString('id-ID')}
+                  Terakhir diperbarui: {formatDate(donation.updated_at)}
                 </div>
               </CardContent>
             </Card>
@@ -320,7 +381,34 @@ export function DonationDetail({ id }: DonationDetailProps) {
               <TabsTrigger value="activity">Aktivitas</TabsTrigger>
             </TabsList>
             <TabsContent value="contributors" className="space-y-4">
-              <div className="flex justify-end mb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                  <div className="relative w-full md:w-64">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                    <Input
+                      type="search"
+                      placeholder="Cari kontributor..."
+                      className="pl-8 w-full"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-full md:w-48">
+                    <Select
+                      value={paymentMethodFilter}
+                      onValueChange={setPaymentMethodFilter}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Filter metode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Semua Metode</SelectItem>
+                        <SelectItem value="cash">Tunai</SelectItem>
+                        <SelectItem value="transfer">Transfer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
                 <Button 
                   onClick={() => setIsContributorDialogOpen(true)}
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
@@ -334,7 +422,7 @@ export function DonationDetail({ id }: DonationDetailProps) {
                 <div className="text-center py-4">Memuat data kontributor...</div>
               ) : contributorsError ? (
                 <div className="text-center text-red-500 py-4">Gagal memuat data kontributor. Silakan coba lagi nanti.</div>
-              ) : contributors && contributors.length > 0 ? (
+              ) : filteredContributors && filteredContributors.length > 0 ? (
                 <div className="max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-background z-10">
@@ -349,31 +437,49 @@ export function DonationDetail({ id }: DonationDetailProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {contributors.map((contributor) => (
+                      {filteredContributors.map((contributor) => (
                         <TableRow key={contributor.id}>
-                          <TableCell className="font-medium">{contributor.name}</TableCell>
+                          <TableCell className="font-medium">
+                            <Button 
+                              variant="link" 
+                              className="p-0 h-auto font-medium text-left" 
+                              onClick={() => handleViewContributorDetail(contributor)}
+                            >
+                              {contributor.name}
+                            </Button>
+                          </TableCell>
                           <TableCell>
                             {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(contributor.amount)}
                           </TableCell>
                           <TableCell>{contributor.payment_method === 'cash' ? 'Tunai' : 'Transfer'}</TableCell>
-                          <TableCell>{contributor.payment_date ? new Date(contributor.payment_date).toLocaleDateString('id-ID') : '-'}</TableCell>
+                          <TableCell>{formatDate(contributor.payment_date)}</TableCell>
                           <TableCell>{contributor.message || '-'}</TableCell>
-                          <TableCell>{new Date(contributor.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{formatDate(contributor.created_at)}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteContributor(contributor.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                <line x1="10" y1="11" x2="10" y2="17"/>
-                                <line x1="14" y1="11" x2="14" y2="17"/>
-                              </svg>
-                            </Button>
+                            <div className="flex justify-end space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewContributorDetail(contributor)}
+                                className="text-blue-500 hover:text-blue-700 hover:bg-blue-100"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteContributor(contributor.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2">
+                                  <path d="M3 6h18"/>
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                  <line x1="10" y1="11" x2="10" y2="17"/>
+                                  <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -382,32 +488,96 @@ export function DonationDetail({ id }: DonationDetailProps) {
                 </div>
               ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  Belum ada kontributor. Jadilah yang pertama berkontribusi!
+                  {searchTerm || paymentMethodFilter !== 'all' 
+                    ? 'Tidak ada kontributor yang sesuai dengan filter.'
+                    : 'Belum ada kontributor. Jadilah yang pertama berkontribusi!'}
                 </div>
               )}
-            </TabsContent>
-            <TabsContent value="activity" className="space-y-4">
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Tidak ada aktivitas terbaru
-              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
 
-      {/* Dialog untuk form kontributor */}
-      <Dialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      {/* Dialog untuk detail kontributor */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Tambah Kontribusi</DialogTitle>
+            <DialogTitle>Detail Kontributor</DialogTitle>
             <DialogDescription>
-              Isi formulir berikut untuk menambahkan kontribusi Anda pada donasi ini
+              Informasi lengkap tentang kontributor
+            </DialogDescription>
+          </DialogHeader>
+          {selectedContributor && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Nama</Label>
+                  <p className="text-base font-medium">{selectedContributor.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Jumlah Kontribusi</Label>
+                  <p className="text-base font-medium">
+                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(selectedContributor.amount)}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Metode Pembayaran</Label>
+                  <p className="text-base font-medium">{selectedContributor.payment_method === 'cash' ? 'Tunai' : 'Transfer'}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Tanggal Pembayaran</Label>
+                  <p className="text-base font-medium">{formatDate(selectedContributor.payment_date)}</p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-sm font-medium text-gray-500">Pesan</Label>
+                  <p className="text-base">{selectedContributor.message || '-'}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Tanggal Dibuat</Label>
+                  <p className="text-base font-medium">{formatDate(selectedContributor.created_at)}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">ID Kontributor</Label>
+                  <p className="text-base font-medium">{selectedContributor.id}</p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setIsDetailDialogOpen(false)}>Tutup</Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog konfirmasi hapus kontributor */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Penghapusan</DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus kontributor ini? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Batal</Button>
+            <Button variant="destructive" onClick={confirmDeleteContributor}>Hapus</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog untuk menambahkan kontributor baru */}
+      <Dialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tambah Kontributor Baru</DialogTitle>
+            <DialogDescription>
+              Isi form berikut untuk menambahkan kontributor baru ke donasi ini.
             </DialogDescription>
           </DialogHeader>
           <DonationContributorForm 
             donationId={id} 
-            onSuccess={handleContributionSuccess}
-            onCancel={() => setIsContributorDialogOpen(false)}
+            onSuccess={handleContributionSuccess} 
+            onCancel={() => setIsContributorDialogOpen(false)} 
           />
         </DialogContent>
       </Dialog>

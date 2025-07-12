@@ -980,6 +980,31 @@ export class DatabaseStorage implements IStorage {
       
       if (result.rowCount === 0) return false;
       
+      // If walletId exists, update the wallet balance and record transaction
+      if (contributor.walletId) {
+        // Update wallet balance by subtracting the contribution amount
+        await tx
+          .update(wallets)
+          .set({
+            balance: sql`${wallets.balance} - ${contributor.amount}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, contributor.walletId));
+        
+        // Record transaction for this donation contribution deletion
+        await tx
+          .insert(transactions)
+          .values({
+            walletId: contributor.walletId,
+            amount: contributor.amount,
+            type: "expense",
+            category: "donation",
+            description: `Pembatalan kontribusi donasi ID: ${contributor.donationId}`,
+            date: new Date(),
+            createdBy: contributor.userId
+          });
+      }
+      
       // Update donation amount by subtracting the contribution amount
       await tx
         .update(donations)
